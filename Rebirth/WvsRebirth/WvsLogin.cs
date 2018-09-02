@@ -39,14 +39,26 @@ namespace WvsRebirth
 
         private void Handle_CheckPassword(CClientSocket c, CInPacket p)
         {
-            var v1 = p.DecodeString();
-            var v2 = p.DecodeString();
+            var pwd = p.DecodeString();
+            var user = p.DecodeString();
+          
+            Console.WriteLine(pwd);
+            Console.WriteLine(user);
 
-            Console.WriteLine(v1);
-            Console.WriteLine(v2);
 
+            Send(c,PacketFactory.getAuthSuccess(1337,0,0,user));
 
-            c.Send(PacketFactory.getAuthSuccess(1337,0,0,v2));
+        }
+
+        private void Send(CClientSocket c, COutPacket p)
+        {
+            var buffer = p.ToArray();
+            var opcode = (SendOps) BitConverter.ToInt16(buffer, 0);
+
+            var name = Enum.GetName(typeof(SendOps), opcode);
+            var str = BitConverter.ToString(buffer);
+
+            Console.WriteLine("Send [{0}] {1}", name, str);
 
         }
 
