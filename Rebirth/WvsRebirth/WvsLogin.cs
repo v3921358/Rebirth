@@ -4,6 +4,7 @@ using System.Linq;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Common;
 using Common.Network;
 using Common.Server;
 
@@ -28,21 +29,24 @@ namespace WvsRebirth
 
             switch (opcode)
             {
-                case RecvOps.LP_GuestIDLoginResult:
-                    Handle_GuestIDLoginResult(socket, packet);
+                case RecvOps.CP_CheckPassword:
+                    Handle_CheckPassword(socket, packet);
                     break;
 
             }
 
         }
 
-        private void Handle_GuestIDLoginResult(CClientSocket c, CInPacket p)
+        private void Handle_CheckPassword(CClientSocket c, CInPacket p)
         {
             var v1 = p.DecodeString();
             var v2 = p.DecodeString();
 
             Console.WriteLine(v1);
             Console.WriteLine(v2);
+
+
+            c.Send(PacketFactory.getAuthSuccess(1337,0,0,v2));
 
         }
 

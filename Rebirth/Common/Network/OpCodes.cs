@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Common.Network
 {
-    public enum RecvOps
+    public enum SendOps
     {
         LP_BEGIN_SOCKET = 0x0,
         LP_CheckPasswordResult = 0x0,
@@ -517,7 +517,7 @@ namespace Common.Network
         LP_LogoutGift = 0x1B0,
         LP_NO = 0x1B1,
     };
-    public enum SendOps
+    public enum RecvOps
     {
         CP_BEGIN_SOCKET = 0x0,
         CP_CheckPassword = 0x1,
