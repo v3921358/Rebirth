@@ -41,7 +41,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Client\Character.cs" />
     <Compile Include="Client\ClientBase.cs" />
+    <Compile Include="Client\GW_CharacterStat.cs" />
+    <Compile Include="Client\WvsLoginClient.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Crypto\FastAES.cs" />
     <Compile Include="Crypto\MapleAes.cs" />
@@ -55,7 +58,7 @@
     <Compile Include="Network\OpCodes.cs" />
     <Compile Include="Network\CAcceptor.cs" />
     <Compile Include="Network\TcpHelp.cs" />
-    <Compile Include="Network\CPacketFactory.cs" />
+    <Compile Include="Network\CPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Server\ServerBase.cs" />
     <Compile Include="Server\WvsCenter.cs" />

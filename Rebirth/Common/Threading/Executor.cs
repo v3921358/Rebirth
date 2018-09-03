@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading;
+using Common.Log;
 
 namespace Common.Threading
 {
@@ -10,6 +11,7 @@ namespace Common.Threading
         private readonly ConcurrentQueue<Action> m_queue;
         private readonly Thread m_thread;
 
+        private string m_name;
         private bool m_started;
         private bool m_running;
 
@@ -17,12 +19,14 @@ namespace Common.Threading
 
         public Executor(string name)
         {
+            m_name = name;
+
             m_event = new ManualResetEvent(false);
             m_queue = new ConcurrentQueue<Action>();
 
             m_thread = new Thread(Work);
             m_thread.IsBackground = false;
-            m_thread.Name = $"Executor {name}";
+            m_thread.Name = $"Executor {m_name}";
             m_thread.Priority = ThreadPriority.AboveNormal;
 
             m_started = false;
@@ -37,7 +41,7 @@ namespace Common.Threading
 
         public void Start()
         {
-            if(m_started)
+            if (m_started)
                 throw new InvalidOperationException();
 
             m_thread.Start();
@@ -71,7 +75,14 @@ namespace Common.Threading
 
                 while (m_queue.TryDequeue(out var action))
                 {
-                    action();
+                    try
+                    {
+                        action();
+                    }
+                    catch (Exception ex)
+                    {
+                        Logger.Exception(ex, "[{0}] Executor Exception: {1}", m_name, ex);
+                    }
                 }
 
                 m_event.WaitOne();

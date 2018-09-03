@@ -157,7 +157,7 @@ namespace Common.Network
 
         }
 
-        public void Send(COutPacket outPacket)
+        internal void Send(COutPacket outPacket)
         {
             if (Disposed)
                 return;

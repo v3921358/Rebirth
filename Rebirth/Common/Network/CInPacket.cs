@@ -61,7 +61,7 @@ namespace Common.Network
 
             return value;
         }
-        public unsafe int Encode4()
+        public unsafe int Decode4()
         {
             CheckLength(4);
 
@@ -76,7 +76,7 @@ namespace Common.Network
 
             return value;
         }
-        public unsafe long Encode8()
+        public unsafe long Decode8()
         {
             CheckLength(8);
 
@@ -91,7 +91,7 @@ namespace Common.Network
 
             return value;
         }
-        public byte[] EncodeBuffer(byte[] value, int start, int length)
+        public byte[] DecodeBuffer(byte[] value, int start, int length)
         {
             CheckLength(length);
             var temp = new byte[length];

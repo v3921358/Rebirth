@@ -1,26 +1,32 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net.Sockets;
+using Common.Client;
 using Common.Log;
 using Common.Network;
 using Common.Threading;
 
 namespace Common.Server
 {
-    public class ServerBase
+    public class ServerBase<TClient> where TClient : ClientBase
     {
         private readonly string m_name;
+        private readonly Func<CClientSocket, TClient> m_createFunc;
 
         private Executor m_thread;
         private CAcceptor m_acceptor;
-        
+
+        public bool LogPackets { get; set; } = true;
+
         //Implement later
         //private bool m_running;
 
         public string Name => m_name;
 
-        public ServerBase(string name, int port)
+        public ServerBase(string name, int port, Func<CClientSocket, TClient> createClient)
         {
             m_name = name;
+            m_createFunc = createClient;
 
             m_thread = new Executor(name);
             m_acceptor = new CAcceptor(port);
@@ -30,48 +36,36 @@ namespace Common.Server
         private void OnClientAccepted(Socket socket)
         {
             var client = new CClientSocket(socket);
-            client.OnPacket += (p) => OnClientPacket(client, p);
-            client.OnDisconnected += () => OnClientClosed(client);
-            
-            Logger.Write(LogLevel.Info,"[{0}] Accepted {1}", Name, client.Host);
+            var realClient = m_createFunc(client);
 
+            Logger.Write(LogLevel.Info, "[{0}] Accepted {1}", Name, client.Host);
+
+            client.OnPacket += (p) => OnClientPacket(realClient, p);
+            client.OnDisconnected += () => OnClientClosed(realClient);
             client.Initialize(Constants.Version);
         }
-        private void OnClientPacket(CClientSocket socket, CInPacket packet)
+        private void OnClientPacket(TClient socket, CInPacket packet)
         {
-            Enqueue(() => HandlePacket(socket,packet));
+            Enqueue(() => HandlePacket(socket, packet));
         }
-        private void OnClientClosed(CClientSocket socket)
+        private void OnClientClosed(TClient socket)
         {
-            Logger.Write(LogLevel.Info,"[{0}] Disconnected {1}",Name, socket.Host);
-
             Enqueue(() => HandleDisconnect(socket));
         }
 
-        protected virtual void HandlePacket(CClientSocket socket, CInPacket packet)
+        protected virtual void HandlePacket(TClient client, CInPacket packet)
         {
             var buffer = packet.ToArray();
-            var opcode = (RecvOps) BitConverter.ToInt16(buffer, 0);
+            var opcode = (RecvOps)BitConverter.ToInt16(buffer, 0);
 
             var name = Enum.GetName(typeof(RecvOps), opcode);
             var str = BitConverter.ToString(buffer);
 
-            Logger.Write(LogLevel.Info,"Recv [{0}] {1}", name, str);
+            Logger.Write(LogLevel.Info, "Recv [{0}] {1}", name, str);
         }
-        protected virtual void HandleDisconnect(CClientSocket socket) { }
-
-        public void SendPacket(CClientSocket socket, COutPacket packet)
+        protected virtual void HandleDisconnect(TClient client)
         {
-            var buffer = packet.ToArray();
-            var opcode = (SendOps)BitConverter.ToInt16(buffer, 0);
-
-            var name = Enum.GetName(typeof(SendOps), opcode);
-            var str = BitConverter.ToString(buffer);
-
-            Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
-
-            //L000000L I FORGOT THIS LINE AND WONDERED WHY IT DIDNT WORK ~__~
-            socket.Send(packet); 
+            Logger.Write(LogLevel.Info, "[{0}] Disconnected {1}", Name, client.Host);
         }
 
         public void Start()

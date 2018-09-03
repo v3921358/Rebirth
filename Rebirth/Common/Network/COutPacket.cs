@@ -48,6 +48,12 @@ namespace Common.Network
             ThrowIfDisposed();
             m_stream.WriteByte(value);
         }
+        public void Encode1(bool value)
+        {
+            ThrowIfDisposed();
+            var x = (byte) (value ? 1 : 0);
+            m_stream.WriteByte(x);
+        }
         public void Encode2(short value)
         {
             ThrowIfDisposed();

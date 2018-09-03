@@ -8,6 +8,8 @@ namespace Common
 {
     public static class Constants
     {
+        public static readonly Random Rand = new Random();
+
         public const ushort Version = 95;
     }
 }
