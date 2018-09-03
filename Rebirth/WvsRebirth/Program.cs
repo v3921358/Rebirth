@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Log;
 using Common.Network;
 
 namespace WvsRebirth
@@ -11,9 +12,9 @@ namespace WvsRebirth
     {
         static void Main(string[] args)
         {
-            Console.Title = "Rebirth v95";
-            Console.ForegroundColor = ConsoleColor.White;
-
+            ConsoleLog.InitConsole("Rebirth v95");
+            Logger.Add(new ConsoleLog());
+            
             WvsLogin x = new WvsLogin();
             x.Start();
             Console.ReadLine();

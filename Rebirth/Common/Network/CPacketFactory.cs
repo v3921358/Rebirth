@@ -7,9 +7,9 @@ using Common.Network;
 
 namespace Common
 {
-    public static class PacketFactory
+    public static class CPacketFactory
     {
-        public static COutPacket getAuthSuccess(int accId, byte gender, byte gmLevel, string accountName)
+        public static COutPacket CheckPasswordResult(int accId, byte gender, byte gmLevel, string accountName)
         {
             var p = new COutPacket();
 
@@ -28,34 +28,52 @@ namespace Common
             p.Encode1(0); //  LOBYTE(sMsg2._m_pStr) = CInPacket::Decode1(iPacket);
             p.Encode8(0); //CInPacket::DecodeBuffer(iPacket, &dtChatUnblockDate, 8u);
             p.Encode8(0); //CInPacket::DecodeBuffer(iPacket, &dtRegisterDate, 8u);
-            p.Encode4(0); //nNumOfCharacter = CInPacket::Decode4(iPacket);
+            p.Encode4(1); //nNumOfCharacter = CInPacket::Decode4(iPacket);
             p.Encode1(1); //v43 = (unsigned __int8)CInPacket::Decode1(iPacket)
             p.Encode1(0); //sMsg._m_pStr[432] = CInPacket::Decode1(iPacket);
 
+            //I dont remember if this is extra padding or from the .idb
             p.Encode8(0);
             p.Encode8(0);
             p.Encode8(0);
-
-            //mplew.Encode4(0);
-            //mplew.Encode2(0);
-            //mplew.Encode4(accId); //user id
-            //mplew.Encode1(gender);
-            //mplew.Encode1((byte)(gmLevel > 0 ? 1 : 0)); //admin byte
-            //short toWrite = (short)(gmLevel * 32);
-            ////toWrite = toWrite |= 0x100; only in higher versions
-            //mplew.Encode1((byte)(toWrite > 0x80 ? 0x80 : toWrite)); //0x80 is admin, 0x20 and 0x40 = subgm
-            //mplew.Encode1((byte)(gmLevel > 0 ? 1 : 0));
-            ////mplew.Encode2(toWrite > 0x80 ? 0x80 : toWrite); only in higher versions...
-            //mplew.EncodeString(accountName);
-            //mplew.Encode1(0);
-            //mplew.Encode1(0); //isquietbanned
-            //mplew.Encode8(0); //isquietban time
-            //mplew.Encode8(0); //creation time
-            //mplew.Encode4(0);
-            //mplew.Encode2(2); //PIN
 
             return p;
-
         }
+
+        public static COutPacket WorldRequest()
+        {
+            var p = new COutPacket();
+
+            p.Encode2((short)SendOps.LP_WorldInformation);
+            p.Encode1(1); //server id
+            p.EncodeString("Server Name");
+            p.Encode1(0); //flag
+            p.EncodeString("Event Message?");
+            p.Encode2(100);
+            p.Encode2(100);
+            p.Encode1(0);
+
+            p.Encode1(1); //last channel?
+
+            p.EncodeString("World 1");
+            p.Encode4(200); //pop
+            p.Encode1(1);
+            p.Encode1(0); //server indx
+            p.Encode1(0);
+
+            p.Encode2(0); //balloons
+
+            return p;
+        }
+        public static COutPacket WorldRequestEnd()
+        {
+            var p = new COutPacket();
+
+            p.Encode2((short)SendOps.LP_WorldInformation);
+            p.Encode1(0xff); //server id
+           
+            return p;
+        }
+
     }
 }

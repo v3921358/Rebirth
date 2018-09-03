@@ -5,7 +5,10 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace Common.Network
-{
+{    
+    /// <summary>
+    /// TODO: Implement this https://github.com/RajanGrewal/ByteBuffer
+    /// </summary>
     public class CInPacket
     {
         private readonly byte[] m_buffer;

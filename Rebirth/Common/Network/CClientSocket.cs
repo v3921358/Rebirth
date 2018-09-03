@@ -4,6 +4,11 @@ using Common.Crypto;
 
 namespace Common.Network
 {
+    /// <summary>
+    /// To be fair, A lot of people may accuse me of copy pasting 
+    /// from other public C# sources, but in reality I wrote the 
+    /// code in those sources. ( Networking Stuff )
+    /// </summary>
     public class CClientSocket : IDisposable
     {
         public const int ReceiveSize = 8192;
@@ -14,45 +19,44 @@ namespace Common.Network
         private byte[] m_buffer;
         private int m_offset;
 
-        private bool m_disposed;
-
+        private ushort m_version;
         private MapleIV m_siv;
         private MapleIV m_riv;
 
         private object m_sendSync;
 
         public string Host { get; set; }
-
-        public bool Disposed
-        {
-            get
-            {
-                return m_disposed;
-            }
-        }
+        public bool Disposed { get; private set; }
 
         public CClientSocket(Socket socket)
         {
             m_socket = socket;
-            m_socket.NoDelay = true;
 
             Host = TcpHelp.SetSockOpt(ref m_socket);
+            Disposed = false;
 
             m_recvBuffer = new byte[ReceiveSize];
             m_buffer = new byte[ReceiveSize];
             m_offset = 0;
-
-            m_disposed = false;
-
-            m_sendSync = new object();
-
-            m_siv = new MapleIV(1234);
-            m_riv = new MapleIV(5678);
             
+            m_sendSync = new object();
+        }
+
+        //Eventually move this out of socket
+        public void Initialize(ushort version)
+        {
+            m_siv = new MapleIV(0xBADF00D);
+            m_riv = new MapleIV(0XDEADBEEF);
+
+            m_version = version;
+
+            //m_siv = new MapleIV(0x52616A61); //Raja
+            //m_riv = new MapleIV(0x6E523078); //nR0x
+
             using (var p = new COutPacket())
             {
                 p.Encode2(0x0E);
-                p.Encode2((short)Constants.Version);
+                p.Encode2((short)version);
                 p.EncodeString("1");
                 p.Encode4((int)m_riv.Value);
                 p.Encode4((int)m_siv.Value);
@@ -62,16 +66,16 @@ namespace Common.Network
 
                 SendRaw(buffer);
             }
+
+            Receive();
         }
 
-
         public event Action<CInPacket> OnPacket;
-
         public event Action OnDisconnected;
 
-        public void Receive()
+        internal void Receive()
         {
-            if (m_disposed)
+            if (Disposed)
                 return;
 
             SocketError errorCode = SocketError.Success;
@@ -83,7 +87,7 @@ namespace Common.Network
         }
         private void EndReceive(IAsyncResult ar)
         {
-            if (!m_disposed)
+            if (!Disposed)
             {
                 SocketError errorCode = SocketError.Success;
 
@@ -120,9 +124,15 @@ namespace Common.Network
         }
         private void ManipulateBuffer()
         {
-            while (m_offset >= 4 && m_disposed == false)
+            while (m_offset >= 4 && Disposed == false)
             {
                 int size = MapleAes.GetLength(m_buffer);
+
+                if (size <= 0)
+                {
+                    Dispose();
+                    return;
+                }
 
                 if (m_offset < size + 4)
                 {
@@ -149,18 +159,18 @@ namespace Common.Network
 
         public void Send(COutPacket outPacket)
         {
-            if (m_disposed)
+            if (Disposed)
                 return;
 
             lock (m_sendSync)
             {
-                if (m_disposed)
+                if (Disposed)
                     return;
 
                 byte[] packet = outPacket.ToArray();
                 byte[] final = new byte[packet.Length + 4];
 
-                MapleAes.GetHeader(final, m_siv, Constants.Version);
+                MapleAes.GetHeader(final, m_siv, m_version);
 
                 MapleCustom.EncryptTransform(packet);
                 MapleAes.Transform(packet, m_siv);
@@ -190,9 +200,9 @@ namespace Common.Network
 
         public void Dispose()
         {
-            if (!m_disposed)
+            if (!Disposed)
             {
-                m_disposed = true;
+                Disposed = true;
 
                 try
                 {

@@ -7,6 +7,9 @@ using System.Threading.Tasks;
 
 namespace Common.Network
 {
+    /// <summary>
+    /// TODO: Implement this https://github.com/RajanGrewal/ByteBuffer
+    /// </summary>
     public class COutPacket : IDisposable
     {
         public const int DefaultBufferSize = 1024;
@@ -18,6 +21,16 @@ namespace Common.Network
         {
             m_stream = new MemoryStream(DefaultBufferSize);
             m_disposed = false;
+        }
+
+        public COutPacket(SendOps opCode) : this()
+        {
+            Encode2((short)opCode);
+        }
+
+        public COutPacket(short opCode) : this()
+        {
+            Encode2(opCode);
         }
 
         //From LittleEndianByteConverter by Shoftee

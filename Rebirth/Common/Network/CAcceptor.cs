@@ -1,14 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Common.Network
 {
-    public class TcpAcceptor : IDisposable
+    public class CAcceptor : IDisposable
     {
         private readonly int m_port;
         private readonly IPAddress m_address;
@@ -23,7 +19,7 @@ namespace Common.Network
 
         public event Action<Socket> OnClientAccepted;
 
-        public TcpAcceptor(IPAddress address, int port)
+        public CAcceptor(IPAddress address, int port)
         {
             if (port < 0 || port > 65535)
                 throw new ArgumentOutOfRangeException(nameof(port), @"Port is out of range");
@@ -34,7 +30,7 @@ namespace Common.Network
             m_disposed = false;
         }
 
-        public TcpAcceptor(int port) : this(IPAddress.Any, port) { }
+        public CAcceptor(int port) : this(IPAddress.Any, port) { }
 
         public void StartListen(int backlog = 0)
         {

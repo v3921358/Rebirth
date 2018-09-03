@@ -1,13 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+using Common.Log;
 using Common.Network;
 using Common.Threading;
-using Common.Network;
 
 namespace Common.Server
 {
@@ -16,7 +11,10 @@ namespace Common.Server
         private readonly string m_name;
 
         private Executor m_thread;
-        private TcpAcceptor m_acceptor;
+        private CAcceptor m_acceptor;
+        
+        //Implement later
+        //private bool m_running;
 
         public string Name => m_name;
 
@@ -25,7 +23,7 @@ namespace Common.Server
             m_name = name;
 
             m_thread = new Executor(name);
-            m_acceptor = new TcpAcceptor(port);
+            m_acceptor = new CAcceptor(port);
             m_acceptor.OnClientAccepted += OnClientAccepted;
         }
 
@@ -34,24 +32,46 @@ namespace Common.Server
             var client = new CClientSocket(socket);
             client.OnPacket += (p) => OnClientPacket(client, p);
             client.OnDisconnected += () => OnClientClosed(client);
-            client.Receive();
+            
+            Logger.Write(LogLevel.Info,"[{0}] Accepted {1}", Name, client.Host);
 
-            Console.WriteLine("Accepted {0}", client.Host);
+            client.Initialize(Constants.Version);
         }
-
         private void OnClientPacket(CClientSocket socket, CInPacket packet)
         {
             Enqueue(() => HandlePacket(socket,packet));
         }
-
         private void OnClientClosed(CClientSocket socket)
         {
-            Console.WriteLine("Disconnected {0}", socket.Host);
+            Logger.Write(LogLevel.Info,"[{0}] Disconnected {1}",Name, socket.Host);
+
+            Enqueue(() => HandleDisconnect(socket));
         }
 
         protected virtual void HandlePacket(CClientSocket socket, CInPacket packet)
         {
-            
+            var buffer = packet.ToArray();
+            var opcode = (RecvOps) BitConverter.ToInt16(buffer, 0);
+
+            var name = Enum.GetName(typeof(RecvOps), opcode);
+            var str = BitConverter.ToString(buffer);
+
+            Logger.Write(LogLevel.Info,"Recv [{0}] {1}", name, str);
+        }
+        protected virtual void HandleDisconnect(CClientSocket socket) { }
+
+        public void SendPacket(CClientSocket socket, COutPacket packet)
+        {
+            var buffer = packet.ToArray();
+            var opcode = (SendOps)BitConverter.ToInt16(buffer, 0);
+
+            var name = Enum.GetName(typeof(SendOps), opcode);
+            var str = BitConverter.ToString(buffer);
+
+            Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
+
+            //L000000L I FORGOT THIS LINE AND WONDERED WHY IT DIDNT WORK ~__~
+            socket.Send(packet); 
         }
 
         public void Start()
