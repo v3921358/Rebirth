@@ -6,7 +6,8 @@ using System.Threading.Tasks;
 
 namespace Common.Server
 {
-    class WvsCenter
+    public class WvsCenter
     {
+
     }
 }

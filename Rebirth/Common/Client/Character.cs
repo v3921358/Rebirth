@@ -78,10 +78,7 @@ namespace Common.Client
         public void EncodeStats(COutPacket p)
         {
             p.Encode4(Uid);
-
-            if (Name.Length > 12)
-                throw new InvalidOperationException();
-
+            
             for (int i = 0; i < 12; i++)
             {
                 if (i < Name.Length)
@@ -111,10 +108,10 @@ namespace Common.Client
             p.Encode2(StatDex);
             p.Encode2(StatInt);
             p.Encode2(StatLuk);
-            p.Encode2(StatCurHp);
-            p.Encode2(StatMaxHp);
-            p.Encode2(StatCurMp);
-            p.Encode2(StatMaxMp);
+            p.Encode4(StatCurHp);
+            p.Encode4(StatMaxHp);
+            p.Encode4(StatCurMp);
+            p.Encode4(StatMaxMp);
             p.Encode2(Ap);
             //
 
@@ -140,8 +137,11 @@ namespace Common.Client
             p.Encode1(false);//p.Encode1((byte)(mega ? 0 : 1));
             p.Encode4(Hair);
 
-            p.Encode1(unchecked((byte)-1));  //Normal Equips
-            p.Encode1(unchecked((byte)-1));      //Cash Equips
+            p.Encode1(0x0B);
+            p.Encode4(1302000);
+
+            p.Encode1(0xFF);  //Normal Equips
+            p.Encode1(0xFF);      //Cash Equips
 
             p.Encode4(0);//Cash Weapon
 

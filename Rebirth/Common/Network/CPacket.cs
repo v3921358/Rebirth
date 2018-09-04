@@ -166,5 +166,31 @@ namespace Common
             //}
 
         }
+
+        public static COutPacket SelectCharacterResult(int uid)
+        {
+            var p = new COutPacket(SendOps.LP_SelectCharacterResult);
+      
+            p.Encode1(0); //v3 | World
+            p.Encode1(0); //dwCharacterID | Selectec Char
+
+            var ip = new byte[] {127, 0, 0, 1};
+            p.EncodeBuffer(ip,0,ip.Length);
+            p.Encode2(Constants.GamePort); 
+            p.Encode4(uid);
+            p.Encode1(0);
+            p.Encode4(0);
+
+            //v8 = CInPacket::Decode4(iPacket);
+            //v9 = CInPacket::Decode2(iPacket);
+            //v10 = CInPacket::Decode4(iPacket);
+            //bAuthenCode = CInPacket::Decode1(iPacket);
+            //v12 = CInPacket::Decode4(iPacket);
+            //ZInetAddr::ZInetAddr((ZInetAddr*)&addrNet, v9);
+
+            return p;
+        }
+
+        //public static COutPacket SetField(Character c, CInPacket p){}
     }
 }

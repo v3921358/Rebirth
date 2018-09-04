@@ -12,6 +12,9 @@ namespace Common
 
         public const ushort Version = 95;
 
+        public const int LoginPort = 8484;
+        public const int GamePort = 8585;
+
         public static byte HexToByte(string hex)
         {
             if (hex.Length > 2 || hex.Length <= 0)

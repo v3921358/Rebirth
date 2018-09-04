@@ -15,6 +15,9 @@ namespace Common.Client
 
         public string Host => m_socket.Host;
 
+        public byte ServerId { get; set; }
+        public byte ChannelId { get; set; }
+
         protected ClientBase(CClientSocket socket)
         {
             m_socket = socket;

@@ -1,5 +1,6 @@
 ﻿using System;
 using Common.Log;
+using Common.Server;
 
 namespace WvsRebirth
 {
@@ -10,10 +11,16 @@ namespace WvsRebirth
             ConsoleLog.InitConsole("Rebirth v95");
             Logger.Add(new ConsoleLog());
             
-            WvsLogin x = new WvsLogin();
-            x.Start();
+            WvsLogin login = new WvsLogin();
+            WvsGame game = new WvsGame();
+
+            login.Start();
+            game.Start();
+
             Console.ReadLine();
-            x.Stop();
+
+            login.Stop();
+            game.Start();
         }
     }
 }

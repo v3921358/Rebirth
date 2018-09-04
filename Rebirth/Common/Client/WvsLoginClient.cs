@@ -9,8 +9,7 @@ namespace Common.Client
 {
     public class WvsLoginClient : ClientBase
     {
-        public byte ServerId { get; set; }
-        public byte ChannelId { get; set; }
+
 
         public List<Character> Characters { get; set; }
 

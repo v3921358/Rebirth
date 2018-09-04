@@ -10,11 +10,11 @@ using Common.Server;
 namespace WvsRebirth
 {
     public class WvsLogin : ServerBase<WvsLoginClient>
-    {
+    {   
         private static readonly Func<CClientSocket, WvsLoginClient> ClientCreator
             = ccs => new WvsLoginClient(ccs);
         //-----------------------------------------------------------------------------
-        public WvsLogin() : base("WvsLogin", 8484, ClientCreator)
+        public WvsLogin() : base("WvsLogin", Constants.LoginPort, ClientCreator)
         {
             //Eventually do something L0L
         }
@@ -59,7 +59,7 @@ namespace WvsRebirth
             switch (opcode)
             {
                 case RecvOps.CP_ClientDumpLog:
-                    //Handle_ClientDumpLog(socket,packet);
+                    Handle_ClientDumpLog(socket,packet);
                     break;
                 case RecvOps.CP_CheckPassword:
                     Handle_CheckPassword(socket, packet);
@@ -87,9 +87,12 @@ namespace WvsRebirth
                 case RecvOps.CP_CreateNewCharacter:
                     Handle_CreateNewCharacter(socket, packet);
                     break;
+                case RecvOps.CP_SelectCharacter:
+                    Handle_SelectCharacter(socket, packet);
+                    break;
             }
         }
-
+        //-----------------------------------------------------------------------------
         private void Handle_ClientDumpLog(WvsLoginClient c, CInPacket p)
         {
             var callType = p.Decode2();
@@ -106,18 +109,33 @@ namespace WvsRebirth
                 rawSeq, callTypeName, errorCode, backupBufferSize, type,
                 type,//LoginOperation.getByType(type).name(),
                 Constants.GetString(backupBuffer)
-                );
+            );
+        }
+        private void Handle_SelectCharacter(WvsLoginClient c, CInPacket p)
+        {
+            //var v1 = p.Decode1();
+            //var v2 = p.Decode1(); //dwCharacterID
+            var uid = p.Decode4();
+            //var hwid1 = p.DecodeString();
+            //var hwid2 = p.DecodeBuffer(6);
+            //var hwid3 = p.DecodeString();
+
+            //GOTTA MIGRATE TO WVS GAME
+            //c.SendPacket(CPacket.CheckPasswordResult(5000, 0, 0, user));
+
+            c.SendPacket(CPacket.SelectCharacterResult(uid));
+
         }
 
-        //-----------------------------------------------------------------------------
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
         {
             var pwd = p.DecodeString();
             var user = p.DecodeString();
 
+            const int AccountId = 5000;
             //TODO: Login logic
 
-            c.SendPacket(CPacket.CheckPasswordResult(5000, 0, 0, user));
+            c.SendPacket(CPacket.CheckPasswordResult(AccountId, 0, 0, user));
         }
         private void Handle_WorldRequest(WvsLoginClient c, CInPacket p)
         {
@@ -143,13 +161,6 @@ namespace WvsRebirth
             var unk = p.Decode1();
             var hwid_maybe = p.Decode4();
             
-            //var hex =
-            //    "0B 00 00 02 35 00 00 00 5B 35 33 5D 44 61 72 74 65 72 00 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 06 8A 30 10 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 36 00 00 00 5B 35 34 5D 4D 6F 72 64 72 65 64 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00";
-
-            //var packet = Constants.GetBytes(hex);
-
-            //c.SendPacket(packet);
-
 
             //var character = Character.Default();
             var character = Array.Empty<Character>();
@@ -176,46 +187,19 @@ namespace WvsRebirth
             var shoes = p.Decode4();
             var weapon = p.Decode4();
             var gender_maybe = p.Decode1();
-
-            //var x = new Character
-            //{
-            //    Uid = Constants.Rand.Next(1245, 5432),
-            //    Name = name,
-            //    Gender = 1,//gender_maybe,
-            //    SkinColor = 0,//(byte)skinColor,
-            //    Face = 21000,//face,
-            //    Hair = 31000,//hair + hairColor,
-            //    //Pets
-            //    Level = 10,
-            //    Job = 0,//Job = (short)job,
-            //    //db
-            //    StatStr = 4,
-            //    StatDex = 4,
-            //    StatInt = 4,
-            //    StatLuk = 4,
-            //    StatCurHp = 10,
-            //    StatMaxHp = 50,
-            //    StatCurMp = 10,
-            //    StatMaxMp = 50,
-            //    Ap = 10,
-            //    Sp = 20,
-            //    Exp = 500,
-            //    Fame = 255,
-            //    MapId = 180000000,
-            //    MapSpawn = 0,
-            //};
+            
 
             var x = new Character
             {
                 Uid = 7876,
                 Name = name,
-                Gender = 1,//gender_maybe,
-                SkinColor = 0,//(byte)skinColor,
-                Face = 21000,//face,
-                Hair = 31000,//hair + hairColor,
+                Gender = gender_maybe,
+                SkinColor = (byte)skinColor,
+                Face = face,
+                Hair = hair + hairColor,
                 //Pets
                 Level = 10,
-                Job = 0,//Job = (short)job,
+                Job = (short)job,
                 //db
                 StatStr = 4,
                 StatDex = 4,
@@ -233,14 +217,7 @@ namespace WvsRebirth
                 MapSpawn = 0,
             };
 
-            //var buffer =
-            //   Constants.GetBytes("0E 00 00 36 00 00 00 5B 35 34 5D 4D 6F 72 64 72 65 64 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 06 8A 30 10 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
-
-            //c.SendPacket(buffer);
-
             //c.Characters.Add(x);
-
-            //This shit right here does not work
             c.SendPacket(CPacket.CreateNewCharacter(name, true, x));
         }
     }
