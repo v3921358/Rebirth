@@ -91,7 +91,7 @@ namespace Common.Network
 
             return value;
         }
-        public byte[] DecodeBuffer(byte[] value, int start, int length)
+        public byte[] DecodeBuffer(int length)
         {
             CheckLength(length);
             var temp = new byte[length];

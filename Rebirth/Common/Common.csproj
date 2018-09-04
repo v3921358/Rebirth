@@ -43,13 +43,13 @@
   <ItemGroup>
     <Compile Include="Client\Character.cs" />
     <Compile Include="Client\ClientBase.cs" />
-    <Compile Include="Client\GW_CharacterStat.cs" />
     <Compile Include="Client\WvsLoginClient.cs" />
     <Compile Include="Constants.cs" />
     <Compile Include="Crypto\FastAES.cs" />
     <Compile Include="Crypto\MapleAes.cs" />
     <Compile Include="Crypto\MapleCustom.cs" />
     <Compile Include="Crypto\MapleIV.cs" />
+    <Compile Include="Entities\CrashCallType.cs" />
     <Compile Include="Log\ConsoleLog.cs" />
     <Compile Include="Log\Logger.cs" />
     <Compile Include="Network\CInPacket.cs" />
@@ -64,6 +64,9 @@
     <Compile Include="Server\WvsCenter.cs" />
     <Compile Include="Server\WvsLogin.cs" />
     <Compile Include="Threading\Executor.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Tools\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

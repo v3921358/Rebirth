@@ -2,6 +2,7 @@
 using System.Linq;
 using Common;
 using Common.Client;
+using Common.Entities;
 using Common.Log;
 using Common.Network;
 using Common.Server;
@@ -57,6 +58,9 @@ namespace WvsRebirth
 
             switch (opcode)
             {
+                case RecvOps.CP_ClientDumpLog:
+                    Handle_ClientDumpLog(socket,packet);
+                    break;
                 case RecvOps.CP_CheckPassword:
                     Handle_CheckPassword(socket, packet);
                     break;
@@ -85,6 +89,26 @@ namespace WvsRebirth
                     break;
             }
         }
+
+        private void Handle_ClientDumpLog(WvsLoginClient c, CInPacket p)
+        {
+            var callType = p.Decode2();
+            var errorCode = p.Decode4();
+            var backupBufferSize = p.Decode2();
+            var rawSeq = p.Decode4();
+            var type = p.Decode2();
+            var backupBuffer = p.DecodeBuffer(backupBufferSize - 6);
+
+            var callTypeName = Enum.GetName(typeof(CrashCallType), callType);
+
+            Logger.Write(LogLevel.Trace,
+                "RawSeq: {0} CallType: {1} ErrorCode: {2} BackupBufferSize: {3} Type: {4} - {5} Packet: {6}",
+                rawSeq, callTypeName, errorCode, backupBufferSize, type,
+                type,//LoginOperation.getByType(type).name(),
+                Constants.GetString(backupBuffer)
+                );
+        }
+
         //-----------------------------------------------------------------------------
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
         {
@@ -146,33 +170,66 @@ namespace WvsRebirth
             var weapon = p.Decode4();
             var gender_maybe = p.Decode1();
 
+            //var x = new Character
+            //{
+            //    Uid = Constants.Rand.Next(1245, 5432),
+            //    Name = name,
+            //    Gender = 1,//gender_maybe,
+            //    SkinColor = 0,//(byte)skinColor,
+            //    Face = 21000,//face,
+            //    Hair = 31000,//hair + hairColor,
+            //    //Pets
+            //    Level = 10,
+            //    Job = 0,//Job = (short)job,
+            //    //db
+            //    StatStr = 4,
+            //    StatDex = 4,
+            //    StatInt = 4,
+            //    StatLuk = 4,
+            //    StatCurHp = 10,
+            //    StatMaxHp = 50,
+            //    StatCurMp = 10,
+            //    StatMaxMp = 50,
+            //    Ap = 10,
+            //    Sp = 20,
+            //    Exp = 500,
+            //    Fame = 255,
+            //    MapId = 180000000,
+            //    MapSpawn = 0,
+            //};
+
             var x = new Character
             {
-                Uid = Constants.Rand.Next(5000, 6000),
+                Uid = Constants.Rand.Next(1245, 5432),
                 Name = name,
-                Gender = gender_maybe,
-                SkinColor = (byte)skinColor,
-                Face = face,
-                Hair = hair + hairColor,
+                Gender = 1,//gender_maybe,
+                SkinColor = 0,//(byte)skinColor,
+                Face = 21000,//face,
+                Hair = 31000,//hair + hairColor,
                 //Pets
                 Level = 10,
-                Job = (short)job,
+                Job = 100,//Job = (short)job,
                 //db
                 StatStr = 4,
                 StatDex = 4,
                 StatInt = 4,
                 StatLuk = 4,
-                StatCurHp = 10,
+                StatCurHp = 50,
                 StatMaxHp = 50,
-                StatCurMp = 10,
+                StatCurMp = 50,
                 StatMaxMp = 50,
-                Ap = 0,
-                Sp = 0,
-                Exp = 0,
-                Fame = 0,
-                MapId = 180000000,
+                Ap = 10,
+                Sp = 20,
+                Exp = 2,
+                Fame = 255,
+                MapId = 100000000,
                 MapSpawn = 0,
             };
+
+            //var buffer =
+            //   Constants.GetBytes("0E 00 00 36 00 00 00 5B 35 34 5D 4D 6F 72 64 72 65 64 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 06 8A 30 10 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
+
+//            c.SendPacket(buffer);
 
             //c.Characters.Add(x);
             c.SendPacket(CPacket.CreateNewCharacter(name, true, x));

@@ -28,10 +28,6 @@ namespace Common.Network
             Encode2((short)opCode);
         }
 
-        public COutPacket(short opCode) : this()
-        {
-            Encode2(opCode);
-        }
 
         //From LittleEndianByteConverter by Shoftee
         private void Append(long value, int byteCount)

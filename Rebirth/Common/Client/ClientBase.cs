@@ -22,16 +22,21 @@ namespace Common.Client
 
         public void SendPacket(COutPacket packet)
         {
-            var buffer = packet.ToArray();
+            SendPacket(packet.ToArray());
+        }
+        public void SendPacket(byte[] packet)
+        {
+            var buffer = packet;
             var opcode = (SendOps)BitConverter.ToInt16(buffer, 0);
 
             var name = Enum.GetName(typeof(SendOps), opcode);
-            var str = BitConverter.ToString(buffer);
+            var str = Constants.GetString(buffer);
 
             Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
 
             m_socket.Send(packet);
         }
+
 
         public void Disconnect()
         {

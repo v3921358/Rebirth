@@ -59,7 +59,7 @@ namespace Common.Server
             var opcode = (RecvOps)BitConverter.ToInt16(buffer, 0);
 
             var name = Enum.GetName(typeof(RecvOps), opcode);
-            var str = BitConverter.ToString(buffer);
+            var str = Constants.GetString(buffer);
 
             Logger.Write(LogLevel.Info, "Recv [{0}] {1}", name, str);
         }

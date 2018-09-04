@@ -155,19 +155,19 @@ namespace Common.Client
 
             p.Encode4(Exp); //nEXP
             p.Encode2(Fame); //nPOP
-            p.Encode4(0); //nTempEXP | Gachapon
+            p.Encode4(0); //nTempEXP | Gachapon?
             p.Encode4(MapId); //dwPosMap_CS
             p.Encode1(MapSpawn); //v3->nPortal
             p.Encode4(0); //v3->nPlaytime
             p.Encode2(0); //v3->nSubJob | 1 here for dual blade?
         }
-        public void EncodeLook(COutPacket p,bool mega)
+        public void EncodeLook(COutPacket p)
         {
             p.Encode1(Gender);
             p.Encode1(SkinColor);
             p.Encode4(Face);
-            p.Encode1((byte)(mega ? 0 : 1));
-            p.Encode4(Hair );
+            p.Encode1(false);//p.Encode1((byte)(mega ? 0 : 1));
+            p.Encode4(Hair);
 
             //Normal Equips
             p.Encode1(0xFF);

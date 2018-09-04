@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Common.Client;
 using Common.Network;
+// ReSharper disable InconsistentNaming
 
 namespace Common
 {
@@ -94,16 +95,15 @@ namespace Common
 
             foreach (var x in chars)
             {
-                AddCharEntry(x,p,false);
+                AddCharEntry(x,p);
             }
 
             p.Encode1(2); //m_bLoginOpt | spw request?
-            p.Encode4(3); //m_nSlotCount
-            p.Encode4(0); //m_nBuyCharCount | https://i.imgur.com/DMynDxG.png
 
-            p.Encode8(0);
-            p.Encode8(0);
-
+            p.Encode8(3);
+            //p.Encode4(3); //m_nSlotCount
+            //p.Encode4(0); //m_nBuyCharCount | https://i.imgur.com/DMynDxG.png
+            
             return p;
         }
 
@@ -138,18 +138,22 @@ namespace Common
             var p = new COutPacket(SendOps.LP_CreateNewCharacterResult);
             p.Encode1((byte)(worked ? 0 : 1));
 
-            c.EncodeStats(p);
-            c.EncodeLook(p, false);
+            if (worked)
+            {
+               AddCharEntry(c,p);
+            }
 
             return p;
         }
 
-        public static void AddCharEntry(Character c, COutPacket p,bool mega)
+        public static void AddCharEntry(Character c, COutPacket p)
         {
             //const bool ranking = false;
 
             c.EncodeStats(p);
-            c.EncodeLook(p, mega);
+            c.EncodeLook(p);
+
+            //p.Encode8(0); //idk
 
             p.Encode1(0);
             p.Encode1(0); //ranking
@@ -161,6 +165,7 @@ namespace Common
             //    mplew.writeInt(chr.getJobRank());
             //    mplew.writeInt(chr.getJobRankMove());
             //}
+            
         }
     }
 }

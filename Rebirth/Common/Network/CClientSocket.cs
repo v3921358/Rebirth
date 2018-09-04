@@ -157,7 +157,7 @@ namespace Common.Network
 
         }
 
-        internal void Send(COutPacket outPacket)
+        internal void Send(byte[] packet)
         {
             if (Disposed)
                 return;
@@ -167,7 +167,7 @@ namespace Common.Network
                 if (Disposed)
                     return;
 
-                byte[] packet = outPacket.ToArray();
+                //byte[] packet = outPacket.ToArray();
                 byte[] final = new byte[packet.Length + 4];
 
                 MapleAes.GetHeader(final, m_siv, m_version);
