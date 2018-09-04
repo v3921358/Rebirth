@@ -86,6 +86,8 @@ namespace Common.Server
         {
             m_thread.Start();
             m_acceptor.StartListen();
+
+            Logger.Write(LogLevel.Debug, "{0} listening on tcp port {1}", Name, m_acceptor.Port);
         }
         public void Stop()
         {

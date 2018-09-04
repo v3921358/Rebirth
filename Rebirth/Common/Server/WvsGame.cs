@@ -15,16 +15,18 @@ namespace Common.Server
         private static readonly Func<CClientSocket, WvsGameClient> ClientCreator
             = ccs => new WvsGameClient(ccs);
         //-----------------------------------------------------------------------------
-        public WvsGame() : base("WvsGame1", Constants.GamePort, ClientCreator)
+        public byte ChannelId { get; private set; }
+        //-----------------------------------------------------------------------------
+        public WvsGame(byte channel) : base($"WvsGame{channel}", Constants.GamePort + channel, ClientCreator)
         {
-            //Eventually do something L0L
+            ChannelId = channel;
         }
         //-----------------------------------------------------------------------------
         protected override void HandlePacket(WvsGameClient socket, CInPacket packet)
         {
             base.HandlePacket(socket, packet);
             var opcode = (RecvOps)packet.Decode2();
-            
+
             //TODO: Some migrate flag before accepted other packets
 
             switch (opcode)
@@ -32,19 +34,14 @@ namespace Common.Server
                 case RecvOps.CP_MigrateIn:
                     Handle_MigrateIn(socket, packet);
                     break;
-                    
             }
         }
         //-----------------------------------------------------------------------------
         private void Handle_MigrateIn(WvsGameClient c, CInPacket p)
         {
             var uid = p.Decode4();
-
             var character = Character.Default();
-
-            //Send SetField
-            //c.SendPacket(CPacket.SetField(character,p));
-
+            c.SendPacket(CPacket.SetFieldComplete(character,true));
         }
-  }
+    }
 }

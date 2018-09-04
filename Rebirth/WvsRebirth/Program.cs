@@ -11,16 +11,10 @@ namespace WvsRebirth
             ConsoleLog.InitConsole("Rebirth v95");
             Logger.Add(new ConsoleLog());
             
-            WvsLogin login = new WvsLogin();
-            WvsGame game = new WvsGame();
-
-            login.Start();
-            game.Start();
-
+            var server = new WvsCenter(1);
+            server.Start();
             Console.ReadLine();
-
-            login.Stop();
-            game.Start();
+            server.Stop();
         }
     }
 }

@@ -120,11 +120,7 @@ namespace WvsRebirth
             //var hwid2 = p.DecodeBuffer(6);
             //var hwid3 = p.DecodeString();
 
-            //GOTTA MIGRATE TO WVS GAME
-            //c.SendPacket(CPacket.CheckPasswordResult(5000, 0, 0, user));
-
             c.SendPacket(CPacket.SelectCharacterResult(uid));
-
         }
 
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
@@ -160,10 +156,8 @@ namespace WvsRebirth
             var channel = p.Decode1();
             var unk = p.Decode1();
             var hwid_maybe = p.Decode4();
-            
-
-            //var character = Character.Default();
-            var character = Array.Empty<Character>();
+           
+            var character = Character.Default();
             c.SendPacket(CPacket.SelectWorldResult(character));
         }
         private void Handle_CheckDuplicatedID(WvsLoginClient c, CInPacket p)
