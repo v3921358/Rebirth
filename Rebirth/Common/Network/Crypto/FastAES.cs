@@ -1,6 +1,6 @@
 ﻿using System.Security;
 
-namespace Common.Crypto
+namespace Common.Network.Crypto
 {
     public sealed class FastAes
     {

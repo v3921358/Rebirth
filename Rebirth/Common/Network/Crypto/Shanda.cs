@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Crypto
+﻿namespace Common.Network.Crypto
 {
-    public static class MapleCustom
+    public static class Shanda
     {
         public static void EncryptTransform(byte[] data)
         {

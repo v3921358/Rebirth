@@ -4,6 +4,7 @@ using System.Net.Sockets;
 using Common.Client;
 using Common.Log;
 using Common.Network;
+using Common.Packets;
 using Common.Threading;
 
 namespace Common.Server
@@ -87,7 +88,7 @@ namespace Common.Server
             m_thread.Start();
             m_acceptor.StartListen();
 
-            Logger.Write(LogLevel.Debug, "{0} listening on tcp port {1}", Name, m_acceptor.Port);
+            Logger.Write(LogLevel.Debug, "[{0}] listening on port {1}", Name, m_acceptor.Port);
         }
         public void Stop()
         {

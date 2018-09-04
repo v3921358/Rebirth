@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Net.Sockets;
-using Common.Crypto;
+using Common.Network.Crypto;
+using Common.Packets;
 
 namespace Common.Network
 {
@@ -143,7 +144,7 @@ namespace Common.Network
                 Buffer.BlockCopy(m_buffer, 4, packetBuffer, 0, size);
 
                 MapleAes.Transform(packetBuffer, m_riv);
-                MapleCustom.DecryptTransform(packetBuffer);
+                Shanda.DecryptTransform(packetBuffer);
     
                 m_offset -= size + 4;
 
@@ -172,7 +173,7 @@ namespace Common.Network
 
                 MapleAes.GetHeader(final, m_siv, m_version);
 
-                MapleCustom.EncryptTransform(packet);
+                Shanda.EncryptTransform(packet);
                 MapleAes.Transform(packet, m_siv);
 
                 Buffer.BlockCopy(packet, 0, final, 4, packet.Length);

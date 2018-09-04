@@ -5,6 +5,7 @@ using Common.Client;
 using Common.Entities;
 using Common.Log;
 using Common.Network;
+using Common.Packets;
 using Common.Server;
 
 namespace WvsRebirth
@@ -122,7 +123,6 @@ namespace WvsRebirth
 
             c.SendPacket(CPacket.SelectCharacterResult(uid));
         }
-
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
         {
             var pwd = p.DecodeString();
@@ -183,9 +183,9 @@ namespace WvsRebirth
             var gender_maybe = p.Decode1();
             
 
-            var x = new Character
+            var newCharacter = new Character
             {
-                Uid = 7876,
+                Uid = Constants.Rand.Next(1000,2000), //Gotta get some atomic int bs for this
                 Name = name,
                 Gender = gender_maybe,
                 SkinColor = (byte)skinColor,
@@ -212,7 +212,7 @@ namespace WvsRebirth
             };
 
             //c.Characters.Add(x);
-            c.SendPacket(CPacket.CreateNewCharacter(name, true, x));
+            c.SendPacket(CPacket.CreateNewCharacter(name, true, newCharacter));
         }
     }
 }

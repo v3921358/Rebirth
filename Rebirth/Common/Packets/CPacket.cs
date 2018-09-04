@@ -1,16 +1,14 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Client;
 using Common.Network;
+
 // ReSharper disable InconsistentNaming
 
-namespace Common
+namespace Common.Packets
 {
     public static class CPacket
     {
+        //WvsLogin----------------------------------------------------------------------------------------------------
         public static COutPacket CheckPasswordResult(int accId, byte gender, byte gmLevel, string accountName)
         {
             var p = new COutPacket();
@@ -41,7 +39,6 @@ namespace Common
 
             return p;
         }
-
         public static COutPacket WorldRequest(byte serverId)
         {
             var p = new COutPacket();
@@ -83,7 +80,6 @@ namespace Common
 
             return p;
         }
-
         public static COutPacket SelectWorldResult(params Character[] chars)
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
@@ -95,7 +91,7 @@ namespace Common
 
             foreach (var x in chars)
             {
-                AddCharEntry(x, p);
+                AddCharEntry(p,x);
             }
 
             p.Encode1(2); //m_bLoginOpt | spw request?
@@ -106,7 +102,6 @@ namespace Common
 
             return p;
         }
-
         public static COutPacket CheckUserLimit(byte status)
         {
             var p = new COutPacket();
@@ -124,7 +119,6 @@ namespace Common
 
             return p;
         }
-
         public static COutPacket CheckDuplicatedIDResult(string name, bool nameTaken)
         {
             var p = new COutPacket(SendOps.LP_CheckDuplicatedIDResult);
@@ -132,7 +126,6 @@ namespace Common
             p.Encode1(nameTaken);
             return p;
         }
-
         public static COutPacket CreateNewCharacter(string name, bool worked, Character c)
         {
             var p = new COutPacket(SendOps.LP_CreateNewCharacterResult);
@@ -140,12 +133,11 @@ namespace Common
 
             if (worked)
             {
-                AddCharEntry(c, p);
+                AddCharEntry(p,c);
             }
 
             return p;
         }
-
         public static COutPacket SelectCharacterResult(int uid)
         {
             var p = new COutPacket(SendOps.LP_SelectCharacterResult);
@@ -169,178 +161,8 @@ namespace Common
 
             return p;
         }
-
-        public static void AddCharEntry(Character c, COutPacket p)
-        {
-            //  const bool ranking = false;
-
-            c.EncodeStats(p);
-            c.EncodeLook(p);
-
-            p.Encode1(0);
-            p.Encode1(0); //ranking
-
-
-            //if (ranking)
-            //{
-            //    mplew.writeInt(chr.getRank());
-            //    mplew.writeInt(chr.getRankMove());
-            //    mplew.writeInt(chr.getJobRank());
-            //    mplew.writeInt(chr.getJobRankMove());
-            //}
-
-        }
-
-        public static COutPacket SetField(Character c)
-        {
-            const bool bCharacterData = true;
-
-            var p = new COutPacket(SendOps.LP_SetField);
-
-            p.Encode4(0); //  *((_DWORD *)TSingleton<CWvsContext>::ms_pInstance._m_pStr + 2072)
-            p.Encode4(0); //  *((_DWORD *)TSingleton<CWvsContext>::ms_pInstance._m_pStr + 3942)
-
-            p.Encode1(0); //sNotifierMessage
-            p.Encode1(bCharacterData); //bCharacterData
-
-            p.Encode2(0); //Enables ChatBlockReason
-
-            if (bCharacterData)
-            {
-                var seed1 = Constants.Rand.Next();
-                var seed2 = Constants.Rand.Next();
-                var seed3 = Constants.Rand.Next();
-
-                p.Encode4(seed1);
-                p.Encode4(seed2);
-                p.Encode4(seed3);
-
-
-
-                //    CharacterData::Decode((CharacterData *)(v11 + 16), iPacket, 0);
-                long dbcharFlag = 1;
-
-
-                p.Encode8(dbcharFlag); //dbcharFlag
-                p.Encode1(0); //v3->nCombatOrders
-                p.Encode1(0); //v5 some loop
-
-                if ((dbcharFlag & 1) != 0)
-                {
-                    c.EncodeStats(p);
-                    p.Encode1(10); //v3->nFriendMax
-                    p.Encode1(0); // if ( CInPacket::Decode1(v4) )
-                    /*
-                        GW_CharacterStat::Decode(&v3->characterStat, v4, bBackwardUpdate);
-                        v3->nFriendMax = (unsigned __int8)CInPacket::Decode1(v4);
-                        if ( CInPacket::Decode1(v4) )
-                        {
-                          v14 = CInPacket::DecodeStr(v4, (ZXString<char> *)&result.p);
-                          LOBYTE(iPacketa) = 1;
-                          ZXString<char>::operator=(&v3->sLinkedCharacter, v14);
-                          LOBYTE(iPacketa) = 0;
-                          if ( result.p )
-                            ZXString<char>::_Release((ZXString<char>::_ZXStringData *)((char *)&result.p[-1].liCashItemSN.QuadPart + 4));
-                        }
-                    */
-                }
-
-                if ((dbcharFlag & 2) != 0)
-                    p.Encode4(100000);//GW_CharacterStat::DecodeMoney(&v3->characterStat, v4);
-
-
-
-                //CWvsContext::OnSetLogoutGiftConfig(v10, iPacket);
-            }
-            else
-            {
-
-            }
-
-            return p;
-        }
-
-        public static COutPacket SetFieldBeta(Character c)
-        {
-            var p = new COutPacket(SendOps.LP_SetField);
-            
-            CClientOptMan__EncodeOpt(p,2);
-
-            //  *((_DWORD *)TSingleton<CWvsContext>::ms_pInstance._m_pStr + 2072) = CInPacket::Decode4(iPacket);
-            //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
-            p.Encode4(1);//chr.getClient().getChannel() - 1);
-            p.Encode4(0);
-
-            const bool bCharacterData = true;
-
-            //BYTE3(sNotifierMessage._m_pStr) = CInPacket::Decode1(iPacket);
-            //bCharacterData = (unsigned __int8)CInPacket::Decode1(iPacket);
-            //v4 = CInPacket::Decode2(iPacket);
-            p.Encode1(1);
-            p.Encode1(bCharacterData); //  bCharacterData 
-            p.Encode2(0); //  nNotifierCheck
-
-            if (bCharacterData)
-            {
-                var seed1 = Constants.Rand.Next();
-                var seed2 = Constants.Rand.Next();
-                var seed3 = Constants.Rand.Next();
-
-                p.Encode4(seed1);
-                p.Encode4(seed2);
-                p.Encode4(seed3);
-
-                AddCharacterData(p,c); //CharacterData::Decode
-
-                //CWvsContextOnSetLogoutGiftConfig
-                //
-                p.Encode4(0); // Lucky Logout Gift packet. Received/do not show = 1; not received/show = 0
-                p.Encode4(0); // SN 1
-                p.Encode4(0); // SN 2
-                p.Encode4(0); // SN 3
-                //
-            }
-            p.Encode8(Environment.TickCount); //some other sort of time
-
-            return p;
-        }
-        public static COutPacket SetField2(Character c, int mapId, byte spawnPoint)
-        {
-            var p = new COutPacket(SendOps.LP_SetField);
-
-            CClientOptMan__EncodeOpt(p, 2);
-
-            //  *((_DWORD *)TSingleton<CWvsContext>::ms_pInstance._m_pStr + 2072) = CInPacket::Decode4(iPacket);
-            //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
-            p.Encode4(1);//chr.getClient().getChannel() - 1);
-            p.Encode4(0);
-
-            const bool bCharacterData = false;
-
-            //BYTE3(sNotifierMessage._m_pStr) = CInPacket::Decode1(iPacket);
-            //bCharacterData = (unsigned __int8)CInPacket::Decode1(iPacket);
-            //v4 = CInPacket::Decode2(iPacket);
-            p.Encode1(1);
-            p.Encode1(bCharacterData); //  bCharacterData 
-            p.Encode2(0); //  nNotifierCheck
-
-            if (!bCharacterData)
-            {
-                p.Encode1(0); // Portal Count
-                p.Encode1(0); // not connect packet
-                p.Encode2(0); // Messages		
-                p.Encode1(0); // revive stuffs?.
-                p.Encode4(mapId);
-                p.Encode1(spawnPoint);
-                p.Encode2(c.StatCurHp);
-                p.Encode1(0);
-            }
-
-            p.Encode8(Environment.TickCount);//(getTime(System.currentTimeMillis()));
-            return p;
-        }
-
-        public static COutPacket SetFieldComplete(Character c,bool bCharacterData)
+        //WvsGame-----------------------------------------------------------------------------------------------------
+        public static COutPacket SetField(Character c,bool bCharacterData)
         {
             var p = new COutPacket(SendOps.LP_SetField);
 
@@ -380,9 +202,10 @@ namespace Common
             }
             else
             {
-                p.Encode1(0); // Portal Count
-                p.Encode1(0); // not connect packet
-                p.Encode2(0); // Messages		
+                //p.Encode1(0); // Portal Count
+                //p.Encode1(0); // not connect packet
+                //p.Encode2(0); // Messages		
+
                 p.Encode1(0); // revive stuffs?.
                 p.Encode4(c.MapId);
                 p.Encode1(c.MapSpawn);
@@ -394,7 +217,27 @@ namespace Common
 
             return p;
         }
+        //WvsCommon---------------------------------------------------------------------------------------------------
+        private static void AddCharEntry(COutPacket p,Character c)
+        {
+            //const bool ranking = false;
 
+            c.EncodeStats(p);
+            c.EncodeLook(p);
+
+            p.Encode1(0);
+            p.Encode1(0); //ranking
+
+
+            //if (ranking)
+            //{
+            //    mplew.writeInt(chr.getRank());
+            //    mplew.writeInt(chr.getRankMove());
+            //    mplew.writeInt(chr.getJobRank());
+            //    mplew.writeInt(chr.getJobRankMove());
+            //}
+
+        }
         private static void AddCharacterData(COutPacket p, Character c)
         {
             p.Encode8(-1); //the bit flag (all anwaays)

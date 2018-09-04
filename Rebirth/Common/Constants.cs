@@ -15,7 +15,7 @@ namespace Common
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
-        public static byte HexToByte(string hex)
+        private static byte HexToByte(string hex)
         {
             if (hex.Length > 2 || hex.Length <= 0)
                 throw new ArgumentException("hex must be 1 or 2 characters in length");

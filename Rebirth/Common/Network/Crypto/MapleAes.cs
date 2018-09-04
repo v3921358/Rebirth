@@ -1,12 +1,12 @@
 ﻿using System;
 
-namespace Common.Crypto
+namespace Common.Network.Crypto
 {
     public static class MapleAes
     {
         private static readonly FastAes sTransformer;
 
-        private static readonly byte[] sUserKey = new byte[32]
+        private static readonly byte[] sUserKey = 
         {
             0x13, 0x00, 0x00, 0x00,
             0x08, 0x00, 0x00, 0x00,

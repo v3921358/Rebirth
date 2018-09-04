@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Network;
+using Common.Packets;
 
 namespace Common.Client
 {

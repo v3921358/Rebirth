@@ -1,12 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Client;
-using Common.Entities;
-using Common.Log;
 using Common.Network;
+using Common.Packets;
 
 namespace Common.Server
 {
@@ -15,7 +10,7 @@ namespace Common.Server
         private static readonly Func<CClientSocket, WvsGameClient> ClientCreator
             = ccs => new WvsGameClient(ccs);
         //-----------------------------------------------------------------------------
-        public byte ChannelId { get; private set; }
+        public byte ChannelId { get; }
         //-----------------------------------------------------------------------------
         public WvsGame(byte channel) : base($"WvsGame{channel}", Constants.GamePort + channel, ClientCreator)
         {
@@ -41,7 +36,7 @@ namespace Common.Server
         {
             var uid = p.Decode4();
             var character = Character.Default();
-            c.SendPacket(CPacket.SetFieldComplete(character,true));
+            c.SendPacket(CPacket.SetField(character,true));
         }
     }
 }

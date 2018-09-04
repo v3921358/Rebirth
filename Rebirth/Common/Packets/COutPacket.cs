@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using Common.Network;
 
-namespace Common.Network
+namespace Common.Packets
 {
     /// <summary>
     /// TODO: Implement this https://github.com/RajanGrewal/ByteBuffer
