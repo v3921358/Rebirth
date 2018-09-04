@@ -58,14 +58,28 @@ namespace Common.Server
             var buffer = packet.ToArray();
             var opcode = (RecvOps)BitConverter.ToInt16(buffer, 0);
 
-            var name = Enum.GetName(typeof(RecvOps), opcode);
-            var str = Constants.GetString(buffer);
+            if (FilterRecvOpCode(opcode) == false)
+            {
+                var name = Enum.GetName(typeof(RecvOps), opcode);
+                var str = Constants.GetString(buffer);
 
-            Logger.Write(LogLevel.Info, "Recv [{0}] {1}", name, str);
+                Logger.Write(LogLevel.Info, "Recv [{0}] {1}", name, str);
+            }
         }
         protected virtual void HandleDisconnect(TClient client)
         {
             Logger.Write(LogLevel.Info, "[{0}] Disconnected {1}", Name, client.Host);
+        }
+
+        protected virtual bool FilterRecvOpCode(RecvOps recvOp)
+        {
+            switch (recvOp)
+            {
+                case RecvOps.CP_ClientDumpLog:
+                case RecvOps.CP_ExceptionLog:
+                    return true;
+            }
+            return false;
         }
 
         public void Start()

@@ -59,7 +59,7 @@ namespace WvsRebirth
             switch (opcode)
             {
                 case RecvOps.CP_ClientDumpLog:
-                    Handle_ClientDumpLog(socket,packet);
+                    //Handle_ClientDumpLog(socket,packet);
                     break;
                 case RecvOps.CP_CheckPassword:
                     Handle_CheckPassword(socket, packet);
@@ -117,7 +117,7 @@ namespace WvsRebirth
 
             //TODO: Login logic
 
-            c.SendPacket(CPacket.CheckPasswordResult(1337, 0, 0, user));
+            c.SendPacket(CPacket.CheckPasswordResult(5000, 0, 0, user));
         }
         private void Handle_WorldRequest(WvsLoginClient c, CInPacket p)
         {
@@ -142,10 +142,17 @@ namespace WvsRebirth
             var channel = p.Decode1();
             var unk = p.Decode1();
             var hwid_maybe = p.Decode4();
+            
+            //var hex =
+            //    "0B 00 00 02 35 00 00 00 5B 35 33 5D 44 61 72 74 65 72 00 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 06 8A 30 10 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 36 00 00 00 5B 35 34 5D 4D 6F 72 64 72 65 64 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 02 03 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00";
+
+            //var packet = Constants.GetBytes(hex);
+
+            //c.SendPacket(packet);
+
 
             //var character = Character.Default();
             var character = Array.Empty<Character>();
-
             c.SendPacket(CPacket.SelectWorldResult(character));
         }
         private void Handle_CheckDuplicatedID(WvsLoginClient c, CInPacket p)
@@ -200,7 +207,7 @@ namespace WvsRebirth
 
             var x = new Character
             {
-                Uid = Constants.Rand.Next(1245, 5432),
+                Uid = 7876,
                 Name = name,
                 Gender = 1,//gender_maybe,
                 SkinColor = 0,//(byte)skinColor,
@@ -208,7 +215,7 @@ namespace WvsRebirth
                 Hair = 31000,//hair + hairColor,
                 //Pets
                 Level = 10,
-                Job = 100,//Job = (short)job,
+                Job = 0,//Job = (short)job,
                 //db
                 StatStr = 4,
                 StatDex = 4,
@@ -229,9 +236,11 @@ namespace WvsRebirth
             //var buffer =
             //   Constants.GetBytes("0E 00 00 36 00 00 00 5B 35 34 5D 4D 6F 72 64 72 65 64 00 00 01 00 08 52 00 00 18 79 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 01 00 00 04 00 04 00 04 00 04 00 32 00 32 00 32 00 32 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 E1 F5 05 00 00 00 00 00 00 00 01 00 08 52 00 00 00 18 79 00 00 05 6A E2 0F 00 06 8A 30 10 00 07 81 5B 10 00 0B F0 DD 13 00 FF FF F0 DD 13 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00");
 
-//            c.SendPacket(buffer);
+            //c.SendPacket(buffer);
 
             //c.Characters.Add(x);
+
+            //This shit right here does not work
             c.SendPacket(CPacket.CreateNewCharacter(name, true, x));
         }
     }

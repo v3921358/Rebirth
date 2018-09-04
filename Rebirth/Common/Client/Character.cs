@@ -27,10 +27,10 @@ namespace Common.Client
                 StatDex = 10,
                 StatInt = 10,
                 StatLuk = 10,
-                StatCurHp =  25,
-                StatMaxHp =  50,
+                StatCurHp = 25,
+                StatMaxHp = 50,
                 StatCurMp = 25,
-                StatMaxMp =  50,
+                StatMaxMp = 50,
                 Ap = 1,
                 Sp = 1,
                 Exp = 0,
@@ -79,10 +79,10 @@ namespace Common.Client
         {
             p.Encode4(Uid);
 
-            if(Name.Length > 12)
+            if (Name.Length > 12)
                 throw new InvalidOperationException();
 
-            for (int i = 0; i < 13; i++)
+            for (int i = 0; i < 12; i++)
             {
                 if (i < Name.Length)
                 {
@@ -93,13 +93,14 @@ namespace Common.Client
                     p.Encode1(0);
                 }
             }
+            p.Encode1(0); //null terminator
 
             p.Encode1(Gender);
             p.Encode1(SkinColor);
             p.Encode4(Face);
             p.Encode4(Hair);
 
-            for(int i = 0;i < Pets.Length;i++)
+            for (int i = 0; i < Pets.Length; i++)
                 p.Encode8(Pets[i]);
 
             p.Encode1(Level);
@@ -123,36 +124,6 @@ namespace Common.Client
             p.Encode2(Sp);
             //
 
-
-            /*
-                  v17 = v3->_ZtlSecureTear_nJob_CS;
-                  v3->_ZtlSecureTear_nAP_CS = v16;
-                  v18 = _ZtlSecureFuse<short>(v3->_ZtlSecureTear_nJob, v17);
-                  if ( v18 / 1000 != 3 && v18 / 100 != 22 && v18 != 2001 )
-                  {
-                    v19 = CInPacket::Decode2(iPacket);
-                    v3->_ZtlSecureTear_nSP_CS = _ZtlSecureTear<short>(v19, v3->_ZtlSecureTear_nSP);
-                    ZList<SPSet>::RemoveAll(&v3->extendSP.lSPSet, (int)v3);
-                  }
-                  else
-                  {
-                    v3->_ZtlSecureTear_nSP_CS = _ZtlSecureTear<short>(0, v3->_ZtlSecureTear_nSP);
-                    ExtendSP::Decode(&v3->extendSP, (int)v3, iPacket);
-                  }
-                  v20 = CInPacket::Decode4(iPacket);
-                  v3->_ZtlSecureTear_nEXP_CS = _ZtlSecureTear<long>(v20, v3->_ZtlSecureTear_nEXP);
-                  v21 = CInPacket::Decode2(iPacket);
-                  v3->_ZtlSecureTear_nPOP_CS = _ZtlSecureTear<short>(v21, v3->_ZtlSecureTear_nPOP);
-                  v22 = CInPacket::Decode4(iPacket);
-                  v3->_ZtlSecureTear_nTempEXP_CS = _ZtlSecureTear<long>(v22, v3->_ZtlSecureTear_nTempEXP);
-                  v23 = CInPacket::Decode4(iPacket);
-                  v3->_ZtlSecureTear_dwPosMap_CS = _ZtlSecureTear<unsigned long>(v23, v3->_ZtlSecureTear_dwPosMap);
-                  v3->nPortal = CInPacket::Decode1(iPacket);
-                  v3->nPlaytime = CInPacket::Decode4(iPacket);
-                  v3->nSubJob = CInPacket::Decode2(iPacket);
-                }
-             */
-
             p.Encode4(Exp); //nEXP
             p.Encode2(Fame); //nPOP
             p.Encode4(0); //nTempEXP | Gachapon?
@@ -169,15 +140,12 @@ namespace Common.Client
             p.Encode1(false);//p.Encode1((byte)(mega ? 0 : 1));
             p.Encode4(Hair);
 
-            //Normal Equips
-            p.Encode1(0xFF);
-
-            //Cash Equips
-            p.Encode1(0xFF);
+            p.Encode1(unchecked((byte)-1));  //Normal Equips
+            p.Encode1(unchecked((byte)-1));      //Cash Equips
 
             p.Encode4(0);//Cash Weapon
 
-            for(int i = 0;i < Pets.Length;i++)
+            for (int i = 0; i < Pets.Length; i++)
                 p.Encode4(0);
         }
     }

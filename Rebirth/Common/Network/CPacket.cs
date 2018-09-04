@@ -95,15 +95,15 @@ namespace Common
 
             foreach (var x in chars)
             {
-                AddCharEntry(x,p);
+                AddCharEntry(x, p);
             }
 
             p.Encode1(2); //m_bLoginOpt | spw request?
 
-            p.Encode8(3);
-            //p.Encode4(3); //m_nSlotCount
-            //p.Encode4(0); //m_nBuyCharCount | https://i.imgur.com/DMynDxG.png
-            
+            //p.Encode8(3);
+            p.Encode4(3); //m_nSlotCount
+            p.Encode4(0); //m_nBuyCharCount | https://i.imgur.com/DMynDxG.png
+
             return p;
         }
 
@@ -125,7 +125,7 @@ namespace Common
             return p;
         }
 
-        public static COutPacket CheckDuplicatedIDResult(string name,bool nameTaken)
+        public static COutPacket CheckDuplicatedIDResult(string name, bool nameTaken)
         {
             var p = new COutPacket(SendOps.LP_CheckDuplicatedIDResult);
             p.EncodeString(name);
@@ -133,14 +133,14 @@ namespace Common
             return p;
         }
 
-        public static COutPacket CreateNewCharacter(string name, bool worked,Character c)
+        public static COutPacket CreateNewCharacter(string name, bool worked, Character c)
         {
             var p = new COutPacket(SendOps.LP_CreateNewCharacterResult);
             p.Encode1((byte)(worked ? 0 : 1));
 
             if (worked)
             {
-               AddCharEntry(c,p);
+                AddCharEntry(c, p);
             }
 
             return p;
@@ -148,15 +148,14 @@ namespace Common
 
         public static void AddCharEntry(Character c, COutPacket p)
         {
-            //const bool ranking = false;
+            //  const bool ranking = false;
 
             c.EncodeStats(p);
             c.EncodeLook(p);
 
-            //p.Encode8(0); //idk
-
             p.Encode1(0);
             p.Encode1(0); //ranking
+
 
             //if (ranking)
             //{
@@ -165,7 +164,7 @@ namespace Common
             //    mplew.writeInt(chr.getJobRank());
             //    mplew.writeInt(chr.getJobRankMove());
             //}
-            
+
         }
     }
 }
