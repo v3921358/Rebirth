@@ -163,7 +163,7 @@ namespace Common.Packets
             return p;
         }
         //WvsGame-----------------------------------------------------------------------------------------------------
-        public static COutPacket SetField(AvatarData c, bool bCharacterData)
+        public static COutPacket SetField(CharacterData c, bool bCharacterData)
         {
             var p = new COutPacket(SendOps.LP_SetField);
 
@@ -191,7 +191,7 @@ namespace Common.Packets
                 p.Encode4(seed2);
                 p.Encode4(seed3);
 
-                AddCharacterData(p, c); //CharacterData::Decode
+                c.Encode(p);//AddCharacterData(p, c); //CharacterData::Decode
 
                 //CWvsContextOnSetLogoutGiftConfig
                 //
@@ -233,7 +233,7 @@ namespace Common.Packets
             return p;
         }
 
-        public static COutPacket UserEnterField(AvatarData c)
+        public static COutPacket UserEnterField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserEnterField);
             p.Encode4(c.Stats.dwCharacterID);
@@ -292,17 +292,29 @@ namespace Common.Packets
             
             return p;
         }
-        public static COutPacket UserLeaveField(AvatarData c)
+        public static COutPacket UserLeaveField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserLeaveField);
             p.Encode4(c.Stats.dwCharacterID);
             return p;
         }
 
+        public static COutPacket UserEmoticon(int uid, int nEmotion, int nDuration, byte bByItemOption)
+        {
+            var p = new COutPacket(SendOps.LP_UserEmotion);
+            p.Encode4(uid);
+            p.Encode4(nEmotion); //nEmoticon
+            p.Encode4(nDuration); //tDuration
+            p.Encode1(bByItemOption); //CUser->m_bEmotionByItemOption
+            return p;
+        }
+
+        
+
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, AvatarData c)
         {
-            bool ranking = false;
+            const bool ranking = false;
 
             c.Stats.Encode(p);
             c.Look.Encode(p);
@@ -315,241 +327,7 @@ namespace Common.Packets
                 p.Skip(16);
             }
         }
-        private static void AddCharacterData(COutPacket p, AvatarData c)
-        {
-            p.Encode8(-1); //the bit flag (all anwaays)
-            p.Encode1(0); //v3->nCombatOrders
-            p.Encode1(0); //some loop?
-
-            c.Stats.Encode(p);   //addCharStats(mplew, chr);
-            p.Encode1(10);//chr.getBuddylist().getCapacity()
-
-            p.Encode1(0); //chr.getLinkedName() == null
-            //else
-            //{
-            //    mplew.write(1);
-            //    mplew.writeMapleAsciiString(chr.getLinkedName());
-            //}
-
-
-            AddInventoryInfo(p, c);
-            AddSkillInfo(p, c);
-            AddQuestInfo(p, c);
-            AddMiniGameInfo(p, c);
-            AddRingInfo(p, c);
-            AddTeleportInfo(p, c);
-            AddMonsterBookInfo(p, c);
-            AddNewYearInfo(p, c); // Short 
-            AddAreaInfo(p, c); // Short 
-            p.Encode2(0);
-            p.Encode2(0);
-        }
-        private static void AddAreaInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode2(0);
-        }
-        private static void AddNewYearInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode2(0);
-        }
-        private static void AddMonsterBookInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode4(0);//mplew.writeInt(chr.getMonsterBookCover()); // cover
-            p.Encode1(0);//mplew.write(0);
-            //Map<Integer, Integer> cards = chr.getMonsterBook().getCards();
-            p.Encode2(0);//mplew.writeShort(cards.size());
-            //for (Entry<Integer, Integer> all : cards.entrySet())
-            //{
-            //    mplew.writeShort(all.getKey() % 10000); // Id
-            //    mplew.write(all.getValue()); // Level
-            //}
-        }
-        private static void AddTeleportInfo(COutPacket p, AvatarData c)
-        {
-            for (int i = 0; i < 5; i++)
-                p.Encode4(0);
-
-            for (int i = 0; i < 10; i++)
-                p.Encode4(0);
-        }
-        private static void AddRingInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode2(0); //getCrushRings
-            p.Encode2(0); //getFriendshipRings
-            p.Encode2(0); //getMarriageRing
-        }
-        private static void AddMiniGameInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode2(0);
-        }
-        private static void AddQuestInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode2(0);//mplew.writeShort(chr.getStartedQuestsSize());
-            //for (MapleQuestStatus q : chr.getStartedQuests())
-            //{
-            //    mplew.writeShort(q.getQuest().getId());
-            //    mplew.writeMapleAsciiString(q.getQuestData());
-            //    if (q.getQuest().getInfoNumber() > 0)
-            //    {
-            //        mplew.writeShort(q.getQuest().getInfoNumber());
-            //        mplew.writeMapleAsciiString(q.getQuestData());
-            //    }
-            //}
-            //List<MapleQuestStatus> completed = chr.getCompletedQuests();
-            //mplew.writeShort(completed.size());
-            p.Encode2(0);//for (MapleQuestStatus q : completed)
-            //{
-            //    mplew.writeShort(q.getQuest().getId());
-            //    mplew.writeLong(getTime(q.getCompletionTime()));
-            //}
-        }
-        private static void AddSkillInfo(COutPacket p, AvatarData c)
-        {
-            //Map<Skill, MapleCharacter.SkillEntry> skills = chr.getSkills();
-            //int skillsSize = skills.size();
-            //// We don't want to include any hidden skill in this, so subtract them from the size list and ignore them.
-            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
-            //{
-            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
-            //    {
-            //        skillsSize--;
-            //    }
-            //}
-            p.Encode2(0);//mplew.writeShort(skillsSize);
-            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
-            //{
-            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
-            //    {
-            //        continue;
-            //    }
-            //    mplew.writeInt(skill.getKey().getId());
-            //    mplew.writeInt(skill.getValue().skillevel);
-            //    addExpirationTime(mplew, skill.getValue().expiration);
-            //    if (skill.getKey().isFourthJob())
-            //    {
-            //        mplew.writeInt(skill.getValue().masterlevel);
-            //    }
-            //}
-            p.Encode2(0);//mplew.writeShort(chr.getAllCooldowns().size());
-            //for (PlayerCoolDownValueHolder cooling : chr.getAllCooldowns())
-            //{
-            //    mplew.writeInt(cooling.skillId);
-            //    int timeLeft = (int)(cooling.length + cooling.startTime - System.currentTimeMillis());
-            //    mplew.writeShort(timeLeft / 1000);
-            //}
-        }
-        private static void AddInventoryInfo(COutPacket p, AvatarData c)
-        {
-            p.Encode4(50000); //Meso
-
-            for (byte i = 1; i <= 5; i++)
-            {
-                p.Encode1(96);
-                //mplew.write(chr.getInventory(MapleInventoryType.getByType(i)).getSlotLimit());
-            }
-            p.Encode8(-2);//getTime(-2));
-            //MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
-            //Collection<Item> equippedC = iv.list();
-            //List<Item> equipped = new ArrayList<>(equippedC.size());
-            //List<Item> equippedCash = new ArrayList<>(equippedC.size());
-            //for (Item item : equippedC)
-            //{
-            //    if (item.getPosition() <= -100)
-            //    {
-            //        equippedCash.add((Item)item);
-            //    }
-            //    else
-            //    {
-            //        equipped.add((Item)item);
-            //    }
-            //}
-            //Collections.sort(equipped);
-            //for (Item item : equipped)
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode2(0); // End Of Equipped
-            //for (Item item : equippedCash)
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode2(0); // End Of Equip Cash
-            //for (Item item : chr.getInventory(MapleInventoryType.EQUIP).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode4(0);  // End of Equip 
-            //for (Item item : chr.getInventory(MapleInventoryType.USE).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Use 
-            //for (Item item : chr.getInventory(MapleInventoryType.SETUP).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Set Up
-            //for (Item item : chr.getInventory(MapleInventoryType.ETC).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0);  // End of Etc
-            //for (Item item : chr.getInventory(MapleInventoryType.CASH).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Cash
-        }
-        private static void AddRingLook(COutPacket p, AvatarData c)
-        {
-            //List<MapleRing> rings;
-            //if (crush)
-            //{
-            //    rings = chr.getCrushRings();
-            //}
-            //else
-            //{
-            //    rings = chr.getFriendshipRings();
-            //}
-            //boolean yes = false;
-            //for (MapleRing ring : rings)
-            //{
-            //    if (ring.equipped())
-            //    {
-            //        if (yes == false)
-            //        {
-            //            yes = true;
-            //            mplew.write(1);
-            //        }
-            //        mplew.writeInt(ring.getRingId());
-            //        mplew.writeInt(0);
-            //        mplew.writeInt(ring.getPartnerRingId());
-            //        mplew.writeInt(0);
-            //        mplew.writeInt(ring.getItemId());
-            //    }
-            //}
-            //if (yes == false)
-            //{
-                p.Encode1(0);
-            //}
-        }
-        private static void AddMarriageRingLook(COutPacket p, AvatarData c)
-        {
-            //if (chr.getMarriageRing() != null && !chr.getMarriageRing().equipped())
-            //{
-               p.Encode1(0); //    mplew.write(0);
-            //    return;
-            //}
-            //mplew.writeBool(chr.getMarriageRing() != null);
-            //if (chr.getMarriageRing() != null)
-            //{
-            //    mplew.writeInt(chr.getId());
-            //    mplew.writeInt(chr.getMarriageRing().getPartnerChrId());
-            //    mplew.writeInt(chr.getMarriageRing().getRingId());
-            //}
-        }
+       
         private static void CClientOptMan__EncodeOpt(COutPacket p, short optCount)
         {
             p.Encode2(optCount);

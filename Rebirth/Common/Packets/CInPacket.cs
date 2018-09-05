@@ -9,32 +9,29 @@ namespace Common.Packets
     public class CInPacket
     {
         private readonly byte[] m_buffer;
+        private readonly int m_length;
         private int m_index;
+        
+        public int Position => m_index;
 
-        public int Position
-        {
-            get
-            {
-                return m_index;
-            }
-        }
-        public int Available
-        {
-            get
-            {
-                return m_buffer.Length - m_index;
-            }
-        }
+        public int Available => m_length - m_index;
 
-        public CInPacket(byte[] packet)
+        public CInPacket(byte[] data)
         {
-            m_buffer = packet;
+            m_buffer = data;
             m_index = 0;
+            m_length = data.Length;
+        }
+        public CInPacket(byte[] data,int start,int length)
+        {
+            m_buffer = data;
+            m_index = start;
+            m_length = length;
         }
 
-        private void CheckLength(int length)
+        private void CheckLength(int count)
         {
-            if (m_index + length > m_buffer.Length || length < 0)
+            if (m_index + count > m_length || count < 0)
                 throw new InvalidOperationException("Not enough space");
         }
 

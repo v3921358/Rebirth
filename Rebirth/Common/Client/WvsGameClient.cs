@@ -18,10 +18,8 @@ namespace Common.Client
         public bool Initialized { get; private set; }
         public bool SentCharData { get; set; }
 
-        //public CharacterData Character { get; private set; }
-        public AvatarData Character { get; private set; }
-
-
+        public CharacterData Character { get; private set; }
+        
         public WvsGameClient(WvsGame game,CClientSocket socket) :base(socket)
         {
             ParentServer = game;
@@ -32,7 +30,12 @@ namespace Common.Client
 
         public void LoadCharacter(int uid)
         {
-            Character = AvatarData.Default();
+            var temp = AvatarData.Default();
+
+            Character = new CharacterData();
+            Character.Stats = temp.Stats;
+            Character.Look = temp.Look;
+        
             Initialized = true;
         }
 
@@ -47,7 +50,7 @@ namespace Common.Client
             var newField = GetCharField();
 
             var spawn = newField.Portals.FirstOrDefault(x => portal.sTName == x.sName);
-            
+
             //TODO: Verify this in the future
             Character.Stats.nPortal = spawn == null ? newField.GetRandomSpawn() : (byte)spawn.nIdx; 
             

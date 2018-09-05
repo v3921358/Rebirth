@@ -64,6 +64,9 @@ namespace Common.Server
                     case RecvOps.CP_UserTransferFieldRequest:
                         Handle_UserTransferFieldRequest(socket, packet);
                         break;
+                    case RecvOps.CP_UserEmotion:
+                        Handle_UserEmotion(socket, packet);
+                        break;
                 }
             }
             else
@@ -82,7 +85,6 @@ namespace Common.Server
                 }
             }
         }
-
         protected override void HandleDisconnect(WvsGameClient client)
         {
             base.HandleDisconnect(client);
@@ -94,7 +96,6 @@ namespace Common.Server
                 client.GetCharField().Remove(client);
             }
         }
-
         //-----------------------------------------------------------------------------
         private void Handle_MigrateIn(WvsGameClient c, CInPacket p)
         {
@@ -107,7 +108,6 @@ namespace Common.Server
 
             GetField(character.Stats.dwPosMap).Add(c);
         }
-
         private void Handle_UserChat(WvsGameClient c, CInPacket p)
         {
             var tick = p.Decode4();
@@ -118,7 +118,6 @@ namespace Common.Server
 
             c.GetCharField().Broadcast(CPacket.UserChat(stats.dwCharacterID, msg, true, show));
         }
-
         private void Handle_UserMove(WvsGameClient c, CInPacket p)
         {
             var v1 = p.Decode8();
@@ -130,11 +129,19 @@ namespace Common.Server
 
             var movePath = p.DecodeBuffer(p.Available);
 
+            {
+                var iPacket = new CInPacket(movePath);
+                var x = iPacket.Decode2();
+                var y = iPacket.Decode2();
+                var vx = iPacket.Decode2();
+                var vy = iPacket.Decode2();
+                //int size = iPacket.Decode1();
+            }
+
             var stats = c.Character.Stats;
 
             c.GetCharField().Broadcast(CPacket.UserMovement(stats.dwCharacterID, movePath), c);
         }
-
         private void Handle_UserTransferFieldRequest(WvsGameClient c, CInPacket p)
         {
             if (p.Available == 0)
@@ -167,6 +174,22 @@ namespace Common.Server
             {
                 c.UsePortal(portal);
             }
+        }
+        private void Handle_UserEmotion(WvsGameClient c, CInPacket p)
+        {
+            var nEmotion = p.Decode4();
+            var nDuration = p.Decode4();
+            var bByItemOption = p.Decode1();
+            
+            //if (emote > 7)
+            //{
+            //    int emoteid = 5159992 + emote;
+            //    //TODO: As if i care check if the emote is in CS inventory, if not return
+            //}
+
+            var stats = c.Character.Stats;
+
+            c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.dwCharacterID, nEmotion, nDuration, bByItemOption), c);
         }
     }
 }

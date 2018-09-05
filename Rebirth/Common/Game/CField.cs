@@ -18,8 +18,8 @@ namespace Common.Game
     {
         public int MapId { get; }
 
-        public List<AvatarData> Characters { get; }
-        public Dictionary<AvatarData, WvsGameClient> Sockets { get; }
+        public List<CharacterData> Characters { get; }
+        public Dictionary<CharacterData, WvsGameClient> Sockets { get; }
 
         public List<Portal> Portals { get; }
 
@@ -27,8 +27,8 @@ namespace Common.Game
         {
             MapId = mapId;
 
-            Characters = new List<AvatarData>();
-            Sockets = new Dictionary<AvatarData, WvsGameClient>();
+            Characters = new List<CharacterData>();
+            Sockets = new Dictionary<CharacterData, WvsGameClient>();
 
             Portals = new List<Portal>();
         }
