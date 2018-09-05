@@ -1,6 +1,7 @@
 ﻿using System;
 using Common.Client;
 using Common.Entities;
+using Common.Game;
 using Common.Network;
 
 // ReSharper disable InconsistentNaming
@@ -173,7 +174,7 @@ namespace Common.Packets
             //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
             p.Encode4(1);//chr.getClient().getChannel() - 1);
             p.Encode4(0);
-            
+
             p.Encode1(1); //sNotifierMessage._m_pStr
             p.Encode1(bCharacterData); //  bCharacterData 
             p.Encode2(0); //  nNotifierCheck
@@ -286,7 +287,7 @@ namespace Common.Packets
 
             p.Encode1(0); //CUserPool::OnNewYearCardRecordAdd loop
             p.Encode4(0); //m_nPhase
-            
+
             return p;
         }
         public static COutPacket UserLeaveField(CharacterData c)
@@ -305,7 +306,27 @@ namespace Common.Packets
             p.Encode1(bByItemOption); //CUser->m_bEmotionByItemOption
             return p;
         }
-        
+
+        //WvsGame::MobPool--------------------------------------------------------------------------------------------
+
+        public static COutPacket MobEnterField(CMob mob)
+        {
+            var p = new COutPacket(SendOps.LP_MobEnterField);
+            mob.EncodeInitData(p);
+            return p;
+        }
+        public static COutPacket MobLeaveField(CMob mob,byte nDeadType)
+        {
+            var p = new COutPacket(SendOps.LP_MobEnterField);
+            p.Encode4(mob.dwMobId);
+            p.Encode1(nDeadType); // 0 = dissapear, 1 = fade out, 2+ = special
+
+            if (nDeadType == 4)
+                p.Encode4(-1); //m_dwSwallowCharacterID
+
+            return p;
+        }   
+
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, AvatarData c)
         {
@@ -316,7 +337,7 @@ namespace Common.Packets
 
             p.Encode1(0); //VAC
             p.Encode1(ranking); //ranking
-        
+
             if (ranking)
             {
                 p.Skip(16);
@@ -332,6 +353,220 @@ namespace Common.Packets
                 //dwType = CInPacket::Decode4(v3);
                 //iPacket = (CInPacket*)CInPacket::Decode4(v3);
             }
+        }
+        public static void MobStat__EncodeTemporary(COutPacket p, long dwFlag1, long dwFlag2, int tCur)
+        {
+            p.Encode8(dwFlag1);
+            p.Encode8(dwFlag2);
+
+            //Code below is old from BMS when flag was just an int
+
+            /*
+              v4 = this;
+              dwToSend = 0;
+              if ( dwFlag & 1 && this->nPAD_ )
+                dwToSend = 1;
+              if ( dwFlag & 2 && this->nPDD_ )
+                dwToSend |= 2u;
+              if ( dwFlag & 4 && this->nMAD_ )
+                dwToSend |= 4u;
+              if ( dwFlag & 8 && this->nMDD_ )
+                dwToSend |= 8u;
+              if ( dwFlag & 0x10 && this->nACC_ )
+                dwToSend |= 0x10u;
+              if ( dwFlag & 0x20 && this->nEVA_ )
+                dwToSend |= 0x20u;
+              if ( dwFlag & 0x40 && this->nSpeed_ )
+                dwToSend |= 0x40u;
+              if ( dwFlag & 0x80 && this->nStun_ )
+                LOBYTE(dwToSend) = dwToSend | 0x80;
+              if ( dwFlag & 0x100 && this->nFreeze_ )
+                dwToSend |= 0x100u;
+              if ( dwFlag & 0x200 && this->nPoison_ )
+                dwToSend |= 0x200u;
+              if ( dwFlag & 0x400 && this->nSeal_ )
+                dwToSend |= 0x400u;
+              if ( dwFlag & 0x800 && this->nDarkness_ )
+                dwToSend |= 0x800u;
+              if ( dwFlag & 0x1000 && this->nPowerUp_ )
+                dwToSend |= 0x1000u;
+              if ( dwFlag & 0x2000 && this->nMagicUp_ )
+                dwToSend |= 0x2000u;
+              if ( dwFlag & 0x4000 && this->nPGuardUp_ )
+                dwToSend |= 0x4000u;
+              if ( dwFlag & 0x8000 && this->nMGuardUp_ )
+                dwToSend |= 0x8000u;
+              if ( dwFlag & 0x40000 && this->nPImmune_ )
+                dwToSend |= 0x40000u;
+              if ( dwFlag & 0x80000 && this->nMImmune_ )
+                dwToSend |= 0x80000u;
+              if ( dwFlag & 0x10000 && this->nDoom_ )
+                dwToSend |= 0x10000u;
+              if ( dwFlag & 0x20000 && this->nWeb_ )
+                dwToSend |= 0x20000u;
+              if ( dwFlag & 0x200000 && this->nHardSkin_ )
+                dwToSend |= 0x200000u;
+              if ( dwFlag & 0x400000 && this->nAmbush_ )
+                dwToSend |= 0x400000u;
+              if ( dwFlag & 0x1000000 && this->nVenom_ )
+                dwToSend |= 0x1000000u;
+              if ( dwFlag & 0x2000000 && this->nBlind_ )
+                dwToSend |= 0x2000000u;
+              if ( dwFlag & 0x4000000 && this->nSealSkill_ )
+                dwToSend |= 0x4000000u;
+              COutPacket::Encode4(oPacket, dwToSend);
+              if ( dwToSend & 1 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPAD_);
+                COutPacket::Encode4(oPacket, v4->rPAD_);
+                COutPacket::Encode2(oPacket, (v4->tPAD_ - tCur) / 500);
+              }
+              if ( dwToSend & 2 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPDD_);
+                COutPacket::Encode4(oPacket, v4->rPDD_);
+                COutPacket::Encode2(oPacket, (v4->tPDD_ - tCur) / 500);
+              }
+              if ( dwToSend & 4 )
+              {
+                COutPacket::Encode2(oPacket, v4->nMAD_);
+                COutPacket::Encode4(oPacket, v4->rMAD_);
+                COutPacket::Encode2(oPacket, (v4->tMAD_ - tCur) / 500);
+              }
+              if ( dwToSend & 8 )
+              {
+                COutPacket::Encode2(oPacket, v4->nMDD_);
+                COutPacket::Encode4(oPacket, v4->rMDD_);
+                COutPacket::Encode2(oPacket, (v4->tMDD_ - tCur) / 500);
+              }
+              if ( dwToSend & 0x10 )
+              {
+                COutPacket::Encode2(oPacket, v4->nACC_);
+                COutPacket::Encode4(oPacket, v4->rACC_);
+                COutPacket::Encode2(oPacket, (v4->tACC_ - tCur) / 500);
+              }
+              if ( dwToSend & 0x20 )
+              {
+                COutPacket::Encode2(oPacket, v4->nEVA_);
+                COutPacket::Encode4(oPacket, v4->rEVA_);
+                COutPacket::Encode2(oPacket, (v4->tEVA_ - tCur) / 500);
+              }
+              if ( dwToSend & 0x40 )
+              {
+                COutPacket::Encode2(oPacket, v4->nSpeed_);
+                COutPacket::Encode4(oPacket, v4->rSpeed_);
+                COutPacket::Encode2(oPacket, (v4->tSpeed_ - tCur) / 500);
+              }
+              if ( dwToSend & 0x80 )
+              {
+                COutPacket::Encode2(oPacket, v4->nStun_);
+                COutPacket::Encode4(oPacket, v4->rStun_);
+                COutPacket::Encode2(oPacket, (v4->tStun_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 1 )
+              {
+                COutPacket::Encode2(oPacket, v4->nFreeze_);
+                COutPacket::Encode4(oPacket, v4->rFreeze_);
+                COutPacket::Encode2(oPacket, (v4->tFreeze_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 2 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPoison_);
+                COutPacket::Encode4(oPacket, v4->rPoison_);
+                COutPacket::Encode2(oPacket, (v4->tPoison_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 4 )
+              {
+                COutPacket::Encode2(oPacket, v4->nSeal_);
+                COutPacket::Encode4(oPacket, v4->rSeal_);
+                COutPacket::Encode2(oPacket, (v4->tSeal_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 8 )
+              {
+                COutPacket::Encode2(oPacket, v4->nDarkness_);
+                COutPacket::Encode4(oPacket, v4->rDarkness_);
+                COutPacket::Encode2(oPacket, (v4->tDarkness_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 0x10 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPowerUp_);
+                COutPacket::Encode4(oPacket, v4->rPowerUp_);
+                COutPacket::Encode2(oPacket, (v4->tPowerUp_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 0x20 )
+              {
+                COutPacket::Encode2(oPacket, v4->nMagicUp_);
+                COutPacket::Encode4(oPacket, v4->rMagicUp_);
+                COutPacket::Encode2(oPacket, (v4->tMagicUp_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 0x40 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPGuardUp_);
+                COutPacket::Encode4(oPacket, v4->rPGuardUp_);
+                COutPacket::Encode2(oPacket, (v4->tPGuardUp_ - tCur) / 500);
+              }
+              if ( BYTE1(dwToSend) & 0x80 )
+              {
+                COutPacket::Encode2(oPacket, v4->nMGuardUp_);
+                COutPacket::Encode4(oPacket, v4->rMGuardUp_);
+                COutPacket::Encode2(oPacket, (v4->tMGuardUp_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 4 )
+              {
+                COutPacket::Encode2(oPacket, v4->nPImmune_);
+                COutPacket::Encode4(oPacket, v4->rPImmune_);
+                COutPacket::Encode2(oPacket, (v4->tPImmune_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 8 )
+              {
+                COutPacket::Encode2(oPacket, v4->nMImmune_);
+                COutPacket::Encode4(oPacket, v4->rMImmune_);
+                COutPacket::Encode2(oPacket, (v4->tMImmune_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 1 )
+              {
+                COutPacket::Encode2(oPacket, v4->nDoom_);
+                COutPacket::Encode4(oPacket, v4->rDoom_);
+                COutPacket::Encode2(oPacket, (v4->tDoom_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 2 )
+              {
+                COutPacket::Encode2(oPacket, v4->nWeb_);
+                COutPacket::Encode4(oPacket, v4->rWeb_);
+                COutPacket::Encode2(oPacket, (v4->tWeb_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 0x20 )
+              {
+                COutPacket::Encode2(oPacket, v4->nHardSkin_);
+                COutPacket::Encode4(oPacket, v4->rHardSkin_);
+                COutPacket::Encode2(oPacket, (v4->tHardSkin_ - tCur) / 500);
+              }
+              if ( BYTE2(dwToSend) & 0x40 )
+              {
+                COutPacket::Encode2(oPacket, v4->nAmbush_);
+                COutPacket::Encode4(oPacket, v4->rAmbush_);
+                COutPacket::Encode2(oPacket, (v4->tAmbush_ - tCur) / 500);
+              }
+              if ( BYTE3(dwToSend) & 1 )
+              {
+                COutPacket::Encode2(oPacket, v4->nVenom_);
+                COutPacket::Encode4(oPacket, v4->rVenom_);
+                COutPacket::Encode2(oPacket, (v4->tVenom_ - tCur) / 500);
+              }
+              if ( BYTE3(dwToSend) & 2 )
+              {
+                COutPacket::Encode2(oPacket, v4->nBlind_);
+                COutPacket::Encode4(oPacket, v4->rBlind_);
+                COutPacket::Encode2(oPacket, (v4->tBlind_ - tCur) / 500);
+              }
+              if ( BYTE3(dwToSend) & 4 )
+              {
+                COutPacket::Encode2(oPacket, v4->nSealSkill_);
+                COutPacket::Encode4(oPacket, v4->rSealSkill_);
+                COutPacket::Encode2(oPacket, (v4->tSealSkill_ - tCur) / 500);
+              }
+             */
+
         }
     }
 }

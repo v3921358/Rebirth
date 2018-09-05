@@ -11,7 +11,7 @@ namespace Common.Entities
     {
         //This stuff i added myself
         public AvatarLook Look { get; set; }
-        public CharMapPos Position { get; set; }
+        public MapPos Position { get; set; }
 
         //Below are copy pasted from Maple
 
@@ -73,7 +73,7 @@ namespace Common.Entities
 
             x.Stats = stats;
             x.Look = look;
-            x.Position = new CharMapPos();
+            x.Position = new MapPos();
 
             return x;
         }

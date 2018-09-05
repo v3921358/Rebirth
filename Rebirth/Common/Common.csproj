@@ -40,7 +40,7 @@
     <Compile Include="Client\ClientBase.cs" />
     <Compile Include="Entities\AvatarLook.cs" />
     <Compile Include="Entities\CharacterData.cs" />
-    <Compile Include="Entities\CharMapPos.cs" />
+    <Compile Include="Entities\MapPos.cs" />
     <Compile Include="Entities\ExtendSP.cs" />
     <Compile Include="Entities\GW_CharacterStat.cs" />
     <Compile Include="Client\WvsGameClient.cs" />
@@ -49,6 +49,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Game\CField.cs" />
     <Compile Include="Game\CFootholdMan.cs" />
+    <Compile Include="Game\CMob.cs" />
     <Compile Include="Game\CPortalMan.cs" />
     <Compile Include="Game\Foothold.cs" />
     <Compile Include="Game\Portal.cs" />

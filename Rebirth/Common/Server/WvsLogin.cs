@@ -70,6 +70,8 @@ namespace WvsRebirth
         //-----------------------------------------------------------------------------
         private void Handle_ClientDumpLog(WvsLoginClient c, CInPacket p)
         {
+            //Thank you to Mordred for this handler!
+
             var callType = p.Decode2();
             var errorCode = p.Decode4();
             var backupBufferSize = p.Decode2();

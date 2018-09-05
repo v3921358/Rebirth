@@ -114,9 +114,16 @@ namespace Common.Server
             var msg = p.DecodeString();
             var show = p.Decode1() != 0;
 
-            var stats = c.Character.Stats;
-
-            c.GetCharField().Broadcast(CPacket.UserChat(stats.dwCharacterID, msg, true, show));
+            if (msg.StartsWith("!"))
+            {
+                var split = msg.Split(' ');
+                c.HandleCommand(split);
+            }
+            else
+            {
+                var stats = c.Character.Stats;
+                c.GetCharField().Broadcast(CPacket.UserChat(stats.dwCharacterID, msg, true, show));
+            }
         }
         private void Handle_UserMove(WvsGameClient c, CInPacket p)
         {

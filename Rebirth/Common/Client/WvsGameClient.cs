@@ -7,6 +7,7 @@ using Common.Entities;
 using Common.Game;
 using Common.Log;
 using Common.Network;
+using Common.Packets;
 using Common.Server;
 
 namespace Common.Client
@@ -54,6 +55,26 @@ namespace Common.Client
             Character.Position.Foothold = 0;//(short)(foothold?.Id ?? 0);
 
             newField.Add(this);
+        }
+
+        public void HandleCommand(string[] split)
+        {
+            //100% for testing
+
+            switch (split[0])
+            {
+                case "!mob":
+                    {
+                        var mob = new CMob(100101);
+                        mob.Position.Position = Character.Position.Position;
+                        mob.Position.Foothold = Character.Position.Foothold;
+
+                        SendPacket(CPacket.MobEnterField(mob));
+
+                        break;
+                    }
+            }
+
         }
     }
 }

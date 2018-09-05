@@ -1,23 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Entities
+﻿namespace Common.Entities
 {
-    public class CharMapPos
+    public class MapPos
     {
         public TagPoint Position { get; set; }
         public short Foothold { get; set; }
         public byte Stance { get; set; }
 
-        public CharMapPos()
+        public MapPos()
         {
             Position = new TagPoint();
         }
 
-        public CharMapPos(TagPoint position)
+        public MapPos(TagPoint position)
         {
             Position = position;
         }
