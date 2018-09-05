@@ -28,7 +28,7 @@ namespace Common.Client
         {
             SendPacket(packet.ToArray());
         }
-        public void SendPacket(byte[] packet)
+        private void SendPacket(byte[] packet)
         {
             var buffer = packet;
             var opcode = (SendOps)BitConverter.ToInt16(buffer, 0);
@@ -38,10 +38,9 @@ namespace Common.Client
 
             Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
 
-            m_socket.Send(packet);
+            m_socket.SendPacket(packet);
         }
-
-
+        
         public void Disconnect()
         {
             m_socket.Dispose();

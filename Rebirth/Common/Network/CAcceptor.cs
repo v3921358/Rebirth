@@ -39,7 +39,7 @@ namespace Common.Network
             if (m_active)
                 throw new InvalidOperationException();
 
-            m_sock = TcpHelp.CreateTcpSock();
+            m_sock = CSockHelp.CreateTcpSock();
             m_sock.Bind(new IPEndPoint(m_address, m_port));
             m_sock.Listen(backlog);
 

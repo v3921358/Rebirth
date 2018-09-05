@@ -5,7 +5,7 @@ using System.Net.Sockets;
 
 namespace Common.Network
 {
-    public static class TcpHelp
+    public static class CSockHelp
     {
         /// <summary>
         /// Creates a tcp socket with:

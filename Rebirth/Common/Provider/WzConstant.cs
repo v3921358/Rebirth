@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using reWZ;
+﻿using reWZ;
 
-namespace Provider
+namespace Common.Provider
 {
     public static class WzConstant
     {

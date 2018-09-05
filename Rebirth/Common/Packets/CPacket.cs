@@ -173,11 +173,8 @@ namespace Common.Packets
             //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
             p.Encode4(1);//chr.getClient().getChannel() - 1);
             p.Encode4(0);
-
-            //BYTE3(sNotifierMessage._m_pStr) = CInPacket::Decode1(iPacket);
-            //bCharacterData = (unsigned __int8)CInPacket::Decode1(iPacket);
-            //v4 = CInPacket::Decode2(iPacket);
-            p.Encode1(1);
+            
+            p.Encode1(1); //sNotifierMessage._m_pStr
             p.Encode1(bCharacterData); //  bCharacterData 
             p.Encode2(0); //  nNotifierCheck
 
@@ -191,7 +188,7 @@ namespace Common.Packets
                 p.Encode4(seed2);
                 p.Encode4(seed3);
 
-                c.Encode(p);//AddCharacterData(p, c); //CharacterData::Decode
+                c.Encode(p); //CharacterData::Decode
 
                 //CWvsContextOnSetLogoutGiftConfig
                 //
@@ -210,7 +207,7 @@ namespace Common.Packets
                 p.Encode1(0); //Enables two Encode4's
             }
 
-            p.Encode8(Environment.TickCount); //some other sort of time
+            p.Encode8(Environment.TickCount); //Odin GameTime(-2)
 
             return p;
         }
@@ -224,7 +221,6 @@ namespace Common.Packets
             p.Encode1(visable);
             return p;
         }
-
         public static COutPacket UserMovement(int uid, byte[] movePath)
         {
             var p = new COutPacket(SendOps.LP_UserMove);
@@ -253,7 +249,7 @@ namespace Common.Packets
             p.Encode1(0); p.Encode1(0);
             //
 
-            p.Encode2(0); //v4->m_nJobCode = CInPacket::Decode2(iPacket);
+            p.Encode2(c.Stats.nJob); //v4->m_nJobCode = CInPacket::Decode2(iPacket);
             c.Look.Encode(p); //AvatarLook::AvatarLook(&v87, iPacket);
 
             p.Encode4(0); //  v4->m_dwDriverID
@@ -266,23 +262,24 @@ namespace Common.Packets
             p.Encode2(0); //x and bPrivate ?
 
             p.Encode2(0); //m_pStr
-            p.Encode1(0); //v4->m_nMoveAction
-            p.Encode2(0); //dwSN ( Foothold? )
+            p.Encode1(c.Position.Stance); //v4->m_nMoveAction
+            p.Encode2(c.Position.Foothold); //dwSN ( Foothold? )
             p.Encode1(0); //bShowAdminEffect
 
-            p.Encode1(0); //Some loop based on true
+            p.Encode1(0); //Some loop [PETS I THINK]
 
             p.Encode4(0); //m_nTamingMobLevel
             p.Encode4(0); //m_nTamingMobExp
             p.Encode4(0); //m_nTamingMobFatigue
 
-            p.Encode1(0); //Minigame flag
+            p.Encode1(0); //m_nMiniRoomType (Flag)
 
-            p.Encode1(0); //  v4->m_bADBoardRemote (loops on this)
+            p.Encode1(0); //v4->m_bADBoardRemote ( If true write a string )
             p.Encode1(0); //CUserPool::OnCoupleRecordAdd loop flag
             p.Encode1(0); //CUserPool::OnFriendRecordAdd loop flag
             p.Encode1(0); //CUserPool::OnMarriageRecordAdd
 
+            //Dark Force, Dragon, Swallowing Effect?
             byte someLoadingBitflag = 0;
 
             p.Encode1(someLoadingBitflag);
@@ -308,9 +305,7 @@ namespace Common.Packets
             p.Encode1(bByItemOption); //CUser->m_bEmotionByItemOption
             return p;
         }
-
         
-
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, AvatarData c)
         {
@@ -327,16 +322,16 @@ namespace Common.Packets
                 p.Skip(16);
             }
         }
-       
         private static void CClientOptMan__EncodeOpt(COutPacket p, short optCount)
         {
             p.Encode2(optCount);
 
             for (int i = 0; i < optCount; i++)
+            {
                 p.Encode8(i + 1);
-
-            //dwType = CInPacket::Decode4(v3);
-            //iPacket = (CInPacket*)CInPacket::Decode4(v3);
+                //dwType = CInPacket::Decode4(v3);
+                //iPacket = (CInPacket*)CInPacket::Decode4(v3);
+            }
         }
     }
 }

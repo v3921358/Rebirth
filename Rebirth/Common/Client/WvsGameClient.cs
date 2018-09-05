@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Xml.XPath;
 using Common.Entities;
 using Common.Game;
 using Common.Log;
@@ -19,8 +18,8 @@ namespace Common.Client
         public bool SentCharData { get; set; }
 
         public CharacterData Character { get; private set; }
-        
-        public WvsGameClient(WvsGame game,CClientSocket socket) :base(socket)
+
+        public WvsGameClient(WvsGame game, CClientSocket socket) : base(socket)
         {
             ParentServer = game;
             Initialized = false;
@@ -30,12 +29,10 @@ namespace Common.Client
 
         public void LoadCharacter(int uid)
         {
+            //TODO: Real database lol
             var temp = AvatarData.Default();
 
-            Character = new CharacterData();
-            Character.Stats = temp.Stats;
-            Character.Look = temp.Look;
-        
+            Character = CharacterData.Create(temp.Stats, temp.Look);
             Initialized = true;
         }
 
@@ -47,13 +44,15 @@ namespace Common.Client
             oldField.Remove(this);
 
             Character.Stats.dwPosMap = portal.nTMap;
+
             var newField = GetCharField();
 
-            var spawn = newField.Portals.FirstOrDefault(x => portal.sTName == x.sName);
+            var spawn = newField.Portals.GetByName(portal.sTName);
+            Character.Stats.nPortal = spawn == null ? newField.Portals.GetRandomSpawn() : (byte)spawn.nIdx;
 
-            //TODO: Verify this in the future
-            Character.Stats.nPortal = spawn == null ? newField.GetRandomSpawn() : (byte)spawn.nIdx; 
-            
+            //var foothold = newField.Footholds.FindBelow(portal.ptPos);
+            Character.Position.Foothold = 0;//(short)(foothold?.Id ?? 0);
+
             newField.Add(this);
         }
     }

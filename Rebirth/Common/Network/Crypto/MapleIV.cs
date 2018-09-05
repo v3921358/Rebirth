@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace Common.Network.Crypto
+﻿namespace Common.Network.Crypto
 {
     public sealed class MapleIV
     {
@@ -27,22 +25,11 @@ namespace Common.Network.Crypto
         public uint Value => m_value;
         private uint m_value;
 
-        public ushort HIWORD
-        {
-            get
-            {
-                return unchecked((ushort)(m_value >> 16));
-            }
-        }
-        public ushort LOWORD
-        {
-            get
-            {
-                return (ushort)m_value;
-            }
-        }
+        public ushort HIWORD => unchecked((ushort)(m_value >> 16));
 
-        public MapleIV(UInt32 vector)
+        public ushort LOWORD => (ushort)m_value;
+
+        public MapleIV(uint vector)
         {
             m_value = vector;
         }
@@ -63,7 +50,7 @@ namespace Common.Network.Crypto
                         *((byte*)pKey + 2) ^= (byte)(*((byte*)pIV + i) + *(pShuffle + *((byte*)pKey + 3)));
                         *((byte*)pKey + 3) = (byte)(*((byte*)pKey + 3) - *(byte*)pKey + *(pShuffle + *((byte*)pIV + i)));
 
-                        *(uint*)pKey = (*(uint*)pKey << 3) | (*(uint*)pKey >> (32 - 3));
+                        *pKey = (*pKey << 3) | (*pKey >> 29);
                     }
                 }
             }

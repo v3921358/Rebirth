@@ -9,9 +9,13 @@ namespace Common.Entities
 {
     public sealed class CharacterData
     {
-        public AvatarLook Look; //I added this myself
-        public GW_CharacterStat Stats; //characterStat
-        
+        //This stuff i added myself
+        public AvatarLook Look { get; set; }
+        public CharMapPos Position { get; set; }
+
+        //Below are copy pasted from Maple
+
+        public GW_CharacterStat Stats { get; set; } //characterStat
         //ZRef<GW_ItemSlotBase> aEquipped[60];
         //ZRef<GW_ItemSlotBase> aEquipped2[60];
         //ZRef<GW_ItemSlotBase> aDragonEquipped[4];
@@ -19,7 +23,7 @@ namespace Common.Entities
         //ZArray<ZRef<GW_ItemSlotBase>> aaItemSlot[6];
         //_FILETIME aEquipExtExpire[1];
         //ZMap<long, EQUIPPED_SETITEM, long> m_mEquippedSetItem;
-        public int nCombatOrders;
+        public int nCombatOrders { get; set; }
         //ZMap<long, long, long> mSkillRecord;
         //ZMap<long, long, long> mSkillRecordEx;
         //ZMap<long, long, long> mSkillMasterLev;
@@ -28,23 +32,23 @@ namespace Common.Entities
         //ZMap<unsigned short, _FILETIME, unsigned short> mQuestComplete;
         //ZMap<unsigned short, _FILETIME, unsigned short> mQuestCompleteOld;
         //ZMap<long, ZRef<GW_MiniGameRecord>, long> mMiniGameRecord;
-        public int nFriendMax;
+        public int nFriendMax { get; set; }
         //ZList<GW_CoupleRecord> lCoupleRecord;
         //ZList<GW_FriendRecord> lFriendRecord;
         //ZList<GW_NewYearCardRecord> lNewYearCardRecord;
         //ZList<GW_MarriageRecord> lMarriageRecord;
-        public int[] adwMapTransfer;
-        public int[] adwMapTransferEx;
+        public int[] adwMapTransfer { get; private set; }
+        public int[] adwMapTransferEx { get; private set; }
         //int bReachMaxLevel;
         //_FILETIME ftReachMaxLevelTime;
         //int nItemTotalNumber[5];
         //ZMap<long, long, long> mAdminShopCommodityCount;
-        public string sLinkedCharacter;
+        public string sLinkedCharacter { get; set; }
         //ZRef<GW_WildHunterInfo> pWildHunterInfo;
         //ZMap<long, ZRef<GW_MonsterBookCard>, long> mpMonsterBookCard;
-        public int nMonsterBookCoverID;
-        public int nMonsterCardNormal;
-        public int nMonsterCardSpecial;
+        public int nMonsterBookCoverID { get; set; }
+        public int nMonsterCardNormal { get; set; }
+        public int nMonsterCardSpecial { get; set; }
         //ZMap<unsigned short, ZXString<char>, unsigned short> mQuestRecord;
         //ZMap<unsigned short, CSimpleStrMap, unsigned short> mQuestRecordEx;
         //ZArray<Additional::SKILL> aSkill;
@@ -55,12 +59,23 @@ namespace Common.Entities
         //ZMap<ZXString<char>, ZPair<long, long>, ZXString<char>> aUpgradeCountByDamageTheme;
         //ZMap<long, long, long> m_mVisitorQuestLog;
 
-        public CharacterData()
+        private CharacterData()
         {
-            Stats = new GW_CharacterStat();
+           // Stats = new GW_CharacterStat();
 
             adwMapTransfer = new int[5];
             adwMapTransferEx = new int[10];
+        }
+
+        public static CharacterData Create(GW_CharacterStat stats, AvatarLook look)
+        {
+            var x  = new CharacterData();
+
+            x.Stats = stats;
+            x.Look = look;
+            x.Position = new CharMapPos();
+
+            return x;
         }
 
         //CharacterData::Decode

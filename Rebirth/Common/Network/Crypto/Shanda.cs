@@ -77,7 +77,6 @@
             }
         }
 
-
         private static byte RollLeft(byte value, int shift)
         {
             uint num = (uint)(value << (shift % 8));

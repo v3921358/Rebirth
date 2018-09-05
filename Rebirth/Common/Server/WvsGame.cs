@@ -29,7 +29,7 @@ namespace Common.Server
             if (!CFieldMan.ContainsKey(id))
             {
                 var field = new CField(id);
-                field.LoadPortals(ParentServer);
+                field.Load(ParentServer);
 
                 CFieldMan.Add(id, field);
             }
@@ -129,13 +129,41 @@ namespace Common.Server
 
             var movePath = p.DecodeBuffer(p.Available);
 
+            //TODO: Move this out later lol
             {
                 var iPacket = new CInPacket(movePath);
                 var x = iPacket.Decode2();
                 var y = iPacket.Decode2();
                 var vx = iPacket.Decode2();
                 var vy = iPacket.Decode2();
-                //int size = iPacket.Decode1();
+                var size = iPacket.Decode1();
+
+                //LOL
+                c.Character.Position.Position.X = x;
+                c.Character.Position.Position.Y = y;
+
+                for (int i = 0; i < size; i++)
+                {
+                    var cmd = iPacket.Decode1();
+                    
+                    if (cmd == 0)
+                    {
+                        c.Character.Position.Position.X = iPacket.Decode2();
+                        c.Character.Position.Position.Y = iPacket.Decode2();
+                        var xwob = iPacket.Decode2();
+                        var ywob = iPacket.Decode2();
+                        c.Character.Position.Foothold = iPacket.Decode2();
+                        var xoff = iPacket.Decode2();
+                        var yoff = iPacket.Decode2();
+                        c.Character.Position.Stance = iPacket.Decode1();
+                        var duration = iPacket.Decode2();
+                    }
+                    else
+                    {
+                        Logger.Write(LogLevel.Debug, "Unparsed Movement SubOp {0}", cmd);
+                        break; //break loop because we didnt parse subop
+                    }
+                }
             }
 
             var stats = c.Character.Stats;
@@ -164,11 +192,11 @@ namespace Common.Server
             var portal =
                 c.GetCharField()
                 .Portals
-                .FirstOrDefault(z => z.sName == portalName);
+                .GetByName(portalName);
 
             if (portal == null)
             {
-                Logger.Write(LogLevel.Warning,"Client tried to enter non existant portal {0}",portalName);
+                Logger.Write(LogLevel.Warning, "Client tried to enter non existant portal {0}", portalName);
             }
             else
             {
@@ -180,7 +208,7 @@ namespace Common.Server
             var nEmotion = p.Decode4();
             var nDuration = p.Decode4();
             var bByItemOption = p.Decode1();
-            
+
             //if (emote > 7)
             //{
             //    int emoteid = 5159992 + emote;

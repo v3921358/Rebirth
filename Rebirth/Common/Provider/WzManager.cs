@@ -1,12 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using reWZ;
-using Tools;
 
-namespace Provider
+namespace Common.Provider
 {
     public class WzManager : IDisposable
     {

@@ -10,7 +10,6 @@ using Common.Network;
 using Common.Packets;
 using Common.Server;
 using reWZ.WZProperties;
-using Tools;
 
 namespace Common.Game
 {
@@ -21,8 +20,9 @@ namespace Common.Game
         public List<CharacterData> Characters { get; }
         public Dictionary<CharacterData, WvsGameClient> Sockets { get; }
 
-        public List<Portal> Portals { get; }
-
+        public CPortalMan Portals { get; }
+        public CFootholdMan Footholds { get; }
+        
         public CField(int mapId)
         {
             MapId = mapId;
@@ -30,7 +30,8 @@ namespace Common.Game
             Characters = new List<CharacterData>();
             Sockets = new Dictionary<CharacterData, WvsGameClient>();
 
-            Portals = new List<Portal>();
+            Portals = new CPortalMan();
+            Footholds = new CFootholdMan();
         }
 
         public void Add(WvsGameClient c)
@@ -45,7 +46,7 @@ namespace Common.Game
             else
             {
                 c.SentCharData = true;
-                character.Stats.nPortal = GetRandomSpawn();
+                character.Stats.nPortal = Portals.GetRandomSpawn();
                 c.SendPacket(CPacket.SetField(character, true));
             }
 
@@ -87,42 +88,13 @@ namespace Common.Game
             packet.Dispose();
         }
 
-        public void LoadPortals(WvsCenter parentServer)
+        public void Load(WvsCenter parentServer)
         {
-            var wz = parentServer.WzMan["Map.wz"];
-            var path = $"Map/Map{MapId / 100000000}/{MapId}.img/portal";
-            var portals = wz.ResolvePath(path);
-
-            foreach (WZObject x in portals)
-            {
-                var p = new Portal
-                {
-                    nIdx = Convert.ToInt32(x.Name),
-                    sName = x["pn"].ValueOrDie<string>(),
-                    nType = x["pt"].ValueOrDie<int>(),
-                    nTMap = x["tm"].ValueOrDie<int>(),
-                    sTName = x["tn"].ValueOrDie<string>(),
-                    ptPos =
-                    {
-                        X = (short)x["x"].ValueOrDie<int>(),
-                        Y = (short)x["y"].ValueOrDie<int>()
-                    }
-                };
-
-                Portals.Add(p);
-            }
+            var wzMan = parentServer.WzMan;
+            Portals.Load(MapId, wzMan);
+            Footholds.Load(MapId, wzMan);   
 
         }
-
-        public byte GetRandomSpawn()
-        {
-            var list = Portals.Where(p => p.sName == "sp").ToArray();
-
-            if (list.Length == 0)
-                return 0;
-
-            return (byte)list.Random().nIdx;
-        }
-
+        
     }
 }
