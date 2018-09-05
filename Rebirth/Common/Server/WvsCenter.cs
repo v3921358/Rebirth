@@ -3,25 +3,32 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Provider;
 using WvsRebirth;
 
 namespace Common.Server
 {
     public class WvsCenter
     {
-        private WvsLogin m_login;
-        private WvsGame[] m_games;
+        private readonly WzManager m_wzMan;
+
+        private readonly WvsLogin m_login;
+        private readonly WvsGame[] m_games;
+
+        public WzManager WzMan => m_wzMan;
 
         public WvsCenter(int channels)
         {
-            m_login = new WvsLogin();
+            m_wzMan = new WzManager();
+            m_wzMan.LoadFile("Map.wz");
 
+            m_login = new WvsLogin(this);
             m_games = new WvsGame[channels];
 
             for (int i = 0; i < m_games.Length; i++)
             {
                 var channel = (byte) i;
-                m_games[i] = new WvsGame(channel);
+                m_games[i] = new WvsGame(this,channel);
             }
         }
 

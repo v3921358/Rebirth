@@ -22,12 +22,10 @@ namespace Common
 
             return byte.Parse(hex, System.Globalization.NumberStyles.HexNumber);
         }
-
         public static string GetString(byte[] buffer)
         {
             return BitConverter.ToString(buffer).Replace("-", " ");
         }
-
         public static byte[] GetBytes(string hexString)
         {
             string newString = hexString
@@ -51,6 +49,29 @@ namespace Common
                 j = j + 2;
             }
             return bytes;
+        }
+        
+        public static short GetRealJobFromCreation(int job)
+        {
+            switch (job)
+            {
+                case 0:
+                    return 1000;
+                case 1:
+                    return 0;
+                case 2:
+                    return 2000;
+                case 3:
+                    return 2001;
+                case 4:
+                    return 3000;
+            }
+            return 0;
+        }
+
+        public static bool IsNotExtendedSp(short job)
+        {
+            return job / 1000 != 3 && job / 100 != 22 && job != 2001;
         }
     }
 }

@@ -12,10 +12,9 @@ namespace Common.Server
     public class ServerBase<TClient> where TClient : ClientBase
     {
         private readonly string m_name;
-        private readonly Func<CClientSocket, TClient> m_createFunc;
-
-        private Executor m_thread;
-        private CAcceptor m_acceptor;
+        private readonly WvsCenter m_center;
+        private readonly Executor m_thread;
+        private readonly CAcceptor m_acceptor;
 
         public bool LogPackets { get; set; } = true;
 
@@ -23,12 +22,12 @@ namespace Common.Server
         //private bool m_running;
 
         public string Name => m_name;
+        public WvsCenter ParentServer => m_center;
 
-        public ServerBase(string name, int port, Func<CClientSocket, TClient> createClient)
+        public ServerBase(string name, int port,WvsCenter parent)
         {
             m_name = name;
-            m_createFunc = createClient;
-
+            m_center = parent;
             m_thread = new Executor(name);
             m_acceptor = new CAcceptor(port);
             m_acceptor.OnClientAccepted += OnClientAccepted;
@@ -37,7 +36,7 @@ namespace Common.Server
         private void OnClientAccepted(Socket socket)
         {
             var client = new CClientSocket(socket);
-            var realClient = m_createFunc(client);
+            var realClient = CreateClient(client);
 
             Logger.Write(LogLevel.Info, "[{0}] Accepted {1}", Name, client.Host);
 
@@ -81,6 +80,10 @@ namespace Common.Server
                     return true;
             }
             return false;
+        }
+        protected virtual TClient CreateClient(CClientSocket socket)
+        {
+            throw new InvalidOperationException();
         }
 
         public void Start()

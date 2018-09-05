@@ -1,5 +1,6 @@
 ﻿using System;
 using Common.Client;
+using Common.Entities;
 using Common.Network;
 
 // ReSharper disable InconsistentNaming
@@ -80,7 +81,7 @@ namespace Common.Packets
 
             return p;
         }
-        public static COutPacket SelectWorldResult(params Character[] chars)
+        public static COutPacket SelectWorldResult(params AvatarData[] chars)
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
 
@@ -91,7 +92,7 @@ namespace Common.Packets
 
             foreach (var x in chars)
             {
-                AddCharEntry(p,x);
+                AddCharEntry(p, x);
             }
 
             p.Encode1(2); //m_bLoginOpt | spw request?
@@ -126,14 +127,14 @@ namespace Common.Packets
             p.Encode1(nameTaken);
             return p;
         }
-        public static COutPacket CreateNewCharacter(string name, bool worked, Character c)
+        public static COutPacket CreateNewCharacter(string name, bool worked, AvatarData c)
         {
             var p = new COutPacket(SendOps.LP_CreateNewCharacterResult);
             p.Encode1((byte)(worked ? 0 : 1));
 
             if (worked)
             {
-                AddCharEntry(p,c);
+                AddCharEntry(p, c);
             }
 
             return p;
@@ -162,7 +163,7 @@ namespace Common.Packets
             return p;
         }
         //WvsGame-----------------------------------------------------------------------------------------------------
-        public static COutPacket SetField(Character c,bool bCharacterData)
+        public static COutPacket SetField(AvatarData c, bool bCharacterData)
         {
             var p = new COutPacket(SendOps.LP_SetField);
 
@@ -172,7 +173,7 @@ namespace Common.Packets
             //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
             p.Encode4(1);//chr.getClient().getChannel() - 1);
             p.Encode4(0);
-            
+
             //BYTE3(sNotifierMessage._m_pStr) = CInPacket::Decode1(iPacket);
             //bCharacterData = (unsigned __int8)CInPacket::Decode1(iPacket);
             //v4 = CInPacket::Decode2(iPacket);
@@ -202,49 +203,125 @@ namespace Common.Packets
             }
             else
             {
-                //p.Encode1(0); // Portal Count
-                //p.Encode1(0); // not connect packet
-                //p.Encode2(0); // Messages		
-
-                p.Encode1(0); // revive stuffs?.
-                p.Encode4(c.MapId);
-                p.Encode1(c.MapSpawn);
-                p.Encode2(c.StatCurHp);
-                p.Encode1(0);
+                p.Encode1(0); // Revival Shit
+                p.Encode4(c.Stats.dwPosMap);
+                p.Encode1(c.Stats.nPortal);
+                p.Encode4(c.Stats.nHP);
+                p.Encode1(0); //Enables two Encode4's
             }
 
             p.Encode8(Environment.TickCount); //some other sort of time
 
             return p;
         }
-        //WvsCommon---------------------------------------------------------------------------------------------------
-        private static void AddCharEntry(COutPacket p,Character c)
+
+        public static COutPacket UserChat(int uid, string text, bool gm, bool visable)
         {
-            //const bool ranking = false;
-
-            c.EncodeStats(p);
-            c.EncodeLook(p);
-
-            p.Encode1(0);
-            p.Encode1(0); //ranking
-
-
-            //if (ranking)
-            //{
-            //    mplew.writeInt(chr.getRank());
-            //    mplew.writeInt(chr.getRankMove());
-            //    mplew.writeInt(chr.getJobRank());
-            //    mplew.writeInt(chr.getJobRankMove());
-            //}
-
+            var p = new COutPacket(SendOps.LP_UserChat);
+            p.Encode4(uid);
+            p.Encode1(gm);
+            p.EncodeString(text);
+            p.Encode1(visable);
+            return p;
         }
-        private static void AddCharacterData(COutPacket p, Character c)
+
+        public static COutPacket UserMovement(int uid, byte[] movePath)
+        {
+            var p = new COutPacket(SendOps.LP_UserMove);
+            p.Encode4(uid);
+            p.EncodeBuffer(movePath, 0, movePath.Length);
+            return p;
+        }
+
+        public static COutPacket UserEnterField(AvatarData c)
+        {
+            var p = new COutPacket(SendOps.LP_UserEnterField);
+            p.Encode4(c.Stats.dwCharacterID);
+
+            // CUserRemote::Init(v12, iPacket, v13, 1);
+            p.Encode1(c.Stats.nLevel);
+            p.EncodeString(c.Stats.sCharacterName);
+
+            //if (c.getGuildId() < 1)
+            {
+                p.Skip(8); //p.EncodeString("");
+            }
+
+            //TODO:  SecondaryStat::DecodeForRemote(&v4->m_secondaryStat, &result, iPacket);
+            //
+            p.Encode8(0); p.Encode8(0);
+            p.Encode1(0); p.Encode1(0);
+            //
+
+            p.Encode2(0); //v4->m_nJobCode = CInPacket::Decode2(iPacket);
+            c.Look.Encode(p); //AvatarLook::AvatarLook(&v87, iPacket);
+
+            p.Encode4(0); //  v4->m_dwDriverID
+            p.Encode4(0); //  v4->m_dwPassenserID
+            p.Encode4(0); //  nChocoCount
+            p.Encode4(0); //  nActiveEffectItemID
+            p.Encode4(0); //  v4->m_nCompletedSetItemID
+            p.Encode4(0); //  v4->m_nPortableChairID
+
+            p.Encode2(0); //x and bPrivate ?
+
+            p.Encode2(0); //m_pStr
+            p.Encode1(0); //v4->m_nMoveAction
+            p.Encode2(0); //dwSN ( Foothold? )
+            p.Encode1(0); //bShowAdminEffect
+
+            p.Encode1(0); //Some loop based on true
+
+            p.Encode4(0); //m_nTamingMobLevel
+            p.Encode4(0); //m_nTamingMobExp
+            p.Encode4(0); //m_nTamingMobFatigue
+
+            p.Encode1(0); //Minigame flag
+
+            p.Encode1(0); //  v4->m_bADBoardRemote (loops on this)
+            p.Encode1(0); //CUserPool::OnCoupleRecordAdd loop flag
+            p.Encode1(0); //CUserPool::OnFriendRecordAdd loop flag
+            p.Encode1(0); //CUserPool::OnMarriageRecordAdd
+
+            byte someLoadingBitflag = 0;
+
+            p.Encode1(someLoadingBitflag);
+
+            p.Encode1(0); //CUserPool::OnNewYearCardRecordAdd loop
+            p.Encode4(0); //m_nPhase
+            
+            return p;
+        }
+        public static COutPacket UserLeaveField(AvatarData c)
+        {
+            var p = new COutPacket(SendOps.LP_UserLeaveField);
+            p.Encode4(c.Stats.dwCharacterID);
+            return p;
+        }
+
+        //WvsCommon---------------------------------------------------------------------------------------------------
+        private static void AddCharEntry(COutPacket p, AvatarData c)
+        {
+            bool ranking = false;
+
+            c.Stats.Encode(p);
+            c.Look.Encode(p);
+
+            p.Encode1(0); //VAC
+            p.Encode1(ranking); //ranking
+        
+            if (ranking)
+            {
+                p.Skip(16);
+            }
+        }
+        private static void AddCharacterData(COutPacket p, AvatarData c)
         {
             p.Encode8(-1); //the bit flag (all anwaays)
             p.Encode1(0); //v3->nCombatOrders
             p.Encode1(0); //some loop?
 
-            c.EncodeStats(p);   //addCharStats(mplew, chr);
+            c.Stats.Encode(p);   //addCharStats(mplew, chr);
             p.Encode1(10);//chr.getBuddylist().getCapacity()
 
             p.Encode1(0); //chr.getLinkedName() == null
@@ -267,15 +344,15 @@ namespace Common.Packets
             p.Encode2(0);
             p.Encode2(0);
         }
-        private static void AddAreaInfo(COutPacket p, Character c)
+        private static void AddAreaInfo(COutPacket p, AvatarData c)
         {
             p.Encode2(0);
         }
-        private static void AddNewYearInfo(COutPacket p, Character c)
+        private static void AddNewYearInfo(COutPacket p, AvatarData c)
         {
             p.Encode2(0);
         }
-        private static void AddMonsterBookInfo(COutPacket p, Character c)
+        private static void AddMonsterBookInfo(COutPacket p, AvatarData c)
         {
             p.Encode4(0);//mplew.writeInt(chr.getMonsterBookCover()); // cover
             p.Encode1(0);//mplew.write(0);
@@ -287,7 +364,7 @@ namespace Common.Packets
             //    mplew.write(all.getValue()); // Level
             //}
         }
-        private static void AddTeleportInfo(COutPacket p, Character c)
+        private static void AddTeleportInfo(COutPacket p, AvatarData c)
         {
             for (int i = 0; i < 5; i++)
                 p.Encode4(0);
@@ -295,17 +372,17 @@ namespace Common.Packets
             for (int i = 0; i < 10; i++)
                 p.Encode4(0);
         }
-        private static void AddRingInfo(COutPacket p, Character c)
+        private static void AddRingInfo(COutPacket p, AvatarData c)
         {
             p.Encode2(0); //getCrushRings
             p.Encode2(0); //getFriendshipRings
             p.Encode2(0); //getMarriageRing
         }
-        private static void AddMiniGameInfo(COutPacket p, Character c)
+        private static void AddMiniGameInfo(COutPacket p, AvatarData c)
         {
             p.Encode2(0);
         }
-        private static void AddQuestInfo(COutPacket p, Character c)
+        private static void AddQuestInfo(COutPacket p, AvatarData c)
         {
             p.Encode2(0);//mplew.writeShort(chr.getStartedQuestsSize());
             //for (MapleQuestStatus q : chr.getStartedQuests())
@@ -326,7 +403,7 @@ namespace Common.Packets
             //    mplew.writeLong(getTime(q.getCompletionTime()));
             //}
         }
-        private static void AddSkillInfo(COutPacket p, Character c)
+        private static void AddSkillInfo(COutPacket p, AvatarData c)
         {
             //Map<Skill, MapleCharacter.SkillEntry> skills = chr.getSkills();
             //int skillsSize = skills.size();
@@ -363,7 +440,7 @@ namespace Common.Packets
             //    mplew.writeShort(timeLeft / 1000);
             //}
         }
-        private static void AddInventoryInfo(COutPacket p, Character c)
+        private static void AddInventoryInfo(COutPacket p, AvatarData c)
         {
             p.Encode4(50000); //Meso
 
@@ -425,7 +502,55 @@ namespace Common.Packets
             //}
             p.Encode1(0); // End of Cash
         }
-        private static void CClientOptMan__EncodeOpt(COutPacket p,short optCount)
+        private static void AddRingLook(COutPacket p, AvatarData c)
+        {
+            //List<MapleRing> rings;
+            //if (crush)
+            //{
+            //    rings = chr.getCrushRings();
+            //}
+            //else
+            //{
+            //    rings = chr.getFriendshipRings();
+            //}
+            //boolean yes = false;
+            //for (MapleRing ring : rings)
+            //{
+            //    if (ring.equipped())
+            //    {
+            //        if (yes == false)
+            //        {
+            //            yes = true;
+            //            mplew.write(1);
+            //        }
+            //        mplew.writeInt(ring.getRingId());
+            //        mplew.writeInt(0);
+            //        mplew.writeInt(ring.getPartnerRingId());
+            //        mplew.writeInt(0);
+            //        mplew.writeInt(ring.getItemId());
+            //    }
+            //}
+            //if (yes == false)
+            //{
+                p.Encode1(0);
+            //}
+        }
+        private static void AddMarriageRingLook(COutPacket p, AvatarData c)
+        {
+            //if (chr.getMarriageRing() != null && !chr.getMarriageRing().equipped())
+            //{
+               p.Encode1(0); //    mplew.write(0);
+            //    return;
+            //}
+            //mplew.writeBool(chr.getMarriageRing() != null);
+            //if (chr.getMarriageRing() != null)
+            //{
+            //    mplew.writeInt(chr.getId());
+            //    mplew.writeInt(chr.getMarriageRing().getPartnerChrId());
+            //    mplew.writeInt(chr.getMarriageRing().getRingId());
+            //}
+        }
+        private static void CClientOptMan__EncodeOpt(COutPacket p, short optCount)
         {
             p.Encode2(optCount);
 
