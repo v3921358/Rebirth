@@ -63,14 +63,27 @@ namespace Common.Client
 
             switch (split[0])
             {
-                case "!mob":
+                case "!snail":
                     {
                         var mob = new CMob(100101);
                         mob.Position.Position = Character.Position.Position;
                         mob.Position.Foothold = Character.Position.Foothold;
+                        
+                        Logger.Write(LogLevel.Debug,"MrSnail {0}",mob.Position);
 
                         SendPacket(CPacket.MobEnterField(mob));
+                        SendPacket(CPacket.MobChangeController(mob, 1));
 
+                        break;
+                    }
+                case "!mobs":
+                    {
+                        GetCharField().SendSpawnMobs(this);
+                        break;
+                    }
+                case "!npcs":
+                    {
+                        GetCharField().SendSpawnNpcs(this);
                         break;
                     }
             }

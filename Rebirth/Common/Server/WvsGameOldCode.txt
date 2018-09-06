@@ -1,0 +1,78 @@
+        private void Handle_MobMoveBasic(WvsGameClient c, CInPacket p)
+        {
+            int dwMobId = p.Decode4();
+
+            var nMobCtrlSN = p.Decode2();
+            var v7 = p.Decode1();
+
+            var pOldSplit = (v7 & 0xF0) != 0;
+            var bMobMoveStartResult = (v7 & 0xF) != 0;
+
+            c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
+        }
+        private void Handle_MobMove(WvsGameClient c, CInPacket p)
+        {
+            int dwMobId = p.Decode4();
+
+            var bNotForceLandingWhenDiscard = p.Decode1();
+            var bNotChangeAction = p.Decode1();
+            var bNextAttackPossible = p.Decode1();
+            var bLeft = p.Decode1();
+            var dwTargetInfo = p.Decode4();
+
+            var nMultiTargetForBall = p.Decode4();
+
+            for (int i = 0; i < nMultiTargetForBall; i++)
+            {
+                p.Decode8();
+            }
+
+            var nRandTimeforAreaAttack = p.Decode4();
+
+            for (int i = 0; i < nMultiTargetForBall; i++)
+            {
+                p.Decode4();
+            }
+
+            var movePath = p.DecodeBuffer(p.Available);
+
+
+
+        }
+
+
+        private void Handle_MobMove(WvsGameClient c, CInPacket p)
+        {
+            int dwMobId = p.Decode4();
+
+            var nMobCtrlSN = p.Decode2();
+            var v7 = p.Decode1(); //v85 = nDistance | 4 * (v184 | 2 * ((unsigned __int8)retaddr | 2 * v72)); [ CONFIRMED ]
+
+            var pOldSplit = (v7 & 0xF0) != 0; //this is a type of CFieldSplit
+            var bMobMoveStartResult = (v7 & 0xF) != 0;
+
+            var pCurSplit = p.Decode1();
+            var bIllegealVelocity = p.Decode4();
+            var v8 = p.Decode1();
+
+            var bCheatedRandom = (v8 & 0xF0) != 0;
+            var bCheatedCtrlMove = (v8 & 0xF) != 0;
+
+            p.Decode4(); //Loopy Decode 1
+            p.Decode4(); //Loopy Decode 2
+
+            p.DecodeBuffer(16);
+
+            var movePath = p.DecodeBuffer(p.Available);
+
+            //if (pMob->m_pController->pUser != pCtrl
+            //    && (!pOldSplit
+            //        || pMob->m_bNextAttackPossible
+            //        || !CLifePool::ChangeMobController(&v5->m_lifePool, pCtrl->m_dwCharacterID, pMob, 1)))
+            //{
+            //    CMob::SendChangeControllerPacket(v9, v10, 0);
+            //    return;
+            //}
+
+            c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
+        }

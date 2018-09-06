@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Network;
+using Common.Packets;
 
 namespace Common
 {
@@ -73,5 +75,30 @@ namespace Common
         {
             return job / 1000 != 3 && job / 100 != 22 && job != 2001;
         }
+
+
+        public static bool FilterRecvOpCode(RecvOps recvOp)
+        {
+            switch (recvOp)
+            {
+                case RecvOps.CP_ClientDumpLog:
+                case RecvOps.CP_ExceptionLog:
+                case RecvOps.CP_UserMove:
+                //case RecvOps.CP_MobMove:
+                    return true;
+            }
+            return false;
+        }
+        public static bool FilterSendOpCode(SendOps sendOp)
+        {
+            switch (sendOp)
+            {
+                case SendOps.LP_UserMove:
+                case SendOps.LP_MobCtrlAck:
+                    return true;
+            }
+            return false;
+        }
+
     }
 }

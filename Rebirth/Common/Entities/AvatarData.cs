@@ -28,7 +28,7 @@
             s.nSP = 1;
             s.nEXP = 0;
             s.nPOP = 0;
-            s.dwPosMap = 100000000;//180000000;
+            s.dwPosMap = 100010000;//100000000;//180000000;
             s.nPortal = 1;
             s.nPlaytime = 0;
             s.nSubJob = 0;

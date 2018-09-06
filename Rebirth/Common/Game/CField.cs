@@ -22,7 +22,9 @@ namespace Common.Game
 
         public CPortalMan Portals { get; }
         public CFootholdMan Footholds { get; }
-        
+        public CMobPool Mobs { get; }
+        public CNpcPool Npcs { get; set; }
+
         public CField(int mapId)
         {
             MapId = mapId;
@@ -32,6 +34,8 @@ namespace Common.Game
 
             Portals = new CPortalMan();
             Footholds = new CFootholdMan();
+            Mobs = new CMobPool();
+            Npcs = new CNpcPool();
         }
 
         public void Add(WvsGameClient c)
@@ -41,21 +45,24 @@ namespace Common.Game
 
             if (c.SentCharData)
             {
-                c.SendPacket(CPacket.SetField(character, false));
+                c.SendPacket(CPacket.SetField(character, false, c.ChannelId));
             }
             else
             {
                 c.SentCharData = true;
                 character.Stats.nPortal = Portals.GetRandomSpawn();
-                c.SendPacket(CPacket.SetField(character, true));
+                c.SendPacket(CPacket.SetField(character, true, c.ChannelId));
             }
 
             //Send client being added all the existing characters in the map
             Characters.ForEach(x => c.SendPacket(CPacket.UserEnterField(x)));
 
+            SendSpawnMobs(c);
+            SendSpawnNpcs(c);
+
             Characters.Add(c.Character);
             Sockets.Add(c.Character, c);
-            
+
             //Broadcast everyone already in the map that you have arrived
             Broadcast(CPacket.UserEnterField(character), c);
         }
@@ -88,13 +95,36 @@ namespace Common.Game
             packet.Dispose();
         }
 
+        public void SendSpawnMobs(WvsGameClient c)
+        {
+            foreach (var mob in Mobs.Spawns)
+            {
+                var x = new CMob(mob.Id);
+                x.Position.Position.X = (short)mob.X;
+                x.Position.Position.Y = (short)mob.Cy;
+                x.Position.Foothold = (short) mob.Foothold;
+
+                c.SendPacket(CPacket.MobEnterField(x));
+
+                //TODO: Remove this controller shit its for testing right now single player
+                c.SendPacket(CPacket.MobChangeController(x,1));
+            }
+        }
+        public void SendSpawnNpcs(WvsGameClient c)
+        {
+            foreach (var npc in Npcs.Spawns)
+            {
+                c.SendPacket(CPacket.NpcEnterField(npc));
+            }
+        }
+
         public void Load(WvsCenter parentServer)
         {
             var wzMan = parentServer.WzMan;
             Portals.Load(MapId, wzMan);
-            Footholds.Load(MapId, wzMan);   
-
+            Footholds.Load(MapId, wzMan);
+            Mobs.Load(MapId, wzMan);
+            Npcs.Load(MapId, wzMan);
         }
-        
     }
 }

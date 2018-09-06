@@ -10,6 +10,8 @@ namespace Common.Game
         
         public MapPos Position { get; }
 
+
+
         public CMob(int mobId)
         {
             dwMobId = Constants.Rand.Next(4000, 5000);

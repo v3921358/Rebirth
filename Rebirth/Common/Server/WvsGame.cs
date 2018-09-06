@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using Common.Client;
 using Common.Game;
 using Common.Log;
@@ -15,14 +16,12 @@ namespace Common.Server
         public byte ChannelId { get; }
 
         public Dictionary<int, CField> CFieldMan { get; }
-
         //-----------------------------------------------------------------------------
         public WvsGame(WvsCenter parent, byte channel) : base($"WvsGame{channel}", Constants.GamePort + channel, parent)
         {
             ChannelId = channel;
             CFieldMan = new Dictionary<int, CField>();
         }
-
         //-----------------------------------------------------------------------------
         public CField GetField(int id)
         {
@@ -36,7 +35,6 @@ namespace Common.Server
 
             return CFieldMan[id];
         }
-
         //-----------------------------------------------------------------------------
         protected override WvsGameClient CreateClient(CClientSocket socket)
         {
@@ -66,6 +64,9 @@ namespace Common.Server
                         break;
                     case RecvOps.CP_UserEmotion:
                         Handle_UserEmotion(socket, packet);
+                        break;
+                    case RecvOps.CP_MobMove:
+                        Handle_MobMove(socket, packet);
                         break;
                 }
             }
@@ -135,43 +136,7 @@ namespace Common.Server
             var dwKeyCrc = p.Decode4();
 
             var movePath = p.DecodeBuffer(p.Available);
-
-            //TODO: Move this out later lol
-            {
-                var iPacket = new CInPacket(movePath);
-                var x = iPacket.Decode2();
-                var y = iPacket.Decode2();
-                var vx = iPacket.Decode2();
-                var vy = iPacket.Decode2();
-                var size = iPacket.Decode1();
-
-                //LOL
-                c.Character.Position.Position.X = x;
-                c.Character.Position.Position.Y = y;
-
-                for (int i = 0; i < size; i++)
-                {
-                    var cmd = iPacket.Decode1();
-                    
-                    if (cmd == 0)
-                    {
-                        c.Character.Position.Position.X = iPacket.Decode2();
-                        c.Character.Position.Position.Y = iPacket.Decode2();
-                        var xwob = iPacket.Decode2();
-                        var ywob = iPacket.Decode2();
-                        c.Character.Position.Foothold = iPacket.Decode2();
-                        var xoff = iPacket.Decode2();
-                        var yoff = iPacket.Decode2();
-                        c.Character.Position.Stance = iPacket.Decode1();
-                        var duration = iPacket.Decode2();
-                    }
-                    else
-                    {
-                        Logger.Write(LogLevel.Debug, "Unparsed Movement SubOp {0}", cmd);
-                        break; //break loop because we didnt parse subop
-                    }
-                }
-            }
+            c.Character.Position.DecodeMovePath(movePath);
 
             var stats = c.Character.Stats;
 
@@ -198,8 +163,8 @@ namespace Common.Server
 
             var portal =
                 c.GetCharField()
-                .Portals
-                .GetByName(portalName);
+                    .Portals
+                    .GetByName(portalName);
 
             if (portal == null)
             {
@@ -225,6 +190,41 @@ namespace Common.Server
             var stats = c.Character.Stats;
 
             c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.dwCharacterID, nEmotion, nDuration, bByItemOption), c);
+        }
+        private void Handle_MobMove(WvsGameClient c, CInPacket p)
+        {
+            int dwMobId = p.Decode4();
+
+            var nMobCtrlSN = p.Decode2();
+            var v7 = p.Decode1(); //v85 = nDistance | 4 * (v184 | 2 * ((unsigned __int8)retaddr | 2 * v72)); [ CONFIRMED ]
+
+            var pOldSplit = (v7 & 0xF0) != 0; //this is a type of CFieldSplit
+            var bMobMoveStartResult = (v7 & 0xF) != 0;
+
+            var pCurSplit = p.Decode1();
+            var bIllegealVelocity = p.Decode4();
+            var v8 = p.Decode1();
+
+            var bCheatedRandom = (v8 & 0xF0) != 0;
+            var bCheatedCtrlMove = (v8 & 0xF) != 0;
+
+            p.Decode4(); //Loopy Decode 1
+            p.Decode4(); //Loopy Decode 2
+
+            p.DecodeBuffer(16);
+
+            var movePath = p.DecodeBuffer(p.Available);
+
+            //if (pMob->m_pController->pUser != pCtrl
+            //    && (!pOldSplit
+            //        || pMob->m_bNextAttackPossible
+            //        || !CLifePool::ChangeMobController(&v5->m_lifePool, pCtrl->m_dwCharacterID, pMob, 1)))
+            //{
+            //    CMob::SendChangeControllerPacket(v9, v10, 0);
+            //    return;
+            //}
+
+            c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
         }
     }
 }

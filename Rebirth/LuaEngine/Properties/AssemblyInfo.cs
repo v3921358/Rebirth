@@ -5,11 +5,11 @@ using System.Runtime.InteropServices;
 // General Information about an assembly is controlled through the following
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("WvsRebirth")]
-[assembly: AssemblyDescription("MapleStory Emulator")]
+[assembly: AssemblyTitle("LuaEngine")]
+[assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Neckson")]
-[assembly: AssemblyProduct("WvsRebirth")]
+[assembly: AssemblyCompany("")]
+[assembly: AssemblyProduct("LuaEngine")]
 [assembly: AssemblyCopyright("Copyright ©  2018")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -20,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("d3b0fff8-bcb4-4d28-bb44-6854ce60b5ba")]
+[assembly: Guid("72b3c503-e27a-479f-a4e9-164dd058efeb")]
 
 // Version information for an assembly consists of the following four values:
 //
@@ -32,5 +32,5 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-[assembly: AssemblyVersion("8.96.1.0")]
-[assembly: AssemblyFileVersion("8.96.1.0")]
+[assembly: AssemblyVersion("1.0.0.0")]
+[assembly: AssemblyFileVersion("1.0.0.0")]

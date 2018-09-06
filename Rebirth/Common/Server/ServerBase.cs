@@ -40,17 +40,10 @@ namespace Common.Server
 
             Logger.Write(LogLevel.Info, "[{0}] Accepted {1}", Name, client.Host);
 
-            client.OnPacket += (p) => OnClientPacket(realClient, p);
-            client.OnDisconnected += () => OnClientClosed(realClient);
-            client.Initialize(Constants.Version);
-        }
-        private void OnClientPacket(TClient socket, CInPacket packet)
-        {
-            Enqueue(() => HandlePacket(socket, packet));
-        }
-        private void OnClientClosed(TClient socket)
-        {
-            Enqueue(() => HandleDisconnect(socket));
+            client.OnPacket += (packet) => Enqueue(() => HandlePacket(realClient, packet));
+            client.OnDisconnected += () => Enqueue(() => HandleDisconnect(realClient));
+
+            Enqueue(() => client.Initialize(Constants.Version));
         }
 
         protected virtual void HandlePacket(TClient client, CInPacket packet)
@@ -58,7 +51,7 @@ namespace Common.Server
             var buffer = packet.ToArray();
             var opcode = (RecvOps)BitConverter.ToInt16(buffer, 0);
 
-            if (FilterRecvOpCode(opcode) == false)
+            if (Constants.FilterRecvOpCode(opcode) == false)
             {
                 var name = Enum.GetName(typeof(RecvOps), opcode);
                 var str = Constants.GetString(buffer);
@@ -71,16 +64,6 @@ namespace Common.Server
             Logger.Write(LogLevel.Info, "[{0}] Disconnected {1}", Name, client.Host);
         }
 
-        protected virtual bool FilterRecvOpCode(RecvOps recvOp)
-        {
-            switch (recvOp)
-            {
-                case RecvOps.CP_ClientDumpLog:
-                case RecvOps.CP_ExceptionLog:
-                    return true;
-            }
-            return false;
-        }
         protected virtual TClient CreateClient(CClientSocket socket)
         {
             throw new InvalidOperationException();

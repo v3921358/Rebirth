@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Databa
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WvsRebirth", "WvsRebirth\WvsRebirth.csproj", "{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaEngine", "LuaEngine\LuaEngine.csproj", "{72B3C503-E27A-479F-A4E9-164DD058EFEB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{72B3C503-E27A-479F-A4E9-164DD058EFEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{72B3C503-E27A-479F-A4E9-164DD058EFEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{72B3C503-E27A-479F-A4E9-164DD058EFEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{72B3C503-E27A-479F-A4E9-164DD058EFEB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

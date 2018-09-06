@@ -1,4 +1,8 @@
-﻿namespace Common.Entities
+﻿using System;
+using Common.Log;
+using Common.Packets;
+
+namespace Common.Entities
 {
     public class MapPos
     {
@@ -10,10 +14,56 @@
         {
             Position = new TagPoint();
         }
-
         public MapPos(TagPoint position)
         {
             Position = position;
+        }
+
+        public void DecodeMovePath(byte[] movePath)
+        {
+            var iPacket = new CInPacket(movePath);
+
+            Position.X = iPacket.Decode2();
+            Position.X = iPacket.Decode2();
+            var vx = iPacket.Decode2();
+            var vy = iPacket.Decode2();
+
+            var size = iPacket.Decode1();
+            
+            for (int i = 0; i < size; i++)
+            {
+                var cmd = iPacket.Decode1();
+
+                if (cmd == 0)
+                {
+                    Position.X = iPacket.Decode2();
+                    Position.Y = iPacket.Decode2();
+                    var xwob = iPacket.Decode2();
+                    var ywob = iPacket.Decode2();
+                    Foothold = iPacket.Decode2();
+                    var xoff = iPacket.Decode2();
+                    var yoff = iPacket.Decode2();
+                    Stance = iPacket.Decode1();
+                    var duration = iPacket.Decode2();
+                }
+                else if (cmd == 1)
+                {
+                    var xmod = iPacket.Decode2();
+                    var ymod = iPacket.Decode2();
+                    Stance = iPacket.Decode1();
+                    var duration = iPacket.Decode2();
+                }
+                else
+                {
+                    Logger.Write(LogLevel.Warning, "Unparsed Movement SubOp {0}", cmd);
+                    break; //break loop because we didnt parse subop
+                }
+            }
+        }
+
+        public override string ToString()
+        {
+            return $"Position: {Position.X},{Position.Y} - Fh: {Foothold} - Stance:{Stance}";
         }
     }
 }

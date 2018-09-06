@@ -164,7 +164,7 @@ namespace Common.Packets
             return p;
         }
         //WvsGame-----------------------------------------------------------------------------------------------------
-        public static COutPacket SetField(CharacterData c, bool bCharacterData)
+        public static COutPacket SetField(CharacterData c, bool bCharacterData, int nChannel)
         {
             var p = new COutPacket(SendOps.LP_SetField);
 
@@ -172,7 +172,7 @@ namespace Common.Packets
 
             //  *((_DWORD *)TSingleton<CWvsContext>::ms_pInstance._m_pStr + 2072) = CInPacket::Decode4(iPacket);
             //*((_DWORD*)TSingleton < CWvsContext >::ms_pInstance._m_pStr + 3942) = CInPacket::Decode4(iPacket);
-            p.Encode4(1);//chr.getClient().getChannel() - 1);
+            p.Encode4(nChannel);//chr.getClient().getChannel() - 1);
             p.Encode4(0);
 
             p.Encode1(1); //sNotifierMessage._m_pStr
@@ -315,7 +315,7 @@ namespace Common.Packets
             mob.EncodeInitData(p);
             return p;
         }
-        public static COutPacket MobLeaveField(CMob mob,byte nDeadType)
+        public static COutPacket MobLeaveField(CMob mob, byte nDeadType)
         {
             var p = new COutPacket(SendOps.LP_MobEnterField);
             p.Encode4(mob.dwMobId);
@@ -325,7 +325,109 @@ namespace Common.Packets
                 p.Encode4(-1); //m_dwSwallowCharacterID
 
             return p;
-        }   
+        }
+
+        public static COutPacket MobChangeController(CMob mob, byte nLevel)
+        {
+            var p = new COutPacket(SendOps.LP_MobChangeController);
+            p.Encode1(nLevel); // 1 = remove i think
+
+            if (nLevel == 0)
+            {
+                p.Encode4(mob.dwMobId);
+            }
+            else
+            {
+                mob.EncodeInitData(p);
+            }
+
+            return p;
+        }
+
+
+        public static COutPacket MobMoveAck(int dwMobId, short nMobCtrlSN, bool bMobMoveStartResult, short nMP, byte nSkillCommand, byte nSLV)
+        {
+            var p = new COutPacket(SendOps.LP_MobCtrlAck);
+            p.Encode4(dwMobId);
+            p.Encode2(nMobCtrlSN);
+            p.Encode1(bMobMoveStartResult);
+            p.Encode2(nMP); //CMob->nMP lol
+            p.Encode1(nSkillCommand);
+            p.Encode1(nSLV);
+            return p;
+        }
+        public static COutPacket MobMoveTest(int dwMobId, byte[] movePath)
+        {
+            var packet = new COutPacket(SendOps.LP_MobMove);
+            packet.Encode4(dwMobId);
+
+            //packet.Encode2(actionAndDirection);
+            //packet.Encode1(sourceMob.isNextAttackPossible());
+            //packet.Encode1(mobSkillActionMaybe);//needs confirmation
+            //packet.Encode4(skillData);
+
+            //there is a client sided check for these two, let's replicate that later? seems to be here by default tho
+            //packet.Encode4(multiTargetForBall.size());
+            //multiTargetForBall.forEach(packet::encodePoint4);
+            packet.Encode4(0); //multiTargetForBall LOOP
+
+
+            //packet.encode4(randTimeForAreaAttack.size());
+            //randTimeForAreaAttack.forEach(packet::encode4);
+            packet.Encode4(0); //randTimeForAreaAttack LOOP
+
+            //movePath.encode(packet, false);
+            packet.EncodeBuffer(movePath, 0, movePath.Length);
+
+            return packet;
+        }
+
+        public static COutPacket MobMove(int dwMobId, bool bMobMoveStartResult, byte pCurSplit, int bIllegealVelocity, byte[] movePath)
+        {
+            var p = new COutPacket(SendOps.LP_MobMove);
+            p.Encode4(dwMobId); 
+
+            p.Encode1(bMobMoveStartResult); //bNotForceLandingWhenDiscard
+            p.Encode1(pCurSplit);
+            p.Encode4(bIllegealVelocity);
+            p.EncodeBuffer(movePath, 0, movePath.Length);
+            return p;
+
+            //COutPacket::COutPacket((COutPacket*)&oPacketMove, 151, 0);
+            //v39 = (int*)v9->m_dwId;
+            //LOBYTE(v63) = 1;
+            //COutPacket::Encode4((COutPacket*)&oPacketMove, (unsigned int)v39);
+
+            //COutPacket::Encode1((COutPacket*)&oPacketMove, bMobMoveStartResult);
+            //COutPacket::Encode1((COutPacket*)&oPacketMove, (char)pCurSplit);
+            //COutPacket::Encode4((COutPacket*)&oPacketMove, bIllegealVelocity);
+            //CMovePath::CMovePath((CMovePath*)&mp);
+            //LOBYTE(v63) = 2;
+            //CMovePath::Decode((CMovePath*)&mp, iPacket);
+            //CMovePath::Encode((CMovePath*)&mp, (COutPacket*)&oPacketMove);
+        }
+
+        //WvsGame::NpcPool--------------------------------------------------------------------------------------------
+        public static COutPacket NpcEnterField(CLife npc)
+        {
+            var p = new COutPacket(SendOps.LP_NpcEnterField);
+            p.Encode4(Constants.Rand.Next(4545, 8988));
+            p.Encode4(npc.Id);
+
+            //CNpc::Init
+            p.Encode2((short)npc.X); //m_ptPosPrev.x
+            p.Encode2((short)npc.Cy); //m_ptPosPrev.y
+
+            p.Encode1(0 & 1 | 2 * 2); //m_nMoveAction | life.getF() == 1 ? 0 : 1
+            p.Encode2((short)npc.Foothold); //dwSN Foothold
+
+            p.Encode2((short)npc.Rx0); //m_ptPosPrev.x
+            p.Encode2((short)npc.Rx1); //m_ptPosPrev.y
+
+            p.Encode1(true); //I hope this works lol | //mplew.write((show && !life.isHidden()) ? 1 : 0);
+
+            return p;
+        }
 
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, AvatarData c)

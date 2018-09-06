@@ -1,6 +1,6 @@
 ﻿// ReSharper disable InconsistentNaming
 
-namespace Common.Network
+namespace Common.Packets
 {
     public enum SendOps
     {

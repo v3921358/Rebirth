@@ -33,14 +33,17 @@ namespace Common.Client
             var buffer = packet;
             var opcode = (SendOps)BitConverter.ToInt16(buffer, 0);
 
-            var name = Enum.GetName(typeof(SendOps), opcode);
-            var str = Constants.GetString(buffer);
+            if (Constants.FilterSendOpCode(opcode) == false)
+            {
+                var name = Enum.GetName(typeof(SendOps), opcode);
+                var str = Constants.GetString(buffer);
 
-            Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
+                Logger.Write(LogLevel.Info, "Send [{0}] {1}", name, str);
+            }
 
             m_socket.SendPacket(packet);
         }
-        
+
         public void Disconnect()
         {
             m_socket.Dispose();
