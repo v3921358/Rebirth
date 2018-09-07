@@ -46,7 +46,35 @@ namespace Common.Game
 
             }
         }
-        
+        public void Load(WZObject mapNode)
+        {
+            var footholds = mapNode["foothold"];
+
+            foreach (WZObject wz1 in footholds)
+            {
+                foreach (WZObject wz2 in wz1)
+                {
+                    foreach (WZObject fh in wz2)
+                    {
+                        var f = new Foothold
+                        {
+                            Id = Convert.ToInt32(fh.Name),
+                            Next = fh["next"].ValueOrDie<int>(),
+                            Prev = fh["prev"].ValueOrDie<int>(),
+                            X1 = (short)fh["x1"].ValueOrDie<int>(),
+                            Y1 = (short)fh["y1"].ValueOrDie<int>(),
+                            X2 = (short)fh["x2"].ValueOrDie<int>(),
+                            Y2 = (short)fh["y2"].ValueOrDie<int>(),
+                        };
+
+                        Footholds.Add(f);
+                    }
+                }
+
+            }
+        }
+
+
         public Foothold FindBelow(TagPoint p)
         {
             List<Foothold> xMatches = new List<Foothold>();

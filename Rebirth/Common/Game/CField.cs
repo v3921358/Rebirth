@@ -8,6 +8,7 @@ using Common.Entities;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
+using Common.Provider;
 using Common.Server;
 using reWZ.WZProperties;
 
@@ -15,6 +16,10 @@ namespace Common.Game
 {
     public sealed class CField
     {
+
+        private bool m_sentController = false; //TODO: rEMOVE THIS ONE DAY LOL
+
+
         public int MapId { get; }
 
         public List<CharacterData> Characters { get; }
@@ -25,7 +30,7 @@ namespace Common.Game
         public CMobPool Mobs { get; }
         public CNpcPool Npcs { get; set; }
 
-        public CField(int mapId)
+        private CField(int mapId)
         {
             MapId = mapId;
 
@@ -97,34 +102,53 @@ namespace Common.Game
 
         public void SendSpawnMobs(WvsGameClient c)
         {
-            foreach (var mob in Mobs.Spawns)
+            foreach (var mob in Mobs)
             {
-                var x = new CMob(mob.Id);
-                x.Position.Position.X = (short)mob.X;
-                x.Position.Position.Y = (short)mob.Cy;
-                x.Position.Foothold = (short) mob.Foothold;
-
-                c.SendPacket(CPacket.MobEnterField(x));
-
-                //TODO: Remove this controller shit its for testing right now single player
-                c.SendPacket(CPacket.MobChangeController(x,1));
+                if (mob.Controller == 0 || mob.Controller == c.Character.Stats.dwCharacterID)
+                {
+                    mob.Controller = c.Character.Stats.dwCharacterID;
+                    c.SendPacket(CPacket.MobChangeController(mob, 1));
+                }
+                
+                c.SendPacket(CPacket.MobEnterField(mob));
             }
         }
         public void SendSpawnNpcs(WvsGameClient c)
         {
-            foreach (var npc in Npcs.Spawns)
+            foreach (var npc in Npcs)
             {
                 c.SendPacket(CPacket.NpcEnterField(npc));
             }
         }
 
-        public void Load(WvsCenter parentServer)
+        public static CField Load(int mapId, WvsCenter parentServer)
         {
             var wzMan = parentServer.WzMan;
-            Portals.Load(MapId, wzMan);
-            Footholds.Load(MapId, wzMan);
-            Mobs.Load(MapId, wzMan);
-            Npcs.Load(MapId, wzMan);
+            var wz = wzMan["Map.wz"];
+            var mapPath = $"Map/Map{mapId / 100000000}/{mapId}.img";
+
+            try
+            {
+                var mapNode = wz.ResolvePath(mapPath);
+
+                var cf = new CField(mapId);
+                cf.Load(mapNode);
+                return cf;
+            }
+            catch (KeyNotFoundException knfe)
+            {
+                return null;
+            }
+        }
+
+        private void Load(WZObject mapNode)//WzManager wzMan)
+        {
+            Portals.Load(mapNode);
+            Footholds.Load(mapNode);
+            Npcs.Load(mapNode);
+
+            Mobs.Load(mapNode);
+            Mobs.DoMobLogic();
         }
     }
 }

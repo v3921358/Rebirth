@@ -2,20 +2,25 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
+using Common.Client;
 using Common.Network;
 using Common.Packets;
+using Common.Scripts.Npc;
 
 namespace Common
 {
     public static class Constants
     {
-        public static readonly Random Rand = new Random();
-
+        public static Random Rand { get; } = new Random();
+        
         public const ushort Version = 95;
 
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
+
+        public const string ServerMessage = "Welcome to Rebirth v95";
 
         private static byte HexToByte(string hex)
         {
@@ -76,7 +81,6 @@ namespace Common
             return job / 1000 != 3 && job / 100 != 22 && job != 2001;
         }
 
-
         public static bool FilterRecvOpCode(RecvOps recvOp)
         {
             switch (recvOp)
@@ -98,6 +102,24 @@ namespace Common
                     return true;
             }
             return false;
+        }
+
+        private static int UniqueIdKey = 10000;
+
+        public static int GetUniqueId()
+        {
+            return Interlocked.Increment(ref UniqueIdKey);
+        }
+
+        public static NpcScript GetScript(int npcId,WvsGameClient c)
+        {
+            switch (npcId)
+            {
+                case 9900000:
+                    return new Npc9900000(c);
+                default:
+                    return new NpcDefault(npcId, c);
+            }
         }
 
     }

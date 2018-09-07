@@ -7,7 +7,7 @@
             var x = new AvatarData();
 
             var s = x.Stats;
-            s.dwCharacterID = Constants.Rand.Next(1000, 9999);
+            s.dwCharacterID = Constants.GetUniqueId(); 
             s.sCharacterName = $"Rajan{Constants.Rand.Next(0,99)}";
             s.nGender = 0;
             s.nSkin = 0;
@@ -48,7 +48,7 @@
             var x = new AvatarData();
 
             var s = x.Stats;
-            s.dwCharacterID = Constants.Rand.Next(1000, 9999);
+            s.dwCharacterID = Constants.GetUniqueId();
             s.sCharacterName = name;
             s.nGender = gender;
             s.nSkin = skinColor;

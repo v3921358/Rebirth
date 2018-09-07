@@ -8,6 +8,7 @@ using Common.Game;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
+using Common.Scripts.Npc;
 using Common.Server;
 
 namespace Common.Client
@@ -19,6 +20,8 @@ namespace Common.Client
         public bool SentCharData { get; set; }
 
         public CharacterData Character { get; private set; }
+        public NpcScript NpcScript { get; set; }
+
 
         public WvsGameClient(WvsGame game, CClientSocket socket) : base(socket)
         {
@@ -57,37 +60,58 @@ namespace Common.Client
             newField.Add(this);
         }
 
+        public void SetField(int nMapId, byte nPortal, short nFh)
+        {
+            var newField = ParentServer.GetField(nMapId);
+
+            if (newField != null)
+            {
+                var oldField = GetCharField();
+                oldField.Remove(this);
+
+                Character.Stats.dwPosMap = nMapId;
+                Character.Stats.nPortal = nPortal;
+                Character.Position.Foothold = nFh;
+
+                newField.Add(this);
+            }
+        }
+
         public void HandleCommand(string[] split)
         {
-            //100% for testing
+            split[0] = split[0].Remove(0, 1);
 
             switch (split[0])
             {
-                case "!snail":
+                case "snail":
                     {
                         var mob = new CMob(100101);
                         mob.Position.Position = Character.Position.Position;
                         mob.Position.Foothold = Character.Position.Foothold;
-                        
-                        Logger.Write(LogLevel.Debug,"MrSnail {0}",mob.Position);
 
-                        SendPacket(CPacket.MobEnterField(mob));
+                        Logger.Write(LogLevel.Debug, "MrSnail {0}", mob.Position);
+
+                        var p1 = CPacket.MobEnterField(mob);
+
+                        var field = GetCharField();
+                        field.Broadcast(p1);
+
                         SendPacket(CPacket.MobChangeController(mob, 1));
-
                         break;
                     }
-                case "!mobs":
+                case "pos":
                     {
-                        GetCharField().SendSpawnMobs(this);
+                        var msg = $"Map: {Character.Stats.dwPosMap} - {Character.Position}";
+                        SendPacket(CPacket.BroadcastPinkMsg(msg));
                         break;
                     }
-                case "!npcs":
+                case "map":
                     {
-                        GetCharField().SendSpawnNpcs(this);
+                        var mapId = Convert.ToInt32(split[1]);
+                        SetField(mapId, 0, 0);
                         break;
                     }
             }
-
         }
     }
 }

@@ -50,9 +50,11 @@
     <Compile Include="Game\CField.cs" />
     <Compile Include="Game\CFootholdMan.cs" />
     <Compile Include="Game\CMob.cs" />
-    <Compile Include="Game\CMobPool.cs" />
     <Compile Include="Game\CLife.cs" />
+    <Compile Include="Game\CMobPool.cs" />
+    <Compile Include="Game\CNpc.cs" />
     <Compile Include="Game\CNpcPool.cs" />
+    <Compile Include="Game\CObjectPool.cs" />
     <Compile Include="Game\CPortalMan.cs" />
     <Compile Include="Game\Foothold.cs" />
     <Compile Include="Game\Portal.cs" />
@@ -73,6 +75,11 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\WzConstant.cs" />
     <Compile Include="Provider\WzManager.cs" />
+    <Compile Include="Scripts\Npc\Npc9900000.cs" />
+    <Compile Include="Scripts\Npc\NpcDefault.cs" />
+    <Compile Include="Scripts\Npc\NpcDialogOptions.cs" />
+    <Compile Include="Scripts\Npc\NpcScript.cs" />
+    <Compile Include="Scripts\Npc\Query\NpcActionResult.cs" />
     <Compile Include="Server\ServerBase.cs" />
     <Compile Include="Server\WvsCenter.cs" />
     <Compile Include="Server\WvsGame.cs" />
@@ -85,6 +92,10 @@
       <Project>{dc067824-84f0-4e45-a9a3-be590995e3a2}</Project>
       <Name>Database</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Types\CField\" />
+    <Folder Include="Types\CLogin\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

@@ -51,7 +51,6 @@ namespace Common.Network
         {
             m_version = version;
 
-
             m_siv = new MapleIV(0xBADF00D);
             m_riv = new MapleIV(0XDEADBEEF);
             
@@ -161,6 +160,7 @@ namespace Common.Network
             if (Disposed)
                 return;
 
+            //TODO: Phase this lock out one day :^)
             lock (m_sendSync)
             {
                 if (Disposed)
@@ -184,8 +184,7 @@ namespace Common.Network
 
             while (offset < final.Length)
             {
-                SocketError errorCode = SocketError.Success;
-                int sent = m_socket.Send(final, offset, final.Length - offset, SocketFlags.None, out errorCode);
+                int sent = m_socket.Send(final, offset, final.Length - offset, SocketFlags.None, out var errorCode);
 
                 if (sent == 0 || errorCode != SocketError.Success)
                 {

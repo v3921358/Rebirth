@@ -40,6 +40,10 @@ namespace WvsRebirth
                     Handle_CheckPassword(socket, packet);
                     break;
                 case RecvOps.CP_CreateSecurityHandle:
+
+                    //TODO: REMOVE AUTOLOGIN NASTY HACK
+                    Handle_CheckPassword(socket, null); 
+
                     //In GMS this packet was sent when the client
                     //loaded to the login screen. This means HackShield
                     //initialized successfully. This packet would trigger
@@ -102,8 +106,10 @@ namespace WvsRebirth
         }
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
         {
-            var pwd = p.DecodeString();
-            var user = p.DecodeString();
+            //var pwd = p.DecodeString();
+            //var user = p.DecodeString();
+
+            var user = "Tester123";
 
             const int AccountId = 5000;
             //TODO: Login logic
@@ -116,7 +122,7 @@ namespace WvsRebirth
 
             //TODO: World logic
 
-            c.SendPacket(CPacket.WorldRequest(Scania));
+            c.SendPacket(CPacket.WorldRequest(Scania,"Scania"));
             c.SendPacket(CPacket.WorldRequestEnd());
         }
         private void Handle_CheckUserLimit(WvsLoginClient c, CInPacket p)

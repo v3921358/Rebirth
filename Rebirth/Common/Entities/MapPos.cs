@@ -63,7 +63,7 @@ namespace Common.Entities
 
         public override string ToString()
         {
-            return $"Position: {Position.X},{Position.Y} - Fh: {Foothold} - Stance:{Stance}";
+            return $"Position: {Position.X},{Position.Y} - Fh: {Foothold} - Stance: {Stance}";
         }
     }
 }

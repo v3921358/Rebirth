@@ -43,6 +43,29 @@ namespace Common.Game
                 Portals.Add(p);
             }
         }
+        public void Load(WZObject mapNode)
+        {
+            var portals = mapNode["portal"];
+
+            foreach (WZObject x in portals)
+            {
+                var p = new Portal
+                {
+                    nIdx = Convert.ToInt32(x.Name),
+                    sName = x["pn"].ValueOrDie<string>(),
+                    nType = x["pt"].ValueOrDie<int>(),
+                    nTMap = x["tm"].ValueOrDie<int>(),
+                    sTName = x["tn"].ValueOrDie<string>(),
+                    ptPos =
+                    {
+                        X = (short)x["x"].ValueOrDie<int>(),
+                        Y = (short)x["y"].ValueOrDie<int>()
+                    }
+                };
+
+                Portals.Add(p);
+            }
+        }
 
         public Portal GetByName(string name) => Portals.FirstOrDefault(p => p.sName == name);
 

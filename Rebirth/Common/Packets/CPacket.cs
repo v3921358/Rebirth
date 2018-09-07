@@ -41,31 +41,31 @@ namespace Common.Packets
 
             return p;
         }
-        public static COutPacket WorldRequest(byte serverId)
+        public static COutPacket WorldRequest(byte nWorldID,string sName)
         {
             var p = new COutPacket();
 
             //v6 = ZArray<CLogin::WORLDITEM>
             p.Encode2((short)SendOps.LP_WorldInformation);
-            p.Encode1(serverId); //v4 [Server ID]  
-            p.EncodeString("Server Name"); //WORLDITEM->sName
+            p.Encode1(nWorldID); //v4 [Server ID]  
+            p.EncodeString(sName); //WORLDITEM->sName
             p.Encode1(0); //v6->nWorldState
             p.EncodeString("Event Message?"); //sWorldEventDesc
             p.Encode2(100); //v6->nWorldEventEXP_WSE
             p.Encode2(100); //v6->nWorldEventDrop_WSE
             p.Encode1(0); //v6->nBlockCharCreation
 
-            const byte channelCount = 1;
+            const byte nChannelNo = 1;
 
-            p.Encode1(channelCount); //v9 ChannelCount
+            p.Encode1(nChannelNo); //v9
 
-            for (int i = 0; i < channelCount; i++)
+            for (byte i = 0; i < nChannelNo; i++)
             {
                 //v11 =  ZArray<CLogin::CHANNELITEM>
-                p.EncodeString($"World {i + 1}");
+                p.EncodeString($"{sName}-{i}");
                 p.Encode4(200); //v11->nUserNo
-                p.Encode1(serverId); //v11->nWorldID
-                p.Encode1(0); //v11->nChannelID
+                p.Encode1(nWorldID); //v11->nWorldID
+                p.Encode1(i); //v11->nChannelID
                 p.Encode1(0); //v11->bAdultChannel
             }
 
@@ -75,11 +75,8 @@ namespace Common.Packets
         }
         public static COutPacket WorldRequestEnd()
         {
-            var p = new COutPacket();
-
-            p.Encode2((short)SendOps.LP_WorldInformation);
-            p.Encode1(0xff); //server id
-
+            var p = new COutPacket(SendOps.LP_WorldInformation);
+            p.Encode1(0xFF); //nWorldID
             return p;
         }
         public static COutPacket SelectWorldResult(params AvatarData[] chars)
@@ -163,6 +160,7 @@ namespace Common.Packets
 
             return p;
         }
+     
         //WvsGame-----------------------------------------------------------------------------------------------------
         public static COutPacket SetField(CharacterData c, bool bCharacterData, int nChannel)
         {
@@ -308,7 +306,6 @@ namespace Common.Packets
         }
 
         //WvsGame::MobPool--------------------------------------------------------------------------------------------
-
         public static COutPacket MobEnterField(CMob mob)
         {
             var p = new COutPacket(SendOps.LP_MobEnterField);
@@ -326,7 +323,6 @@ namespace Common.Packets
 
             return p;
         }
-
         public static COutPacket MobChangeController(CMob mob, byte nLevel)
         {
             var p = new COutPacket(SendOps.LP_MobChangeController);
@@ -343,8 +339,6 @@ namespace Common.Packets
 
             return p;
         }
-
-
         public static COutPacket MobMoveAck(int dwMobId, short nMobCtrlSN, bool bMobMoveStartResult, short nMP, byte nSkillCommand, byte nSLV)
         {
             var p = new COutPacket(SendOps.LP_MobCtrlAck);
@@ -356,43 +350,31 @@ namespace Common.Packets
             p.Encode1(nSLV);
             return p;
         }
-        public static COutPacket MobMoveTest(int dwMobId, byte[] movePath)
-        {
-            var packet = new COutPacket(SendOps.LP_MobMove);
-            packet.Encode4(dwMobId);
-
-            //packet.Encode2(actionAndDirection);
-            //packet.Encode1(sourceMob.isNextAttackPossible());
-            //packet.Encode1(mobSkillActionMaybe);//needs confirmation
-            //packet.Encode4(skillData);
-
-            //there is a client sided check for these two, let's replicate that later? seems to be here by default tho
-            //packet.Encode4(multiTargetForBall.size());
-            //multiTargetForBall.forEach(packet::encodePoint4);
-            packet.Encode4(0); //multiTargetForBall LOOP
-
-
-            //packet.encode4(randTimeForAreaAttack.size());
-            //randTimeForAreaAttack.forEach(packet::encode4);
-            packet.Encode4(0); //randTimeForAreaAttack LOOP
-
-            //movePath.encode(packet, false);
-            packet.EncodeBuffer(movePath, 0, movePath.Length);
-
-            return packet;
-        }
-
         public static COutPacket MobMove(int dwMobId, bool bMobMoveStartResult, byte pCurSplit, int bIllegealVelocity, byte[] movePath)
         {
             var p = new COutPacket(SendOps.LP_MobMove);
             p.Encode4(dwMobId); 
 
+            //Section 1 - BMS / PDB Combined Version ?
             p.Encode1(bMobMoveStartResult); //bNotForceLandingWhenDiscard
             p.Encode1(pCurSplit);
+            p.Encode1(0);
+            p.Encode1(0);
             p.Encode4(bIllegealVelocity);
+
+            //Section 1 - Mordred Version
+            //packet.Encode2(actionAndDirection);
+            //packet.Encode1(sourceMob.isNextAttackPossible());
+            //packet.Encode1(mobSkillActionMaybe);//needs confirmation
+            //packet.Encode4(skillData);
+
+            p.Encode4(0); //multiTargetForBall LOOP
+            p.Encode4(0); //randTimeForAreaAttack LOOP
+
             p.EncodeBuffer(movePath, 0, movePath.Length);
             return p;
 
+            //BMS v???
             //COutPacket::COutPacket((COutPacket*)&oPacketMove, 151, 0);
             //v39 = (int*)v9->m_dwId;
             //LOBYTE(v63) = 1;
@@ -408,17 +390,17 @@ namespace Common.Packets
         }
 
         //WvsGame::NpcPool--------------------------------------------------------------------------------------------
-        public static COutPacket NpcEnterField(CLife npc)
+        public static COutPacket NpcEnterField(CNpc npc)
         {
             var p = new COutPacket(SendOps.LP_NpcEnterField);
-            p.Encode4(Constants.Rand.Next(4545, 8988));
+            p.Encode4(npc.dwNpcId);
             p.Encode4(npc.Id);
 
             //CNpc::Init
             p.Encode2((short)npc.X); //m_ptPosPrev.x
             p.Encode2((short)npc.Cy); //m_ptPosPrev.y
 
-            p.Encode1(0 & 1 | 2 * 2); //m_nMoveAction | life.getF() == 1 ? 0 : 1
+            p.Encode1(0);// & 1 | 2 * 2); //m_nMoveAction | life.getF() == 1 ? 0 : 1
             p.Encode2((short)npc.Foothold); //dwSN Foothold
 
             p.Encode2((short)npc.Rx0); //m_ptPosPrev.x
@@ -428,7 +410,106 @@ namespace Common.Packets
 
             return p;
         }
+        public static COutPacket NpcScriptMessage(int npc, byte msgType, String talk, String endBytes, byte type, int OtherNPC)
+        {
+            var p = new COutPacket(SendOps.LP_ScriptMessage);
 
+            //CScriptMan::OnScriptMessage
+            
+            p.Encode1(4);
+            p.Encode4(npc);
+            p.Encode1(msgType); //NpcDialogOptions | todo make this
+            p.Encode1(type); // 1 = No ESC, 3 = show character + no sec
+
+            if (type >= 4 && type <= 5)
+            {
+                p.Encode4(OtherNPC);
+            }
+
+            p.EncodeString(talk);
+
+            if (!string.IsNullOrWhiteSpace(endBytes))
+            {
+                var extra = Constants.GetBytes(endBytes);
+                p.EncodeBuffer(extra, 0, extra.Length);
+            }
+
+            return p;
+        }
+    
+        //--------------------------------------------------------------------------------------------
+        public static COutPacket BroadcastPinkMsg(string msg)
+        {
+            return BroadcastMsg(5, msg);
+        }
+        public static COutPacket BroadcastServerMsg(string msg)
+        {
+            return BroadcastMsg(4, msg);
+        }
+        public static COutPacket BroadcastPopupMsg(string msg)
+        {
+            return BroadcastMsg(1, msg);
+        }
+        private static COutPacket BroadcastMsg(byte nType,string message)
+        {
+            var p = new COutPacket(SendOps.LP_BroadcastMsg);
+            p.Encode1(nType);
+
+            // 0: [Notice] <Msg>
+            // 1: Popup <Msg>
+            // 2: Megaphone
+            // 3: Super Megaphone 
+            // 4: Server Message
+            // 5: Pink Text
+            // 6: LightBlue Text ({} as Item)
+            // 7: [int] -> Keep Wz Error
+            // 8: Item Megaphone
+            // 9: Item Megaphone
+            // 10: Three Line Megaphone
+            // 11: Weather Effect
+            // 12: Green Gachapon Message
+            // 13: Yellow Twin Dragon's Egg
+            // 14: Green Twin Dragon's Egg
+            // 15: Lightblue Text
+            // 16: Lightblue Text
+            // 18: LightBlue Text ({} as Item)
+            // 20: (Red Message) : Skull?
+            
+            if (nType == 4)
+            { 
+                p.Encode1(true); // Server Message
+            }
+
+            p.EncodeString(message);
+
+            //switch (nType)
+            //{
+            //    case 3: // Super Megaphone
+            //    case 20: // Skull Megaphone
+            //        mplew.write(channel - 1);
+            //        mplew.write(whisper ? 1 : 0);
+            //        break;
+            //    case 9: // Like Item Megaphone (Without Item)
+            //        mplew.write(channel - 1);
+            //        break;
+            //    case 11: // Weather Effect
+            //        mplew.writeInt(channel); // item id
+            //        break;
+            //    case 13: // Yellow Twin Dragon's Egg
+            //    case 14: // Green Twin Dragon's Egg
+            //        mplew.writeMapleAsciiString("NULL"); // Name
+            //        PacketHelper.addItemInfo(mplew, null, true, true);
+            //        break;
+            //    case 6:
+            //    case 18:
+            //        mplew.writeInt(channel >= 1000000 && channel < 6000000 ? channel : 0); // Item Id
+            //        //E.G. All new EXP coupon {Ruby EXP Coupon} is now available in the Cash Shop!
+            //        break;
+            //}
+
+            return p;
+        }
+     
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, AvatarData c)
         {

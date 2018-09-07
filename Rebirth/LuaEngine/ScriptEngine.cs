@@ -14,6 +14,7 @@ namespace LuaEngine
         public ScriptEngine()
         {
             m_ctx = new Lua();
+       
         }
 
     }

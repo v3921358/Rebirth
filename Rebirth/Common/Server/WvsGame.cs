@@ -7,6 +7,7 @@ using Common.Game;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
+using Common.Scripts.Npc;
 
 namespace Common.Server
 {
@@ -27,8 +28,7 @@ namespace Common.Server
         {
             if (!CFieldMan.ContainsKey(id))
             {
-                var field = new CField(id);
-                field.Load(ParentServer);
+                var field = CField.Load(id, ParentServer);
 
                 CFieldMan.Add(id, field);
             }
@@ -68,6 +68,12 @@ namespace Common.Server
                     case RecvOps.CP_MobMove:
                         Handle_MobMove(socket, packet);
                         break;
+                    case RecvOps.CP_UserSelectNpc:
+                        Handle_UserSelectNpc(socket, packet);
+                        break;
+                    case RecvOps.CP_UserScriptMessageAnswer:
+                        Handle_UserScriptMessageAnswer(socket, packet);
+                        break;
                 }
             }
             else
@@ -105,9 +111,11 @@ namespace Common.Server
             c.LoadCharacter(uid);
 
             var character = c.Character;
-            character.Stats.dwCharacterID = Constants.Rand.Next(1000, 9999); //AGAIN
+            character.Stats.dwCharacterID = Constants.GetUniqueId(); //AGAIN
 
             GetField(character.Stats.dwPosMap).Add(c);
+
+            c.SendPacket(CPacket.BroadcastServerMsg(Constants.ServerMessage));
         }
         private void Handle_UserChat(WvsGameClient c, CInPacket p)
         {
@@ -225,6 +233,178 @@ namespace Common.Server
             //}
 
             c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
+
+            var mobMove = CPacket.MobMove(dwMobId, bMobMoveStartResult, pCurSplit, bIllegealVelocity, movePath);
+            c.GetCharField().Broadcast(mobMove, c);
+
+        }
+
+        private void Handle_UserSelectNpc(WvsGameClient c, CInPacket p)
+        {
+            var dwNpcId = p.Decode4();
+            var nPosX = p.Decode2();
+            var nPosY = p.Decode2();
+
+            if (c.NpcScript != null)
+            {
+                Logger.Write(LogLevel.Warning, "Npc script already in progress?");
+            }
+
+            var field = c.GetCharField();
+            var npc = field.Npcs.Get(dwNpcId);
+
+            if (npc != null)
+            {
+                //if (npc.hasShop())
+                //{
+                //    chr.setConversation(1);
+                //    npc.sendShop(c);
+                //}
+                //else
+                //{
+                //    NPCScriptManager.getInstance().start(c, npc.getId());
+                //}5
+
+
+                c.NpcScript = Constants.GetScript(npc.Id, c);
+                c.NpcScript.Execute();
+            }
+            else
+            {
+                Logger.Write(LogLevel.Warning, "Unable to find NPC {0}", dwNpcId);
+            }
+        }
+        private void Handle_UserScriptMessageAnswer(WvsGameClient c, CInPacket p)
+        {           
+            //CScriptSysFunc::OnScriptMessageAnswer
+
+            var npc = c.NpcScript;
+
+            if (npc == null)
+            {
+                Logger.Write(LogLevel.Warning, "UserScriptMessageAnswer with NO CONTEXT");
+                return;
+            }
+            
+            //Previous send dialog type
+            var type = (NpcDialogOptions)p.Decode1();
+
+            //if (type != npc->get_sent_dialog())
+            //{
+            //    // Hacking
+            //    return;
+            //}
+
+            switch (type)
+            {
+                case NpcDialogOptions.quiz:
+                case NpcDialogOptions.question:
+                    {
+                        var txt = p.DecodeString();
+                        npc.proceed_text(txt);
+                        npc.check_end();
+                        return;
+                    }
+            }
+
+            var choice = p.Decode1();
+
+            switch (type)
+            {
+                case NpcDialogOptions.normal:
+                    {
+                        switch (choice)
+                        {
+                            case 0:
+                                npc.proceed_back();
+                                break;
+                            case 1:
+                                npc.proceed_next();
+                                break;
+                            default:
+                                npc.end();
+                                break;
+                        }
+                        break;
+                    }
+                case NpcDialogOptions.yes_no:
+                case NpcDialogOptions.accept_decline:
+                case NpcDialogOptions.accept_decline_no_exit:
+                    {
+                        switch (choice)
+                        {
+                            case 0:
+                                npc.proceed_selection(0);
+                                break;
+                            case 1:
+                                npc.proceed_selection(1);
+                                break;
+                            default:
+                                npc.end();
+                                break;
+                        }
+                        break;
+                    }
+                case NpcDialogOptions.get_text:
+                    {
+                        if (choice != 0)
+                        {
+                            var txt = p.DecodeString();
+                            npc.proceed_text(txt);
+                        }
+                        else
+                        {
+                            npc.end();
+                        }
+                        break;
+                    }
+                case NpcDialogOptions.get_number:
+                    {
+                        if (choice == 1)
+                        {
+                            var num = p.Decode4();
+                            npc.proceed_number(num);
+                        }
+                        else
+                        {
+                            npc.end();
+                        }
+                        break;
+                    }
+                case NpcDialogOptions.simple:
+                    {
+                        if (choice == 0)
+                        {
+                            npc.end();
+                        }
+                        else
+                        {
+                            var selection = p.Decode1();
+                            npc.proceed_selection(selection);
+                        }
+                        break;
+                    }
+                case NpcDialogOptions.style:
+                    {
+                        if (choice == 1)
+                        {
+                            var selection = p.Decode1();
+                            npc.proceed_selection(selection);
+                        }
+                        else
+                        {
+                            npc.end();
+                        }
+                        break;
+                    }
+                default:
+                    {
+                        npc.end();
+                        break;
+                    }
+            }
+
+            npc.check_end();
         }
     }
 }

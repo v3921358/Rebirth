@@ -9,12 +9,11 @@ namespace Common.Game
         public int dwTemplateId { get; set; } //mob id
         
         public MapPos Position { get; }
-
-
+        public int Controller { get; set; } //Char id or zero
+        
 
         public CMob(int mobId)
         {
-            dwMobId = Constants.Rand.Next(4000, 5000);
             dwTemplateId = mobId;
             Position = new MapPos();
         }
