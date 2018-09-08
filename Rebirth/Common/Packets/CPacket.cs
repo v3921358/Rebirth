@@ -79,6 +79,12 @@ namespace Common.Packets
             p.Encode1(0xFF); //nWorldID
             return p;
         }
+        public static COutPacket LatestConnectedWorld(byte nWorldID)
+        {
+            var p = new COutPacket(SendOps.LP_LatestConnectedWorld);
+            p.Encode4(nWorldID);
+            return p;
+        }
         public static COutPacket SelectWorldResult(params AvatarData[] chars)
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
@@ -103,9 +109,7 @@ namespace Common.Packets
         }
         public static COutPacket CheckUserLimit(byte status)
         {
-            var p = new COutPacket();
-
-            p.Encode2((short)SendOps.LP_CheckUserLimitResult);
+            var p = new COutPacket(SendOps.LP_CheckUserLimitResult);
 
             /* 
              * 0 - Normal
@@ -135,6 +139,25 @@ namespace Common.Packets
                 AddCharEntry(p, c);
             }
 
+            return p;
+        }
+
+        public static COutPacket DeleteCharacter(int uid, byte result)
+        {
+            var p = new COutPacket(SendOps.LP_DeleteCharacterResult);
+            p.Encode4(uid);
+
+            // 6 : Trouble logging in? Try logging in again from maplestory.nexon.net.
+            // 9 : Failed due to unknown reason.
+            // 10 : Could not be processed due to too many connection requests to the server. Please try again later.
+            // 18 : The 8-digit birthday code you have entered is incorrect.
+            // 20 : You have entered an incorrect PIC.
+            // 22 : Cannot delete Guild Master character.
+            // 24 : You may not delete a character that has been engaged or booked for a wedding.
+            // 26 : You cannot delete a character that is currently going through the transfer.
+            // 29 : You may not delete a character that has a family.
+
+            p.Encode1(result);
             return p;
         }
         public static COutPacket SelectCharacterResult(int uid)

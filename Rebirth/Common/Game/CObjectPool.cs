@@ -31,7 +31,10 @@ namespace Common.Game
         }
         public TValue Get(TKey key)
         {
-            return m_cache[key];
+            if (m_cache.ContainsKey(key))
+                return m_cache[key];
+
+            return default(TValue);
         }
 
         protected int GetUniqueId()

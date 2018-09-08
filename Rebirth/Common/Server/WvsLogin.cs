@@ -52,6 +52,7 @@ namespace WvsRebirth
                     //so you could stay on the [LOGIN] server forever.
                     break;
                 case RecvOps.CP_WorldRequest:
+                case RecvOps.CP_WorldInfoRequest:
                     Handle_WorldRequest(socket, packet);
                     break;
                 case RecvOps.CP_CheckUserLimit:
@@ -65,6 +66,9 @@ namespace WvsRebirth
                     break;
                 case RecvOps.CP_CreateNewCharacter:
                     Handle_CreateNewCharacter(socket, packet);
+                    break;
+                case RecvOps.CP_DeleteCharacter:
+                    Handle_DeleteCharacter(socket, packet);
                     break;
                 case RecvOps.CP_SelectCharacter:
                     Handle_SelectCharacter(socket, packet);
@@ -124,6 +128,7 @@ namespace WvsRebirth
 
             c.SendPacket(CPacket.WorldRequest(Scania,"Scania"));
             c.SendPacket(CPacket.WorldRequestEnd());
+            c.SendPacket(CPacket.LatestConnectedWorld(Scania));
         }
         private void Handle_CheckUserLimit(WvsLoginClient c, CInPacket p)
         {
@@ -169,6 +174,11 @@ namespace WvsRebirth
 
             //c.Characters.Add(x);
             c.SendPacket(CPacket.CreateNewCharacter(name, true, newCharacter));
+        }
+        private void Handle_DeleteCharacter(WvsLoginClient c, CInPacket p)
+        {
+            var uid = p.Decode4();
+            c.SendPacket(CPacket.DeleteCharacter(uid,0));
         }
     }
 }

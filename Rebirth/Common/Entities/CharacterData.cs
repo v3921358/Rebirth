@@ -16,11 +16,16 @@ namespace Common.Entities
         //Below are copy pasted from Maple
 
         public GW_CharacterStat Stats { get; set; } //characterStat
+
+        public GW_ItemSlotEquip[] aEquipped { get; } //60
+        public GW_ItemSlotEquip[] aEquipped2 { get; } //60
+
         //ZRef<GW_ItemSlotBase> aEquipped[60];
         //ZRef<GW_ItemSlotBase> aEquipped2[60];
         //ZRef<GW_ItemSlotBase> aDragonEquipped[4];
         //ZRef<GW_ItemSlotBase> aMechanicEquipped[5];
         //ZArray<ZRef<GW_ItemSlotBase>> aaItemSlot[6];
+
         //_FILETIME aEquipExtExpire[1];
         //ZMap<long, EQUIPPED_SETITEM, long> m_mEquippedSetItem;
         public int nCombatOrders { get; set; }
@@ -65,6 +70,9 @@ namespace Common.Entities
 
             adwMapTransfer = new int[5];
             adwMapTransferEx = new int[10];
+
+            aEquipped = new GW_ItemSlotEquip[60];
+            aEquipped2 = new GW_ItemSlotEquip[60];
         }
 
         public static CharacterData Create(GW_CharacterStat stats, AvatarLook look)
@@ -240,36 +248,44 @@ namespace Common.Entities
             //    }
             //}
             //Collections.sort(equipped);
+
+
             //for (Item item : equipped)
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode2(0); // End Of Equipped
+
             //for (Item item : equippedCash)
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode2(0); // End Of Equip Cash
+
             //for (Item item : chr.getInventory(MapleInventoryType.EQUIP).list())
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode4(0);  // End of Equip 
+
             //for (Item item : chr.getInventory(MapleInventoryType.USE).list())
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode1(0); // End of Use 
+
             //for (Item item : chr.getInventory(MapleInventoryType.SETUP).list())
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode1(0); // End of Set Up
+
             //for (Item item : chr.getInventory(MapleInventoryType.ETC).list())
             //{
             //    addItemInfo(mplew, item);
             //}
             p.Encode1(0);  // End of Etc
+
             //for (Item item : chr.getInventory(MapleInventoryType.CASH).list())
             //{
             //    addItemInfo(mplew, item);

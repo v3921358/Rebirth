@@ -40,6 +40,7 @@
     <Compile Include="Client\ClientBase.cs" />
     <Compile Include="Entities\AvatarLook.cs" />
     <Compile Include="Entities\CharacterData.cs" />
+    <Compile Include="Entities\GW_Item.cs" />
     <Compile Include="Entities\MapPos.cs" />
     <Compile Include="Entities\ExtendSP.cs" />
     <Compile Include="Entities\GW_CharacterStat.cs" />

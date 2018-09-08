@@ -5,7 +5,7 @@
         public static AvatarData Default()
         {
             var x = new AvatarData();
-
+            
             var s = x.Stats;
             s.dwCharacterID = Constants.GetUniqueId(); 
             s.sCharacterName = $"Rajan{Constants.Rand.Next(0,99)}";
@@ -40,6 +40,11 @@
             l.nWeaponStickerID = 0;
             l.anHairEquip[0] = 30000;
 
+            l.anHairEquip[5] = 1041002;
+            l.anHairEquip[6] = 1061002;
+            l.anHairEquip[7] = 1072001;
+            l.anHairEquip[11] = 1302000;
+            
             return x;
         }
 

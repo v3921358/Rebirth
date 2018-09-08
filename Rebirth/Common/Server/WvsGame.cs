@@ -65,14 +65,21 @@ namespace Common.Server
                     case RecvOps.CP_UserEmotion:
                         Handle_UserEmotion(socket, packet);
                         break;
-                    case RecvOps.CP_MobMove:
-                        Handle_MobMove(socket, packet);
+                    case RecvOps.CP_UserHit:
+                        //Handle_UserHit(socket, packet);
                         break;
                     case RecvOps.CP_UserSelectNpc:
                         Handle_UserSelectNpc(socket, packet);
                         break;
                     case RecvOps.CP_UserScriptMessageAnswer:
                         Handle_UserScriptMessageAnswer(socket, packet);
+                        break;
+                    case RecvOps.CP_UserCharacterInfoRequest:
+                        Handle_UserCharacterInfoRequest(socket, packet);
+                        break;
+                        
+                    case RecvOps.CP_MobMove:
+                        Handle_MobMove(socket, packet);
                         break;
                 }
             }
@@ -199,46 +206,70 @@ namespace Common.Server
 
             c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.dwCharacterID, nEmotion, nDuration, bByItemOption), c);
         }
-        private void Handle_MobMove(WvsGameClient c, CInPacket p)
+        private void Handle_UserHit(WvsGameClient c, CInPacket p)
         {
-            int dwMobId = p.Decode4();
+            const sbyte bump_damage = -1;
+            const sbyte map_damage = -2;
 
-            var nMobCtrlSN = p.Decode2();
-            var v7 = p.Decode1(); //v85 = nDistance | 4 * (v184 | 2 * ((unsigned __int8)retaddr | 2 * v72)); [ CONFIRMED ]
+            var tick = p.Decode4();
+            var type = (sbyte)p.Decode1(); //-4 is mist, -3 and -2 are map damage.
+            var unk = p.Decode1(); // Element - 0x00 = elementless, 0x01 = ice, 0x02 = fire, 0x03 = lightning
+            int damage = p.Decode4();
 
-            var pOldSplit = (v7 & 0xF0) != 0; //this is a type of CFieldSplit
-            var bMobMoveStartResult = (v7 & 0xF) != 0;
 
-            var pCurSplit = p.Decode1();
-            var bIllegealVelocity = p.Decode4();
-            var v8 = p.Decode1();
+            //bool damage_applied = false;
+            //bool deadly_attack = false;
+            //uint8_t hit = 0;
+            //uint8_t stance = 0;
+            //game_mob_skill_id disease = 0;
+            //game_mob_skill_level level = 0;
+            //game_health mp_burn = 0;
+            //game_map_object map_mob_id = 0;
+            //game_mob_id mob_id = 0;
+            //game_skill_id no_damage_id = 0;
+            //return_damage_data pgmr;
 
-            var bCheatedRandom = (v8 & 0xF0) != 0;
-            var bCheatedCtrlMove = (v8 & 0xF) != 0;
 
-            p.Decode4(); //Loopy Decode 1
-            p.Decode4(); //Loopy Decode 2
+            var field = c.GetCharField();
 
-            p.DecodeBuffer(16);
+            if (type != map_damage)
+            {
+                var mob_id = p.Decode4(); //mob template id
+                var map_mob_id = p.Decode4();
 
-            var movePath = p.DecodeBuffer(p.Available);
+                var mob = field.Mobs.Get(map_mob_id);
 
-            //if (pMob->m_pController->pUser != pCtrl
-            //    && (!pOldSplit
-            //        || pMob->m_bNextAttackPossible
-            //        || !CLifePool::ChangeMobController(&v5->m_lifePool, pCtrl->m_dwCharacterID, pMob, 1)))
-            //{
-            //    CMob::SendChangeControllerPacket(v9, v10, 0);
-            //    return;
-            //}
+                //Look at me guys, sanitary checks!
+                if (mob?.dwTemplateId != mob_id)
+                {
+                    return;
+                }
 
-            c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
+                //if (type != bump_damage)
+                //{
+                //    if (mob == null)
+                //    {
+                //        // TODO FIXME: Restructure so the attack works fine even if the mob dies?
+                //        return;
+                //    }
 
-            var mobMove = CPacket.MobMove(dwMobId, bMobMoveStartResult, pCurSplit, bIllegealVelocity, movePath);
-            c.GetCharField().Broadcast(mobMove, c);
+                //    auto attack = channel_server::get_instance().get_mob_data_provider().get_mob_attack(mob->get_mob_id_or_link(), type);
+                //    if (attack == nullptr)
+                //    {
+                //        // Hacking
+                //        return;
+                //    }
+                //    disease = attack->disease;
+                //    level = attack->level;
+                //    mp_burn = attack->mp_burn;
+                //    deadly_attack = attack->deadly_attack;
+                //}
+
+                var direction = p.Decode1();
+            }
+            
 
         }
-
         private void Handle_UserSelectNpc(WvsGameClient c, CInPacket p)
         {
             var dwNpcId = p.Decode4();
@@ -275,7 +306,7 @@ namespace Common.Server
             }
         }
         private void Handle_UserScriptMessageAnswer(WvsGameClient c, CInPacket p)
-        {           
+        {
             //CScriptSysFunc::OnScriptMessageAnswer
 
             var npc = c.NpcScript;
@@ -285,7 +316,7 @@ namespace Common.Server
                 Logger.Write(LogLevel.Warning, "UserScriptMessageAnswer with NO CONTEXT");
                 return;
             }
-            
+
             //Previous send dialog type
             var type = (NpcDialogOptions)p.Decode1();
 
@@ -406,5 +437,56 @@ namespace Common.Server
 
             npc.check_end();
         }
+        private void Handle_MobMove(WvsGameClient c, CInPacket p)
+        {
+            int dwMobId = p.Decode4();
+
+            var nMobCtrlSN = p.Decode2();
+            var v7 = p.Decode1(); //v85 = nDistance | 4 * (v184 | 2 * ((unsigned __int8)retaddr | 2 * v72)); [ CONFIRMED ]
+
+            var pOldSplit = (v7 & 0xF0) != 0; //this is a type of CFieldSplit
+            var bMobMoveStartResult = (v7 & 0xF) != 0;
+
+            var pCurSplit = p.Decode1();
+            var bIllegealVelocity = p.Decode4();
+            var v8 = p.Decode1();
+
+            var bCheatedRandom = (v8 & 0xF0) != 0;
+            var bCheatedCtrlMove = (v8 & 0xF) != 0;
+
+            p.Decode4(); //Loopy Decode 1
+            p.Decode4(); //Loopy Decode 2
+
+            p.DecodeBuffer(16);
+
+            var movePath = p.DecodeBuffer(p.Available);
+
+            //if (pMob->m_pController->pUser != pCtrl
+            //    && (!pOldSplit
+            //        || pMob->m_bNextAttackPossible
+            //        || !CLifePool::ChangeMobController(&v5->m_lifePool, pCtrl->m_dwCharacterID, pMob, 1)))
+            //{
+            //    CMob::SendChangeControllerPacket(v9, v10, 0);
+            //    return;
+            //}
+
+            c.SendPacket(CPacket.MobMoveAck(dwMobId, nMobCtrlSN, bMobMoveStartResult, 0, 0, 0));
+
+            var mobMove = CPacket.MobMove(dwMobId, bMobMoveStartResult, pCurSplit, bIllegealVelocity, movePath);
+            c.GetCharField().Broadcast(mobMove, c);
+
+        }
+
+
+        private void Handle_UserCharacterInfoRequest(WvsGameClient c, CInPacket p)
+        {
+            var tick = p.Decode4();
+            var uid = p.Decode4();
+
+
+
+        }
+
+
     }
 }

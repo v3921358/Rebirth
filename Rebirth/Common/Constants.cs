@@ -14,13 +14,13 @@ namespace Common
     public static class Constants
     {
         public static Random Rand { get; } = new Random();
-        
+
         public const ushort Version = 95;
 
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
-        public const string ServerMessage = "Welcome to Rebirth v95";
+        public const string ServerMessage = @"8========D~~~ \_oWo_/";
 
         private static byte HexToByte(string hex)
         {
@@ -57,21 +57,21 @@ namespace Common
             }
             return bytes;
         }
-        
+
         public static short GetRealJobFromCreation(int job)
         {
             switch (job)
             {
                 case 0:
-                    return 1000;
+                    return 3000; //citizen
                 case 1:
                     return 0;
-                case 2:
-                    return 2000;
+                case 2: 
+                    return 1000; //noblese
                 case 3:
-                    return 2001;
+                    return 2000; //legend
                 case 4:
-                    return 3000;
+                    return 2001; //evan
             }
             return 0;
         }
@@ -88,7 +88,8 @@ namespace Common
                 case RecvOps.CP_ClientDumpLog:
                 case RecvOps.CP_ExceptionLog:
                 case RecvOps.CP_UserMove:
-                //case RecvOps.CP_MobMove:
+                case RecvOps.CP_MobMove:
+                case RecvOps.CP_UserEmotion:
                     return true;
             }
             return false;
@@ -99,6 +100,8 @@ namespace Common
             {
                 case SendOps.LP_UserMove:
                 case SendOps.LP_MobCtrlAck:
+                case SendOps.LP_MobMove:
+                case SendOps.LP_UserEmotion:
                     return true;
             }
             return false;
@@ -111,7 +114,7 @@ namespace Common
             return Interlocked.Increment(ref UniqueIdKey);
         }
 
-        public static NpcScript GetScript(int npcId,WvsGameClient c)
+        public static NpcScript GetScript(int npcId, WvsGameClient c)
         {
             switch (npcId)
             {
