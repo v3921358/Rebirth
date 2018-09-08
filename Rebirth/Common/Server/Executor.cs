@@ -3,7 +3,7 @@ using System.Collections.Concurrent;
 using System.Threading;
 using Common.Log;
 
-namespace Common.Threading
+namespace Common.Server
 {
     public class Executor : IDisposable
     {

@@ -161,7 +161,8 @@ namespace WvsRebirth
             var job = (short)p.Decode4();// 1 = Adventurer, 0 = Cygnus, 2 = Aran, 3 = evan
             var subJob = p.Decode2();//whether dual blade = 1 or adventurer = 0
             var face = p.Decode4();
-            var hair = p.Decode4() + p.Decode4(); //var hairColor = p.Decode4();
+            var hairColor = p.Decode4();
+            var hair = p.Decode4() + hairColor;
             var skinColor = (byte)p.Decode4();
             var top = p.Decode4();
             var bottom = p.Decode4();
@@ -171,7 +172,7 @@ namespace WvsRebirth
 
             var realJob = Constants.GetRealJobFromCreation(job);
             var newCharacter = AvatarData.Create(name, gender, skinColor, face, hair, realJob, subJob);
-
+            
             //c.Characters.Add(x);
             c.SendPacket(CPacket.CreateNewCharacter(name, true, newCharacter));
         }

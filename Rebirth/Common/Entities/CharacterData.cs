@@ -3,22 +3,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Game;
 using Common.Packets;
 
 namespace Common.Entities
 {
     public sealed class CharacterData
     {
-        //This stuff i added myself
         public AvatarLook Look { get; set; }
         public MapPos Position { get; set; }
-
-        //Below are copy pasted from Maple
+        
+        //----------
 
         public GW_CharacterStat Stats { get; set; } //characterStat
 
-        public GW_ItemSlotEquip[] aEquipped { get; } //60
-        public GW_ItemSlotEquip[] aEquipped2 { get; } //60
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedNormal { get; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedCash { get; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquip { get; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedExt { get; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedUnk { get; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvConsume { get; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvInstall { get; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvEtc { get; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvCash { get; }
 
         //ZRef<GW_ItemSlotBase> aEquipped[60];
         //ZRef<GW_ItemSlotBase> aEquipped2[60];
@@ -71,8 +78,15 @@ namespace Common.Entities
             adwMapTransfer = new int[5];
             adwMapTransferEx = new int[10];
 
-            aEquipped = new GW_ItemSlotEquip[60];
-            aEquipped2 = new GW_ItemSlotEquip[60];
+            aInvEquippedNormal = new CInventory<short, GW_ItemSlotEquip>();
+            aInvEquippedCash = new CInventory<short, GW_ItemSlotEquip>();
+            aInvEquip = new CInventory<short, GW_ItemSlotEquip>();
+            aInvEquippedExt = new CInventory<short, GW_ItemSlotEquip>();
+            aInvEquippedUnk = new CInventory<short, GW_ItemSlotEquip>();
+            aInvConsume = new CInventory<byte, GW_ItemSlotBundle>();
+            aInvInstall = new CInventory<byte, GW_ItemSlotBundle>();
+            aInvEtc = new CInventory<byte, GW_ItemSlotBundle>();
+            aInvCash = new CInventory<byte, GW_ItemSlotBundle>();
         }
 
         public static CharacterData Create(GW_CharacterStat stats, AvatarLook look)
@@ -83,12 +97,27 @@ namespace Common.Entities
             x.Look = look;
             x.Position = new MapPos();
 
+            //----------
+
+            var v1 = new GW_ItemSlotBundle();
+            v1.nItemID = 2000007;
+            v1.nNumber = 5;
+
+            var v2 = new GW_ItemSlotBundle();
+            v2.nItemID = 2000010;
+            v2.nNumber = 500;
+
+            x.aInvConsume.Add(1, v1);
+            x.aInvConsume.Add(2, v2);
+
             return x;
         }
 
         //CharacterData::Decode
         public void Encode(COutPacket p)
         {
+            //TODO: Clean this packet up and make it 
+            //cool with the flags at bottom of file
             const long dbcharFlag = -1;
 
             p.Encode8(dbcharFlag);
@@ -227,43 +256,77 @@ namespace Common.Entities
         private void AddInventoryInfo(COutPacket p)
         {
             //EQUIP, CONSUME, INSTALL, ETC, CASH
+            
+            p.Encode1(aInvEquip.SlotLimit);
+            p.Encode1(aInvConsume.SlotLimit);
+            p.Encode1(aInvInstall.SlotLimit);
+            p.Encode1(aInvEtc.SlotLimit);
+            p.Encode1(aInvCash.SlotLimit);
+            
+            p.Encode8(Constants.PERMANENT); //EQUIPEXTEXPIRE 
 
-            for (byte i = 1; i <= 5; i++)
+            foreach (var i in aInvEquippedNormal)
             {
-                p.Encode1(96);
-                //mplew.write(chr.getInventory(MapleInventoryType.getByType(i)).getSlotLimit());
+                p.Encode2(i.Key);
+                i.Value.RawEncode(p);
             }
+            p.Encode2(0);
 
-            p.Encode8(Constants.SomeFileTime);//getTime(-2)); | EQUIPEXTEXPIRE 
+            foreach (var i in aInvEquippedCash)
+            {
+                p.Encode2(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode2(0);
 
-            p.Encode2(0); //equippedNormal
-            p.Encode2(0); //equippedCash
-            p.Encode2(0); //equipTab
-            p.Encode2(0); //equipExt
-            p.Encode2(0); //????
+            foreach (var i in aInvEquip)
+            {
+                p.Encode2(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode2(0);
 
-            //
+            foreach (var i in aInvEquippedExt)
+            {
+                p.Encode2(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode2(0);
 
-            p.Encode1(1);
-            var v1 = new GW_ItemSlotBundle();
-            v1.nItemID = 2000007;
-            v1.nNumber = 5;
-            v1.RawEncode(p);
+            foreach (var i in aInvEquippedUnk)
+            {
+                p.Encode2(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode2(0);
 
-            p.Encode1(2);
-            var v2 = new GW_ItemSlotBundle();
-            v2.nItemID = 2000010;
-            v2.nNumber = 500;
-            v2.RawEncode(p);
+            foreach (var i in aInvConsume)
+            {
+                p.Encode1(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode1(0);
 
-            p.Encode1(0); //use | CONSUME
+            foreach (var i in aInvInstall)
+            {
+                p.Encode1(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode1(0);
 
-            //
+            foreach (var i in aInvEtc)
+            {
+                p.Encode1(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode1(0);
 
-            p.Encode1(0); //setup | INSTALL
-            p.Encode1(0); //etc | ETC
-            p.Encode1(0); //cash | CASH
-
+            foreach (var i in aInvCash)
+            {
+                p.Encode1(i.Key);
+                i.Value.RawEncode(p);
+            }
+            p.Encode1(0);
         }
     }
 
@@ -299,7 +362,7 @@ namespace Common.Entities
         DBCHAR_VISITORLOG2 = 0x2000000,
         DBCHAR_VISITORLOG3 = 0x4000000,
         DBCHAR_VISITORLOG4 = 0x8000000,
-        DBCHAR_ALL = 0xFFFFFFFF,
+        //DBCHAR_ALL = 0xFFFFFFFF,
         DBCHAR_ITEMSLOT = 0x7C,
     };
 }

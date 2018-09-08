@@ -7,8 +7,8 @@
             var x = new AvatarData();
             
             var s = x.Stats;
-            s.dwCharacterID = Constants.GetUniqueId(); 
-            s.sCharacterName = $"Rajan{Constants.Rand.Next(0,99)}";
+            s.dwCharacterID = Constants.GetUniqueId();
+            s.sCharacterName = Constants.Names.Random();
             s.nGender = 0;
             s.nSkin = 0;
             s.nFace = 20000;
@@ -49,7 +49,7 @@
             
             return x;
         }
-
+        
         public static AvatarData Create(string name,byte gender,byte skinColor,int face,int hair,short job,short subJob)
         {
             var x = new AvatarData();

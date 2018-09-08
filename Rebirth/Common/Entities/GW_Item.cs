@@ -1,17 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Packets;
 
 namespace Common.Entities
 {
+    //All these are updated to v95
+
     public abstract class GW_ItemSlotBase
     {
         public int nItemID;
         public long liCashItemSN;
-        public long dateExpire = Constants.SomeFileTime;
+        public long dateExpire;
 
         public virtual void RawEncode(COutPacket p)
         {
@@ -52,7 +50,7 @@ namespace Common.Entities
             if (type == 2)
                 ret = new GW_ItemSlotPet();
 
-            if(ret == null)
+            if (ret == null)
                 throw new Exception("Unknown item type");
 
             ret.RawDecode(p);
@@ -90,7 +88,9 @@ namespace Common.Entities
         public byte nRepleteness;
         public short nPetAttribute;
         public short usPetSkill;
-        public long dateDead;
+        public long dateDead = Constants.PERMANENT;
+        public int nRemainLife;
+        public short nAttribute;
 
         public override void RawEncode(COutPacket p)
         {
@@ -105,6 +105,8 @@ namespace Common.Entities
             p.Encode8(dateDead);
             p.Encode2(nPetAttribute);
             p.Encode2(usPetSkill);
+            p.Encode4(nRemainLife);
+            p.Encode2(nAttribute);
         }
     }
 
@@ -130,6 +132,20 @@ namespace Common.Entities
         public short nAttribute;
         public long liSN;
         public string sTitle = string.Empty;//char sTitle[13];
+        public byte nLevelUpType;
+        public byte nLevel;
+        public int nEXP;
+        public int nDurability = -1;
+        public int nIUC;
+        public byte nGrade;
+        public byte nCHUC;
+        public short nOption1;
+        public short nOption2;
+        public short nOption3;
+        public short nSocket1;
+        public short nSocket2;
+        public long ftEquipped = Constants.PERMANENT;
+        public int nPrevBonusExpRate = -1;
 
 
         public override void RawEncode(COutPacket p)
@@ -158,8 +174,24 @@ namespace Common.Entities
             p.EncodeString(sTitle);
             p.Encode2(nAttribute);
 
+            p.Encode1(nLevelUpType);
+            p.Encode1(nLevel);
+            p.Encode4(nEXP);
+            p.Encode4(nDurability);
+            p.Encode4(nIUC);
+            p.Encode1(nGrade);
+            p.Encode1(nCHUC);
+            p.Encode2(nOption1);
+            p.Encode2(nOption2);
+            p.Encode2(nOption3);
+            p.Encode2(nSocket1);
+            p.Encode2(nSocket2);
+
             if (liCashItemSN == 0)
                 p.Encode8(liSN);
+
+            p.Encode8(ftEquipped);
+            p.Encode4(nPrevBonusExpRate);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Common.Packets;
 
 namespace Common
 {
@@ -34,6 +35,11 @@ namespace Common
             var count = collection.Length;
             var rand = Rand.Next(count);
             return collection[rand];
+        }
+
+        public static void EncodeDateTime(this COutPacket packet, DateTime dt)
+        {
+            packet.Encode8(dt.ToFileTime());
         }
     }
 }

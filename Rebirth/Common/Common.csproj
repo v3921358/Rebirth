@@ -50,6 +50,7 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Game\CField.cs" />
     <Compile Include="Game\CFootholdMan.cs" />
+    <Compile Include="Game\CInventory.cs" />
     <Compile Include="Game\CMob.cs" />
     <Compile Include="Game\CLife.cs" />
     <Compile Include="Game\CMobPool.cs" />
@@ -86,7 +87,7 @@
     <Compile Include="Server\WvsGame.cs" />
     <Compile Include="Server\WvsLogin.cs" />
     <Compile Include="TagPoint.cs" />
-    <Compile Include="Threading\Executor.cs" />
+    <Compile Include="Server\Executor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Database\Database.csproj">

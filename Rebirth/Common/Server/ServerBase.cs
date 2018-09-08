@@ -5,7 +5,6 @@ using Common.Client;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
-using Common.Threading;
 
 namespace Common.Server
 {

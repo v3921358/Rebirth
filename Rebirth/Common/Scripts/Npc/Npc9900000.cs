@@ -13,11 +13,9 @@ namespace Common.Scripts.Npc
         public Npc9900000(WvsGameClient client) : base(9900000, client)
         {
         }
-
-
         public override void Execute()
         {
-            SendOk("Hello Kacey, Shortcuts, Vazdias");
+            SendOk("Bush did 911");
         }
     }
 }
