@@ -106,8 +106,8 @@ namespace Common.Entities
 
     public class GW_ItemSlotEquip : GW_ItemSlotBase
     {
-        public char nRUC;
-        public char nCUC;
+        public byte nRUC;
+        public byte nCUC;
         public short niSTR;
         public short niDEX;
         public short niINT;
@@ -132,29 +132,28 @@ namespace Common.Entities
         {
             base.RawEncode(p);
 
-            //COutPacket::Encode1(oPacket, v2->nRUC);
-            //COutPacket::Encode1(oPacket, v2->nCUC);
-            //COutPacket::Encode2(oPacket, v2->niSTR);
-            //COutPacket::Encode2(oPacket, v2->niDEX);
-            //COutPacket::Encode2(oPacket, v2->niINT);
-            //COutPacket::Encode2(oPacket, v2->niLUK);
-            //COutPacket::Encode2(oPacket, v2->niMaxHP);
-            //COutPacket::Encode2(oPacket, v2->niMaxMP);
-            //COutPacket::Encode2(oPacket, v2->niPAD);
-            //COutPacket::Encode2(oPacket, v2->niMAD);
-            //COutPacket::Encode2(oPacket, v2->niPDD);
-            //COutPacket::Encode2(oPacket, v2->niMDD);
-            //COutPacket::Encode2(oPacket, v2->niACC);
-            //COutPacket::Encode2(oPacket, v2->niEVA);
-            //COutPacket::Encode2(oPacket, v2->niCraft);
-            //COutPacket::Encode2(oPacket, v2->niSpeed);
-            //COutPacket::Encode2(oPacket, v2->niJump);
-            //v4._m_pStr = v3;
-            //ZXString<char>::ZXString<char>(v2->sTitle, 0xFFFFFFFF);
-            //COutPacket::EncodeStr(oPacket, v4);
-            //COutPacket::Encode2(oPacket, v2->nAttribute);
-            //if (!v2->liCashItemSN.QuadPart)
-            //    COutPacket::EncodeBuffer(oPacket, &v2->liSN, 8u);
+            p.Encode1(nRUC);
+            p.Encode1(nCUC);
+            p.Encode2(niSTR);
+            p.Encode2(niDEX);
+            p.Encode2(niINT);
+            p.Encode2(niLUK);
+            p.Encode2(niMaxHP);
+            p.Encode2(niMaxMP);
+            p.Encode2(niPAD);
+            p.Encode2(niMAD);
+            p.Encode2(niPDD);
+            p.Encode2(niMDD);
+            p.Encode2(niACC);
+            p.Encode2(niEVA);
+            p.Encode2(niCraft);
+            p.Encode2(niSpeed);
+            p.Encode2(niJump);
+            p.EncodeString(sTitle);
+            p.Encode2(nAttribute);
+
+            if (liCashItemSN == 0)
+                p.Encode8(liSN);
         }
     }
 }
