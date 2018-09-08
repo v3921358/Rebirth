@@ -66,7 +66,7 @@ namespace Common.Entities
 
         private CharacterData()
         {
-           // Stats = new GW_CharacterStat();
+            // Stats = new GW_CharacterStat();
 
             adwMapTransfer = new int[5];
             adwMapTransferEx = new int[10];
@@ -77,7 +77,7 @@ namespace Common.Entities
 
         public static CharacterData Create(GW_CharacterStat stats, AvatarLook look)
         {
-            var x  = new CharacterData();
+            var x = new CharacterData();
 
             x.Stats = stats;
             x.Look = look;
@@ -94,7 +94,7 @@ namespace Common.Entities
             p.Encode8(dbcharFlag);
             p.Encode1((byte)nCombatOrders);
             p.Encode1(0); //Some Loop.
-            
+
             //if ((dbcharFlag & 1) > 0)
             //{
             Stats.Encode(p);   //addCharStats(mplew, chr);
@@ -226,71 +226,80 @@ namespace Common.Entities
         }
         private void AddInventoryInfo(COutPacket p)
         {
+            //EQUIP, CONSUME, INSTALL, ETC, CASH
+
             for (byte i = 1; i <= 5; i++)
             {
                 p.Encode1(96);
                 //mplew.write(chr.getInventory(MapleInventoryType.getByType(i)).getSlotLimit());
             }
-            p.Encode8(-2);//getTime(-2));
-            //MapleInventory iv = chr.getInventory(MapleInventoryType.EQUIPPED);
-            //Collection<Item> equippedC = iv.list();
-            //List<Item> equipped = new ArrayList<>(equippedC.size());
-            //List<Item> equippedCash = new ArrayList<>(equippedC.size());
-            //for (Item item : equippedC)
-            //{
-            //    if (item.getPosition() <= -100)
-            //    {
-            //        equippedCash.add((Item)item);
-            //    }
-            //    else
-            //    {
-            //        equipped.add((Item)item);
-            //    }
-            //}
-            //Collections.sort(equipped);
 
+            p.Encode8(Constants.SomeFileTime);//getTime(-2)); | EQUIPEXTEXPIRE 
 
-            //for (Item item : equipped)
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode2(0); // End Of Equipped
+            p.Encode2(0); //equippedNormal
+            p.Encode2(0); //equippedCash
+            p.Encode2(0); //equipTab
+            p.Encode2(0); //equipExt
+            p.Encode2(0); //????
 
-            //for (Item item : equippedCash)
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode2(0); // End Of Equip Cash
+            //
 
-            //for (Item item : chr.getInventory(MapleInventoryType.EQUIP).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode4(0);  // End of Equip 
+            p.Encode1(1);
+            var v1 = new GW_ItemSlotBundle();
+            v1.nItemID = 2000007;
+            v1.nNumber = 5;
+            v1.RawEncode(p);
 
-            //for (Item item : chr.getInventory(MapleInventoryType.USE).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Use 
+            p.Encode1(2);
+            var v2 = new GW_ItemSlotBundle();
+            v2.nItemID = 2000010;
+            v2.nNumber = 500;
+            v2.RawEncode(p);
 
-            //for (Item item : chr.getInventory(MapleInventoryType.SETUP).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Set Up
+            p.Encode1(0); //use | CONSUME
 
-            //for (Item item : chr.getInventory(MapleInventoryType.ETC).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0);  // End of Etc
+            //
 
-            //for (Item item : chr.getInventory(MapleInventoryType.CASH).list())
-            //{
-            //    addItemInfo(mplew, item);
-            //}
-            p.Encode1(0); // End of Cash
+            p.Encode1(0); //setup | INSTALL
+            p.Encode1(0); //etc | ETC
+            p.Encode1(0); //cash | CASH
+
         }
     }
+
+    /* 466 */
+    enum DBCHAR_FLAGS
+    {
+        DBCHAR_CHARACTER = 0x1,
+        DBCHAR_MONEY = 0x2,
+        DBCHAR_ITEMSLOTEQUIP = 0x4,
+        DBCHAR_ITEMSLOTCONSUME = 0x8,
+        DBCHAR_ITEMSLOTINSTALL = 0x10,
+        DBCHAR_ITEMSLOTETC = 0x20,
+        DBCHAR_ITEMSLOTCASH = 0x40,
+        DBCHAR_INVENTORYSIZE = 0x80,
+        DBCHAR_SKILLRECORD = 0x100,
+        DBCHAR_QUESTRECORD = 0x200,
+        DBCHAR_MINIGAMERECORD = 0x400,
+        DBCHAR_COUPLERECORD = 0x800,
+        DBCHAR_MAPTRANSFER = 0x1000,
+        DBCHAR_AVATAR = 0x2000,
+        DBCHAR_QUESTCOMPLETE = 0x4000,
+        DBCHAR_SKILLCOOLTIME = 0x8000,
+        DBCHAR_MONSTERBOOKCARD = 0x10000,
+        DBCHAR_MONSTERBOOKCOVER = 0x20000,
+        DBCHAR_NEWYEARCARD = 0x40000,
+        DBCHAR_QUESTRECORDEX = 0x80000,
+        DBCHAR_ADMINSHOPCOUNT = 0x100000,
+        DBCHAR_EQUIPEXT = 0x100000,
+        DBCHAR_WILDHUNTERINFO = 0x200000,
+        DBCHAR_QUESTCOMPLETE_OLD = 0x400000,
+        DBCHAR_VISITORLOG = 0x800000,
+        DBCHAR_VISITORLOG1 = 0x1000000,
+        DBCHAR_VISITORLOG2 = 0x2000000,
+        DBCHAR_VISITORLOG3 = 0x4000000,
+        DBCHAR_VISITORLOG4 = 0x8000000,
+        DBCHAR_ALL = 0xFFFFFFFF,
+        DBCHAR_ITEMSLOT = 0x7C,
+    };
 }

@@ -33,6 +33,8 @@
             s.nPlaytime = 0;
             s.nSubJob = 0;
 
+            s.nMoney = 1337;
+
             var l = x.Look;
             l.nGender = 0;
             l.nSkin = 0;

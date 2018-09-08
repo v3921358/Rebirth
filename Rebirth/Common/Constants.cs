@@ -20,6 +20,8 @@ namespace Common
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
+        public const long SomeFileTime = 94354848000000000L;//- 2177434800l;
+
         public const string ServerMessage = @"8========D~~~ \_oWo_/";
 
         private static byte HexToByte(string hex)

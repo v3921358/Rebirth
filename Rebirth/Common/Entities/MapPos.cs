@@ -53,6 +53,22 @@ namespace Common.Entities
                     Stance = iPacket.Decode1();
                     var duration = iPacket.Decode2();
                 }
+                //else if (cmd == 11)
+                //{
+                //    Position.X = iPacket.Decode2();
+                //    Position.Y = iPacket.Decode2();
+                //    var unk = iPacket.Decode2();
+                //    Stance = iPacket.Decode1();
+                //    var duration = iPacket.Decode2();
+                //    Logger.Write(LogLevel.Debug, "SubMov 11 {0}", unk);
+                //}
+                //else if (cmd == 12) //jump down
+                //else if (cmd == 2) //the knockback ( by mob after 27 )
+                else if (cmd == 27) //When u get hit by a mob ur stance changes
+                {
+                    Stance = iPacket.Decode1();
+                    var unk = iPacket.Decode2();
+                }
                 else
                 {
                     Logger.Write(LogLevel.Warning, "Unparsed Movement SubOp {0}", cmd);

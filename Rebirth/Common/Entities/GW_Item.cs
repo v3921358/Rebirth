@@ -11,7 +11,7 @@ namespace Common.Entities
     {
         public int nItemID;
         public long liCashItemSN;
-        public long dateExpire;
+        public long dateExpire = Constants.SomeFileTime;
 
         public virtual void RawEncode(COutPacket p)
         {
@@ -64,11 +64,13 @@ namespace Common.Entities
     {
         public short nNumber;
         public short nAttribute;
-        long liSN;
-        public string sTitle; //char sTitle[13];
+        public long liSN;
+        public string sTitle = string.Empty; //char sTitle[13];
 
         public override void RawEncode(COutPacket p)
         {
+            p.Encode1(2);
+
             base.RawEncode(p);
 
             p.Encode2(nNumber);
@@ -82,7 +84,7 @@ namespace Common.Entities
 
     public class GW_ItemSlotPet : GW_ItemSlotBase
     {
-        public string sPetName;//char sPetName[13];
+        public string sPetName = string.Empty;//char sPetName[13];
         public byte nLevel;
         public short nTameness;
         public byte nRepleteness;
@@ -92,6 +94,8 @@ namespace Common.Entities
 
         public override void RawEncode(COutPacket p)
         {
+            p.Encode1(3);
+
             base.RawEncode(p);
 
             p.EncodeFixedString(sPetName, 13);
@@ -125,11 +129,13 @@ namespace Common.Entities
         public short niJump;
         public short nAttribute;
         public long liSN;
-        public string sTitle;//char sTitle[13];
+        public string sTitle = string.Empty;//char sTitle[13];
 
 
         public override void RawEncode(COutPacket p)
         {
+            p.Encode1(1);
+
             base.RawEncode(p);
 
             p.Encode1(nRUC);

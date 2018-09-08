@@ -62,8 +62,6 @@ namespace Common.Entities
 
             p.Encode1(nLevel);
             p.Encode2(nJob);
-
-            //
             p.Encode2(nSTR);
             p.Encode2(nDEX);
             p.Encode2(nINT);
@@ -72,12 +70,8 @@ namespace Common.Entities
             p.Encode4(nMHP);
             p.Encode4(nMP);
             p.Encode4(nMMP);
-            //
-
             p.Encode2(nAP);
             
-            extendSP.Clear();
-
             if (Constants.IsNotExtendedSp(nJob))
                 p.Encode2(nSP);
             else
