@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using Common.Packets;
 
-namespace Common.Entities
+namespace Common.Types
 {
     public class SPSet
     {

@@ -28,10 +28,10 @@ namespace Common.Game
 
             var character = c.Character;
 
-            var source = character.aInvEquip.Get(src);
-            var target = character.aInvEquip.Get(dst);
+            //var source = character.aInvEquip.Items[src];
+            //var target = character.aInvEquip.Items[dst];
 
-            if (source == null || source.nDurability == 0)
+            //if (source == null || source.nDurability == 0)
             {
                 //c.getSession().write(MaplePacketCreator.enableActions());
                 return;

@@ -1,15 +1,16 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using Common.Packets;
+using Common.Types;
 using MongoDB.Bson;
 
 namespace Common.Entities
 {
     public class GW_CharacterStat
     {
-        public ObjectId Id { get; set; }
-        public int AccId;
-        public int CharId;
+        //public ObjectId Id { get; set; }
+        //public int AccId;
+        //public int CharId;
 
         public GW_CharacterStat()
         {
@@ -17,13 +18,13 @@ namespace Common.Entities
             extendSP = new ExtendSP();
         }
 
-        public GW_CharacterStat(int accId, int charId) : this()
-        {
-            AccId = accId;
-            CharId = charId;
-        }
+        //public GW_CharacterStat(int charId, int accId) : this()
+        //{
+        //    CharId = charId;
+        //    AccId = accId;          
+        //}
 
-
+        public int dwCharacterID;
         public string sCharacterName;
         public byte nGender;
         public byte nSkin;
@@ -61,7 +62,7 @@ namespace Common.Entities
 
         public void Encode(COutPacket p)
         {
-            p.Encode4(CharId);
+            p.Encode4(dwCharacterID);
             p.EncodeFixedString(sCharacterName, 13);
             p.Encode1(nGender);
             p.Encode1(nSkin);

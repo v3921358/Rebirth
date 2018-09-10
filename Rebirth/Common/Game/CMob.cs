@@ -1,5 +1,6 @@
 ﻿using Common.Entities;
 using Common.Packets;
+using Common.Types;
 
 namespace Common.Game
 {

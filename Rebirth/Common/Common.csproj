@@ -49,8 +49,10 @@
     <Compile Include="Entities\CharacterData.cs" />
     <Compile Include="Entities\CharacterEntry.cs" />
     <Compile Include="Entities\GW_Item.cs" />
-    <Compile Include="Entities\MapPos.cs" />
-    <Compile Include="Entities\ExtendSP.cs" />
+    <Compile Include="Types\BodyPart.cs" />
+    <Compile Include="Types\CField\DbCharFlags.cs" />
+    <Compile Include="Types\MapPos.cs" />
+    <Compile Include="Types\ExtendSP.cs" />
     <Compile Include="Entities\GW_CharacterStat.cs" />
     <Compile Include="Client\WvsGameClient.cs" />
     <Compile Include="Client\WvsLoginClient.cs" />
@@ -73,7 +75,7 @@
     <Compile Include="Network\Crypto\MapleAes.cs" />
     <Compile Include="Network\Crypto\Shanda.cs" />
     <Compile Include="Network\Crypto\MapleIV.cs" />
-    <Compile Include="Entities\CrashCallType.cs" />
+    <Compile Include="Types\CLogin\CrashCallType.cs" />
     <Compile Include="Log\ConsoleLog.cs" />
     <Compile Include="Log\Logger.cs" />
     <Compile Include="Packets\CInPacket.cs" />
@@ -98,10 +100,7 @@
     <Compile Include="TagPoint.cs" />
     <Compile Include="Server\Executor.cs" />
   </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Types\CField\" />
-    <Folder Include="Types\CLogin\" />
-  </ItemGroup>
+  <ItemGroup />
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>

@@ -1,8 +1,6 @@
-﻿using System;
-using Common.Log;
-using Common.Packets;
+﻿using Common.Packets;
 
-namespace Common.Entities
+namespace Common.Types
 {
     public class MapPos
     {
@@ -71,7 +69,7 @@ namespace Common.Entities
                 }
                 else
                 {
-                    Logger.Write(LogLevel.Warning, "Unparsed Movement SubOp {0}", cmd);
+                    //Logger.Write(LogLevel.Warning, "Unparsed Movement SubOp {0}", cmd);
                     break; //break loop because we didnt parse subop
                 }
             }

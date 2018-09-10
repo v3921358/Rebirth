@@ -116,7 +116,7 @@ namespace Common.Packets
             p.Encode4(nWorldID);
             return p;
         }
-        public static COutPacket SelectWorldResult(List<AvatarData> chars)
+        public static COutPacket SelectWorldResult(List<CharacterData> chars)
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
 
@@ -160,7 +160,7 @@ namespace Common.Packets
             p.Encode1(nameTaken);
             return p;
         }
-        public static COutPacket CreateNewCharacter(string name, bool worked, AvatarData c)
+        public static COutPacket CreateNewCharacter(string name, bool worked, CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_CreateNewCharacterResult);
             p.Encode1((byte)(worked ? 0 : 1));
@@ -285,7 +285,7 @@ namespace Common.Packets
         public static COutPacket UserEnterField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserEnterField);
-            p.Encode4(c.Stats.CharId);
+            p.Encode4(c.CharId);
 
             // CUserRemote::Init(v12, iPacket, v13, 1);
             p.Encode1(c.Stats.nLevel);
@@ -345,7 +345,7 @@ namespace Common.Packets
         public static COutPacket UserLeaveField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserLeaveField);
-            p.Encode4(c.Stats.CharId);
+            p.Encode4(c.CharId);
             return p;
         }
 
@@ -565,7 +565,7 @@ namespace Common.Packets
         }
      
         //WvsCommon---------------------------------------------------------------------------------------------------
-        private static void AddCharEntry(COutPacket p, AvatarData c)
+        private static void AddCharEntry(COutPacket p, CharacterData c)
         {
             const bool ranking = false;
 

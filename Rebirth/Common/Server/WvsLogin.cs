@@ -10,6 +10,7 @@ using Common.Log;
 using Common.Network;
 using Common.Packets;
 using Common.Server;
+using Common.Types.CLogin;
 using MongoDB.Driver;
 
 namespace WvsRebirth
@@ -17,6 +18,9 @@ namespace WvsRebirth
     public class WvsLogin : ServerBase<WvsLoginClient>
     {
         //-----------------------------------------------------------------------------
+
+        //Needs to be WvsCenter cuz when u migrate to WvsGame the login thinks
+        //u logged out
         private readonly Dictionary<WvsLoginClient, Account> m_loginPool;
         //-----------------------------------------------------------------------------
         public WvsLogin(WvsCenter parent) : base("WvsLogin", Constants.LoginPort, parent)
@@ -26,47 +30,47 @@ namespace WvsRebirth
         //-----------------------------------------------------------------------------
         public bool IsUsernameTaken(string userName)
         {
-            return false;
-            //return Db.Get()
-            //    .GetCollection<GW_CharacterStat>("chararcter_looks")
-            //    .FindSync(x => string.Compare(x.sCharacterName,userName,StringComparison.OrdinalIgnoreCase) == 0)
-            //    .Any();
+            return Db.Get()
+                .GetCollection<CharacterEntry>("character")
+                .FindSync(x => x.Name == userName)
+                .Any();
         }
-
         public int FetchNewCharId()
         {
             var tmp = Db.Get()
-                 .GetCollection<CharacterEntry>("character")
+                 .GetCollection<CharacterData>("character_data")
                  .FindSync(x => x.CharId > 0)
                  .ToList();
 
-            if(tmp.Count != 0)
+            if (tmp.Count != 0)
                 return tmp.Max(x => x.CharId) + 1;
 
             return 10000;
-                 
         }
-        public void AddNewChar(AvatarData avatar)
+        public void AddNewChar(CharacterData avatar)
         {
             var name = avatar.Stats.sCharacterName;
 
             var db = Db.Get();
 
-            var entry = new CharacterEntry
-            {
-                AccId = avatar.AccId,
-                CharId = avatar.CharId,
-                Name = name
-            };
+            db.GetCollection<CharacterData>("character_data")
+                .InsertOne(avatar);
 
-            db.GetCollection<CharacterEntry>("character")
-                .InsertOne(entry);
+            //var entry = new CharacterEntry
+            //{
+            //    AccId = avatar.AccId,
+            //    CharId = avatar.CharId,
+            //    Name = name
+            //};
 
-            db.GetCollection<AvatarLook>("character_looks")
-                .InsertOne(avatar.Look);
+            //db.GetCollection<CharacterEntry>("character")
+            //    .InsertOne(entry);
 
-            db.GetCollection<GW_CharacterStat>("character_stats")
-                .InsertOne(avatar.Stats);
+            //db.GetCollection<AvatarLook>("character_looks")
+            //    .InsertOne(avatar.Look);
+
+            //db.GetCollection<GW_CharacterStat>("character_stats")
+            //    .InsertOne(avatar.Stats);
         }
         public byte Login(WvsLoginClient c, string user, string pass)
         {
@@ -155,17 +159,18 @@ namespace WvsRebirth
                             //if you never sent this packet you were never kicked,
                             //so you could stay on the [LOGIN] server forever.
 
-                            if (socket.Host.Contains("127.0.0.1"))
-                            {
-                                COutPacket o = new COutPacket();
-                                o.EncodeString("123456");
-                                o.EncodeString("admin");
+                            //This is a curse for testing mutli client on 1 pc lol
+                            //if (socket.Host.Contains("127.0.0.1"))
+                            //{
+                            //    COutPacket o = new COutPacket();
+                            //    o.EncodeString("123456");
+                            //    o.EncodeString("admin");
 
-                                var buffer = o.ToArray();
-                                packet = new CInPacket(buffer);
+                            //    var buffer = o.ToArray();
+                            //    packet = new CInPacket(buffer);
 
-                                Handle_CheckPassword(socket, packet);
-                            }
+                            //    Handle_CheckPassword(socket, packet);
+                            //}
                             break;
                         }
                 }
@@ -271,7 +276,7 @@ namespace WvsRebirth
         private void Handle_CreateNewCharacter(WvsLoginClient c, CInPacket p)
         {
             var name = p.DecodeString();
-            var job = (short)p.Decode4();// 1 = Adventurer, 0 = Cygnus, 2 = Aran, 3 = evan
+            var job = (short)p.Decode4();
             var subJob = p.Decode2();//whether dual blade = 1 or adventurer = 0
             var face = p.Decode4();
             var hairColor = p.Decode4();
@@ -284,14 +289,57 @@ namespace WvsRebirth
             var gender = p.Decode1();
 
             var realJob = Constants.GetRealJobFromCreation(job);
-
             var charId = c.ParentServer.FetchNewCharId();
 
-            var newCharacter = AvatarData.Create(c.AccId, charId, name, gender, skinColor, face, hair, realJob, subJob);
+            var newChar = new CharacterData(charId, c.AccId);
 
-            c.ParentServer.AddNewChar(newCharacter);
+            newChar.Stats.dwCharacterID = charId;
+            newChar.Stats.sCharacterName = name;
+            newChar.Stats.nGender = gender;
+            newChar.Stats.nSkin = skinColor;
+            newChar.Stats.nFace = face;
+            newChar.Stats.nHair = hair;
+            newChar.Stats.nLevel = 10;
+            newChar.Stats.nJob = realJob;
+            newChar.Stats.nSTR = 10;
+            newChar.Stats.nDEX = 10;
+            newChar.Stats.nINT = 10;
+            newChar.Stats.nLUK = 10;
+            newChar.Stats.nHP = 50;
+            newChar.Stats.nMHP = 50;
+            newChar.Stats.nMP = 50;
+            newChar.Stats.nMMP = 50;
+            newChar.Stats.nAP = 1;
+            newChar.Stats.nSP = 1;
+            newChar.Stats.nEXP = 0;
+            newChar.Stats.nPOP = 0;
+            newChar.Stats.dwPosMap = 100000000;
+            newChar.Stats.nPortal = 0;
+            newChar.Stats.nPlaytime = 0;
+            newChar.Stats.nSubJob = subJob;
 
-            c.SendPacket(CPacket.CreateNewCharacter(name, true, newCharacter));
+            newChar.Look.nGender = gender;
+            newChar.Look.nSkin = skinColor;
+            newChar.Look.nFace = face;
+            newChar.Look.nWeaponStickerID = 0;
+
+            newChar.Look.anHairEquip[0] = hair;
+            newChar.Look.anHairEquip[5] = top;
+            newChar.Look.anHairEquip[6] = bottom;
+            newChar.Look.anHairEquip[7] = shoes;
+            newChar.Look.anHairEquip[11] = weapon;
+            
+            newChar.aInvEquippedNormal.Add(5, new GW_ItemSlotEquip { nItemID = top});
+            newChar.aInvEquippedNormal.Add(6, new GW_ItemSlotEquip { nItemID = bottom });
+            newChar.aInvEquippedNormal.Add(7, new GW_ItemSlotEquip { nItemID = shoes });
+            newChar.aInvEquippedNormal.Add(11, new GW_ItemSlotEquip { nItemID = weapon });
+
+            //newChar.aInvEquippedNormal.Add(1, new GW_ItemSlotEquip { nItemID = 1002080 });
+            //newChar.aInvEquip.Add(1, new GW_ItemSlotEquip {nItemID = 1302016});
+            //newChar.aInvConsume.Add(1, new GW_ItemSlotBundle {nItemID = 2000007, nNumber = 100});
+
+            c.ParentServer.AddNewChar(newChar);
+            c.SendPacket(CPacket.CreateNewCharacter(name, true, newChar));
         }
         private void Handle_DeleteCharacter(WvsLoginClient c, CInPacket p)
         {

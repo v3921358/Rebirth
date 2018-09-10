@@ -38,17 +38,22 @@ namespace Common.Server
         {
             var db = ParentServer.Db.Get();
 
-            var looks = db
-                .GetCollection<AvatarLook>("character_looks")
+            //var looks = db
+            //    .GetCollection<AvatarLook>("character_looks")
+            //    .FindSync(x => x.CharId == charId)
+            //    .First();
+
+            //var stats = db
+            //    .GetCollection<GW_CharacterStat>("character_stats")
+            //    .FindSync(avatar => avatar.CharId == charId)
+            //    .First();
+
+            //return CharacterData.Create(charId,stats, looks);
+
+            return db
+                .GetCollection<CharacterData>("character_data")
                 .FindSync(x => x.CharId == charId)
                 .First();
-
-            var stats = db
-                .GetCollection<GW_CharacterStat>("character_stats")
-                .FindSync(avatar => avatar.CharId == charId)
-                .First();
-
-            return CharacterData.Create(stats, looks);
         }
         //-----------------------------------------------------------------------------
         protected override WvsGameClient CreateClient(CClientSocket socket)
@@ -58,7 +63,6 @@ namespace Common.Server
                 ChannelId = ChannelId,
             };
         }
-
         protected override void HandlePacket(WvsGameClient socket, CInPacket packet)
         {
             base.HandlePacket(socket, packet);
@@ -125,16 +129,23 @@ namespace Common.Server
             if (client.Initialized)
             {
                 client.GetCharField().Remove(client);
+                //Db.Get().GetCollection<CharacterData>("character_data").InsertOne(client.Character);
             }
         }
+
         //-----------------------------------------------------------------------------
         private void Handle_MigrateIn(WvsGameClient c, CInPacket p)
         {
+            //Remote hax 0mg!!!!!
+            //todo: code migration cache to prevent reloading of shit
             var uid = p.Decode4();
 
             c.LoadCharacter(uid);
 
             var character = c.Character;
+
+            Logger.Write(LogLevel.Debug, "Inveotry 1 {0}", character.aInvEquip.Count);
+            Logger.Write(LogLevel.Debug,"Inveotry 2 {0}",character.aInvEquippedNormal.Count);
 
             GetField(character.Stats.dwPosMap).Add(c);
 
@@ -153,8 +164,7 @@ namespace Common.Server
             }
             else
             {
-                var stats = c.Character.Stats;
-                c.GetCharField().Broadcast(CPacket.UserChat(stats.CharId, msg, true, show));
+                c.GetCharField().Broadcast(CPacket.UserChat(c.Character.CharId, msg, true, show));
             }
         }
         private void Handle_UserMove(WvsGameClient c, CInPacket p)
@@ -168,10 +178,8 @@ namespace Common.Server
 
             var movePath = p.DecodeBuffer(p.Available);
             c.Character.Position.DecodeMovePath(movePath);
-
-            var stats = c.Character.Stats;
-
-            c.GetCharField().Broadcast(CPacket.UserMovement(stats.CharId, movePath), c);
+            
+            c.GetCharField().Broadcast(CPacket.UserMovement(c.Character.CharId, movePath), c);
         }
         private void Handle_UserTransferFieldRequest(WvsGameClient c, CInPacket p)
         {
@@ -217,10 +225,8 @@ namespace Common.Server
             //    int emoteid = 5159992 + emote;
             //    //TODO: As if i care check if the emote is in CS inventory, if not return
             //}
-
-            var stats = c.Character.Stats;
-
-            c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.CharId, nEmotion, nDuration, bByItemOption), c);
+            
+            c.GetCharField().Broadcast(CPacket.UserEmoticon(c.Character.CharId, nEmotion, nDuration, bByItemOption), c);
         }
         private void Handle_UserHit(WvsGameClient c, CInPacket p)
         {

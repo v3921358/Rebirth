@@ -4,28 +4,31 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Common.Game;
+using Common.Log;
 using Common.Packets;
+using Common.Types;
+using MongoDB.Bson;
 
 namespace Common.Entities
 {
     public sealed class CharacterData
     {
+        public ObjectId Id { get; set; } //OH you a fool for this one
+        public int CharId;
+        public int AccId;
         public AvatarLook Look { get; set; }
         public MapPos Position { get; set; }
-        
-        //----------
-
-        public GW_CharacterStat Stats { get; set; } //characterStat
-
-        public CInventory<short, GW_ItemSlotEquip> aInvEquippedNormal { get; }
-        public CInventory<short, GW_ItemSlotEquip> aInvEquippedCash { get; }
-        public CInventory<short, GW_ItemSlotEquip> aInvEquip { get; }
-        public CInventory<short, GW_ItemSlotEquip> aInvEquippedExt { get; }
-        public CInventory<short, GW_ItemSlotEquip> aInvEquippedUnk { get; }
-        public CInventory<byte, GW_ItemSlotBundle> aInvConsume { get; }
-        public CInventory<byte, GW_ItemSlotBundle> aInvInstall { get; }
-        public CInventory<byte, GW_ItemSlotBundle> aInvEtc { get; }
-        public CInventory<byte, GW_ItemSlotBundle> aInvCash { get; }
+        public GW_CharacterStat Stats { get; set; }
+        //--------------------------------------------------------------------------------------
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedNormal { get; set; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedCash { get; set; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquip { get; set; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedExt { get; set; }
+        public CInventory<short, GW_ItemSlotEquip> aInvEquippedUnk { get; set; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvConsume { get; set; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvInstall { get; set; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvEtc { get; set; }
+        public CInventory<byte, GW_ItemSlotBundle> aInvCash { get; set; }
 
         //ZRef<GW_ItemSlotBase> aEquipped[60];
         //ZRef<GW_ItemSlotBase> aEquipped2[60];
@@ -49,8 +52,8 @@ namespace Common.Entities
         //ZList<GW_FriendRecord> lFriendRecord;
         //ZList<GW_NewYearCardRecord> lNewYearCardRecord;
         //ZList<GW_MarriageRecord> lMarriageRecord;
-        public int[] adwMapTransfer { get; private set; }
-        public int[] adwMapTransferEx { get; private set; }
+        public int[] adwMapTransfer { get; set; }
+        public int[] adwMapTransferEx { get; set; }
         //int bReachMaxLevel;
         //_FILETIME ftReachMaxLevelTime;
         //int nItemTotalNumber[5];
@@ -71,13 +74,12 @@ namespace Common.Entities
         //ZMap<ZXString<char>, ZPair<long, long>, ZXString<char>> aUpgradeCountByDamageTheme;
         //ZMap<long, long, long> m_mVisitorQuestLog;
 
-        private CharacterData()
+        public CharacterData()
         {
-            // Stats = new GW_CharacterStat();
-
-            adwMapTransfer = new int[5];
-            adwMapTransferEx = new int[10];
-
+            Look = new AvatarLook();
+            Position = new MapPos();
+            Stats = new GW_CharacterStat();
+            
             aInvEquippedNormal = new CInventory<short, GW_ItemSlotEquip>();
             aInvEquippedCash = new CInventory<short, GW_ItemSlotEquip>();
             aInvEquip = new CInventory<short, GW_ItemSlotEquip>();
@@ -87,43 +89,17 @@ namespace Common.Entities
             aInvInstall = new CInventory<byte, GW_ItemSlotBundle>();
             aInvEtc = new CInventory<byte, GW_ItemSlotBundle>();
             aInvCash = new CInventory<byte, GW_ItemSlotBundle>();
+
+            adwMapTransfer = new int[5];
+            adwMapTransferEx = new int[10];
         }
 
-        public static CharacterData Create(GW_CharacterStat stats, AvatarLook look)
+        public CharacterData(int charId,int accId) : this()
         {
-            var x = new CharacterData();
-
-            x.Stats = stats;
-            x.Look = look;
-            x.Position = new MapPos();
-
-            //----------
-
-            var v1 = new GW_ItemSlotBundle();
-            v1.nItemID = 2000007;
-            v1.nNumber = 5;
-
-            var v2 = new GW_ItemSlotBundle();
-            v2.nItemID = 2000010;
-            v2.nNumber = 500;
-
-            x.aInvConsume.Add(1, v1);
-            x.aInvConsume.Add(2, v2);
-
-            var v3 = new GW_ItemSlotEquip();
-            v3.nItemID = 1002080;
-
-            var v4 = new GW_ItemSlotEquip();
-            v4.nItemID = 1302016;
-
-            x.aInvEquippedNormal.Add(1, v3);
-            x.aInvEquip.Add(1, v4);
-            
-            //----------
-            
-            return x;
+            CharId = charId;
+            AccId = accId;
         }
-
+        
         //CharacterData::Decode
         public void Encode(COutPacket p)
         {
@@ -177,6 +153,7 @@ namespace Common.Entities
 
             p.Encode8(Constants.PERMANENT); //EQUIPEXTEXPIRE 
 
+            Logger.Write(LogLevel.Debug,"aInvEquippedNormal {0}",aInvEquippedNormal.Count);
             foreach (var i in aInvEquippedNormal)
             {
                 p.Encode2(i.Key);
@@ -337,40 +314,4 @@ namespace Common.Entities
             p.Encode2(0);
         }
     }
-
-    /* 466 */
-    enum DBCHAR_FLAGS
-    {
-        CHARACTER = 0x1,
-        MONEY = 0x2,
-        ITEMSLOTEQUIP = 0x4,
-        ITEMSLOTCONSUME = 0x8,
-        ITEMSLOTINSTALL = 0x10,
-        ITEMSLOTETC = 0x20,
-        ITEMSLOTCASH = 0x40,
-        INVENTORYSIZE = 0x80,
-        SKILLRECORD = 0x100,
-        QUESTRECORD = 0x200,
-        MINIGAMERECORD = 0x400,
-        COUPLERECORD = 0x800,
-        MAPTRANSFER = 0x1000,
-        AVATAR = 0x2000,
-        QUESTCOMPLETE = 0x4000,
-        SKILLCOOLTIME = 0x8000,
-        MONSTERBOOKCARD = 0x10000,
-        MONSTERBOOKCOVER = 0x20000,
-        NEWYEARCARD = 0x40000,
-        QUESTRECORDEX = 0x80000,
-        ADMINSHOPCOUNT = 0x100000,
-        EQUIPEXT = 0x100000,
-        WILDHUNTERINFO = 0x200000,
-        QUESTCOMPLETE_OLD = 0x400000,
-        VISITORLOG = 0x800000,
-        VISITORLOG1 = 0x1000000,
-        VISITORLOG2 = 0x2000000,
-        VISITORLOG3 = 0x4000000,
-        VISITORLOG4 = 0x8000000,
-        //ALL = 0xFFFFFFFF,
-        ITEMSLOT = 0x7C,
-    };
 }

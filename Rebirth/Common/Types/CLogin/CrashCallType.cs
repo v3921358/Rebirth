@@ -1,4 +1,4 @@
-﻿namespace Common.Entities
+﻿namespace Common.Types.CLogin
 {
     public enum CrashCallType
     {

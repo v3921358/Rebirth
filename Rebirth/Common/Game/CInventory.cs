@@ -4,49 +4,66 @@ using Common.Entities;
 
 namespace Common.Game
 {
+    /*
+    public class CInventory<TKey, TItem> : Dictionary<TKey, TItem> where TItem : GW_ItemSlotBase
+    {
+        public byte SlotLimit { get; set; }
+
+        public CInventory()
+        {
+            SlotLimit = 96;
+        }
+    }
+    */
+
     //Moderator: you want Short for equips, Byte for non-equips
+    
     public class CInventory<TKey,TItem> : IEnumerable<KeyValuePair<TKey,TItem>> where TItem : GW_ItemSlotBase
     {
-        private readonly Dictionary<TKey, TItem> m_items;
+        private readonly Dictionary<TKey, TItem> Items;
 
         public byte SlotLimit { get; set; }
         
-        public int Count => m_items.Count;
+        public int Count => Items.Count;
         
         public CInventory()
         {
             SlotLimit = 96;
 
-            m_items = new Dictionary<TKey, TItem>();
+            Items = new Dictionary<TKey, TItem>();
         }
 
+        public void Add(KeyValuePair<TKey, TItem> kvp)
+        {
+            Items.Add(kvp.Key,kvp.Value);
+        }
         public void Add(TKey slot, TItem item)
         {
-            m_items.Add(slot, item);
+            Items.Add(slot, item);
         }
         public bool Remove(TKey slot)
         {
-            return m_items.Remove(slot);
+            return Items.Remove(slot);
         }
         public void Clear()
         {
-            m_items.Clear();
+            Items.Clear();
         }
         public TItem Get(TKey key)
         {
-            if (m_items.ContainsKey(key))
-                return m_items[key];
+            if (Items.ContainsKey(key))
+                return Items[key];
 
             return default(TItem);
         }
 
         public IEnumerator<KeyValuePair<TKey, TItem>> GetEnumerator()
         {
-            return m_items.GetEnumerator();
+            return Items.GetEnumerator();
         }
         IEnumerator IEnumerable.GetEnumerator()
         {
             return GetEnumerator();
         }
-    }
+    }    
 }

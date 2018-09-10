@@ -38,23 +38,21 @@ namespace Common.Server
             }
         }
 
-        public void InsertDefaultAccount()
+        public void InsertAccount(int accId,int admin,string user,string pass)
         {
-            var admin = new Account
+            var acc = new Account
             {
-                AccId = 2000,
-                Admin = 1,
+                AccId = accId,
+                Admin = admin,
                 Ban = 0,
                 Creation = DateTime.Now,
                 LastLogin = DateTime.Now,
                 LastIP = string.Empty,
-                Username = "admin",
-                Password = "123456"
+                Username = user,
+                Password = pass
             };
-
-
-            Db.Get().GetCollection<Account>("account").InsertOne(admin);
-
+            
+            Db.Get().GetCollection<Account>("account").InsertOne(acc);
         }
 
         public void Start()
