@@ -28,14 +28,14 @@ namespace WvsRebirth
         //-----------------------------------------------------------------------------
         public bool IsUsernameTaken(string userName)
         {
-            return Db.Get()
+            return Db
                 .GetCollection<CharacterData>("character_data")
                 .FindSync(x => x.Stats.sCharacterName == userName)
                 .Any();
         }
         public int FetchNewCharId()
         {
-            var tmp = Db.Get()
+            var tmp = Db
                  .GetCollection<CharacterData>("character_data")
                  .FindSync(x => x.CharId > 0)
                  .ToList();
@@ -47,9 +47,7 @@ namespace WvsRebirth
         }
         public void AddNewChar(CharacterData avatar)
         {
-            var db = Db.Get();
-
-            db.GetCollection<CharacterData>("character_data")
+            Db.GetCollection<CharacterData>("character_data")
                 .InsertOne(avatar);
         }
         public byte Login(WvsLoginClient c, string user, string pass)

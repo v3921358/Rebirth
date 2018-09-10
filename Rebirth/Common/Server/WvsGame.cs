@@ -121,7 +121,7 @@ namespace Common.Server
                 client.GetCharField().Remove(client);
                 
                 //Save to db
-                Db.Get().GetCollection<CharacterData>("character_data")
+                Db.GetCollection<CharacterData>("character_data")
                     .FindOneAndReplace(x => x.CharId == character.CharId, character);
             }
         }

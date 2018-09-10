@@ -34,7 +34,7 @@ namespace Common.Client
         {
             Avatars?.Clear();
 
-            Avatars = ParentServer.Db.Get()
+            Avatars = ParentServer.Db
                 .GetCollection<CharacterData>("character_data")
                 .FindSync(x => x.AccId == AccId)
                 .ToList();

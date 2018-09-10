@@ -5,6 +5,7 @@ using Common.Database;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
+using MongoDB.Driver;
 
 namespace Common.Server
 {
@@ -20,7 +21,7 @@ namespace Common.Server
 
         public string Name => m_name;
         public WvsCenter ParentServer => m_center;
-        public MongoDb Db => m_center.Db;
+        public IMongoDatabase Db => m_center.Db.Get();
 
         public ServerBase(string name, int port,WvsCenter parent)
         {
