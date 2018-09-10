@@ -12,9 +12,6 @@ namespace Common.Client
 {
     public class WvsLoginClient : ClientBase
     {
-        //Temp sim
-        private static int AccIdBase = 200;
-
         public WvsLogin ParentServer { get; }
         public Account Account;
         public List<AvatarData> Avatars;

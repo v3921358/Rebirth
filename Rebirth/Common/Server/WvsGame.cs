@@ -135,7 +135,6 @@ namespace Common.Server
             c.LoadCharacter(uid);
 
             var character = c.Character;
-            character.Stats.CharId = Constants.GetUniqueId(); //AGAIN
 
             GetField(character.Stats.dwPosMap).Add(c);
 

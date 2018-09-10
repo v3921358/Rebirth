@@ -17,7 +17,7 @@ namespace WvsRebirth
     public class WvsLogin : ServerBase<WvsLoginClient>
     {
         //-----------------------------------------------------------------------------
-        private Dictionary<WvsLoginClient, Account> m_loginPool;
+        private readonly Dictionary<WvsLoginClient, Account> m_loginPool;
         //-----------------------------------------------------------------------------
         public WvsLogin(WvsCenter parent) : base("WvsLogin", Constants.LoginPort, parent)
         {
@@ -31,6 +31,20 @@ namespace WvsRebirth
             //    .GetCollection<GW_CharacterStat>("chararcter_looks")
             //    .FindSync(x => string.Compare(x.sCharacterName,userName,StringComparison.OrdinalIgnoreCase) == 0)
             //    .Any();
+        }
+
+        public int FetchNewCharId()
+        {
+            var tmp = Db.Get()
+                 .GetCollection<CharacterEntry>("character")
+                 .FindSync(x => x.CharId > 0)
+                 .ToList();
+
+            if(tmp.Count != 0)
+                return tmp.Max(x => x.CharId) + 1;
+
+            return 10000;
+                 
         }
         public void AddNewChar(AvatarData avatar)
         {
@@ -94,59 +108,69 @@ namespace WvsRebirth
             //base.HandlePacket(socket, packet);
             var opcode = (RecvOps)packet.Decode2();
 
-            switch (opcode)
+            if (socket.LoggedIn)
             {
-                case RecvOps.CP_ClientDumpLog:
-                    Handle_ClientDumpLog(socket, packet);
-                    break;
-                case RecvOps.CP_CheckPassword:
-                    Handle_CheckPassword(socket, packet);
-                    break;
-                case RecvOps.CP_CreateSecurityHandle:
-                    {
-                        //In GMS this packet was sent when the client
-                        //loaded to the login screen. This means HackShield
-                        //initialized successfully. This packet would trigger
-                        //the HackShield heartbeat. Luckily back in the day
-                        //if you never sent this packet you were never kicked,
-                        //so you could stay on the [LOGIN] server forever.
-
-                        if (socket.Host.Contains("127.0.0.1"))
-                        {
-                            COutPacket o = new COutPacket();
-                            o.EncodeString("123456");
-                            o.EncodeString("admin");
-
-                            var buffer = o.ToArray();
-                            packet = new CInPacket(buffer);
-
-                            Handle_CheckPassword(socket, packet);
-                        }
+                switch (opcode)
+                {
+                    case RecvOps.CP_WorldRequest:
+                    case RecvOps.CP_WorldInfoRequest:
+                        Handle_WorldRequest(socket, packet);
                         break;
-                    }
-                case RecvOps.CP_WorldRequest:
-                case RecvOps.CP_WorldInfoRequest:
-                    Handle_WorldRequest(socket, packet);
-                    break;
-                case RecvOps.CP_CheckUserLimit:
-                    Handle_CheckUserLimit(socket, packet);
-                    break;
-                case RecvOps.CP_SelectWorld:
-                    Handle_SelectWorld(socket, packet);
-                    break;
-                case RecvOps.CP_CheckDuplicatedID:
-                    Handle_CheckDuplicatedID(socket, packet);
-                    break;
-                case RecvOps.CP_CreateNewCharacter:
-                    Handle_CreateNewCharacter(socket, packet);
-                    break;
-                case RecvOps.CP_DeleteCharacter:
-                    Handle_DeleteCharacter(socket, packet);
-                    break;
-                case RecvOps.CP_SelectCharacter:
-                    Handle_SelectCharacter(socket, packet);
-                    break;
+                    case RecvOps.CP_CheckUserLimit:
+                        Handle_CheckUserLimit(socket, packet);
+                        break;
+                    case RecvOps.CP_SelectWorld:
+                        Handle_SelectWorld(socket, packet);
+                        break;
+                    case RecvOps.CP_CheckDuplicatedID:
+                        Handle_CheckDuplicatedID(socket, packet);
+                        break;
+                    case RecvOps.CP_CreateNewCharacter:
+                        Handle_CreateNewCharacter(socket, packet);
+                        break;
+                    case RecvOps.CP_DeleteCharacter:
+                        Handle_DeleteCharacter(socket, packet);
+                        break;
+                    case RecvOps.CP_SelectCharacter:
+                        Handle_SelectCharacter(socket, packet);
+                        break;
+                }
             }
+            else
+            {
+                switch (opcode)
+                {
+                    case RecvOps.CP_ClientDumpLog:
+                        Handle_ClientDumpLog(socket, packet);
+                        break;
+                    case RecvOps.CP_CheckPassword:
+                        Handle_CheckPassword(socket, packet);
+                        break;
+                    case RecvOps.CP_CreateSecurityHandle:
+                        {
+                            //In GMS this packet was sent when the client
+                            //loaded to the login screen. This means HackShield
+                            //initialized successfully. This packet would trigger
+                            //the HackShield heartbeat. Luckily back in the day
+                            //if you never sent this packet you were never kicked,
+                            //so you could stay on the [LOGIN] server forever.
+
+                            if (socket.Host.Contains("127.0.0.1"))
+                            {
+                                COutPacket o = new COutPacket();
+                                o.EncodeString("123456");
+                                o.EncodeString("admin");
+
+                                var buffer = o.ToArray();
+                                packet = new CInPacket(buffer);
+
+                                Handle_CheckPassword(socket, packet);
+                            }
+                            break;
+                        }
+                }
+            }
+
         }
         protected override void HandleDisconnect(WvsLoginClient client)
         {
@@ -260,7 +284,10 @@ namespace WvsRebirth
             var gender = p.Decode1();
 
             var realJob = Constants.GetRealJobFromCreation(job);
-            var newCharacter = AvatarData.Create(c.AccId, name, gender, skinColor, face, hair, realJob, subJob);
+
+            var charId = c.ParentServer.FetchNewCharId();
+
+            var newCharacter = AvatarData.Create(c.AccId, charId, name, gender, skinColor, face, hair, realJob, subJob);
 
             c.ParentServer.AddNewChar(newCharacter);
 

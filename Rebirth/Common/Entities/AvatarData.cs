@@ -2,9 +2,8 @@
 {
     public class AvatarData
     {
-        public static AvatarData Create(int accId, string name,byte gender,byte skinColor,int face,int hair,short job,short subJob)
+        public static AvatarData Create(int accId, int charId,string name,byte gender,byte skinColor,int face,int hair,short job,short subJob)
         {
-            var charId = Constants.GetUniqueId();
             var x = new AvatarData(accId, charId);
 
             var s = x.Stats;

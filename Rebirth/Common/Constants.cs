@@ -20,17 +20,18 @@ namespace Common
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
+        public static readonly long MaxTime = new DateTime(2040, 1, 1).ToFileTime();
 
         public const long MAX_TIME = 150842304000000000L;
         public const long ZERO_TIME = 94354848000000000L;
         public const long PERMANENT = 150841440000000000L;
+        
+        public const string ServerMessage = @"Welcome to the stream! twitch.tv/rajan710";
 
-        public static readonly long MaxTime = new DateTime(2040, 1, 1).ToFileTime();
 
-        public static readonly string[] Names = {"Rajan", "hontale", "LloydKorn"};
-
-        public const string ServerMessage = @"8========D~~~";
-
+        //I have SUPER optomized versions of these methods just
+        //on another computer and i cant b bothered rn this is bad but like
+        //its really not that bad. ill put a cool hextool in later
         private static byte HexToByte(string hex)
         {
             if (hex.Length > 2 || hex.Length <= 0)
@@ -84,7 +85,6 @@ namespace Common
             }
             return 0;
         }
-
         public static bool IsNotExtendedSp(short job)
         {
             return job / 1000 != 3 && job / 100 != 22 && job != 2001;

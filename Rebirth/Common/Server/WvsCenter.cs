@@ -40,7 +40,7 @@ namespace Common.Server
 
         public void InsertDefaultAccount()
         {
-            var admin = new Account()
+            var admin = new Account
             {
                 AccId = 2000,
                 Admin = 1,
