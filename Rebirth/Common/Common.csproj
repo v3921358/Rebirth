@@ -50,13 +50,14 @@
     <Compile Include="Types\BodyPart.cs" />
     <Compile Include="Types\CField\DbCharFlags.cs" />
     <Compile Include="Types\CField\PortalType.cs" />
+    <Compile Include="Types\CLogin\PendingLogin.cs" />
     <Compile Include="Types\MapPos.cs" />
     <Compile Include="Types\ExtendSP.cs" />
     <Compile Include="Entities\GW_CharacterStat.cs" />
     <Compile Include="Client\WvsGameClient.cs" />
     <Compile Include="Client\WvsLoginClient.cs" />
-    <Compile Include="Constants.cs" />
-    <Compile Include="Extensions.cs" />
+    <Compile Include="Types\Constants.cs" />
+    <Compile Include="Types\Extensions.cs" />
     <Compile Include="Game\CField.cs" />
     <Compile Include="Game\CFootholdMan.cs" />
     <Compile Include="Game\CInventory.cs" />
@@ -83,7 +84,7 @@
     <Compile Include="Packets\OpCodes.cs" />
     <Compile Include="Network\CAcceptor.cs" />
     <Compile Include="Network\CSockHelp.cs" />
-    <Compile Include="Packets\CPacket.cs" />
+    <Compile Include="CPacket.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Provider\WzConstant.cs" />
     <Compile Include="Provider\WzManager.cs" />
@@ -96,7 +97,7 @@
     <Compile Include="Server\WvsCenter.cs" />
     <Compile Include="Server\WvsGame.cs" />
     <Compile Include="Server\WvsLogin.cs" />
-    <Compile Include="TagPoint.cs" />
+    <Compile Include="Types\TagPoint.cs" />
     <Compile Include="Server\Executor.cs" />
   </ItemGroup>
   <ItemGroup />

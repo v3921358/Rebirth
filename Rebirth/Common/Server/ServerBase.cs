@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Net.Sockets;
 using Common.Client;
-using Common.Database;
 using Common.Log;
 using Common.Network;
 using Common.Packets;

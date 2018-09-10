@@ -20,7 +20,7 @@ namespace Common
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
-        public static readonly long MaxTime = new DateTime(2040, 1, 1).ToFileTime();
+        //public static readonly long MaxTime = new DateTime(2040, 1, 1).ToFileTime();
 
         public const long MAX_TIME = 150842304000000000L;
         public const long ZERO_TIME = 94354848000000000L;
@@ -28,6 +28,7 @@ namespace Common
         
         public const string ServerMessage = @"Welcome to the stream! http://twitch.tv/rajan710";
 
+        public const int MigrateTimeoutSec = 15;
 
         //I have SUPER optomized versions of these methods just
         //on another computer and i cant b bothered rn this is bad but like
@@ -75,7 +76,7 @@ namespace Common
                 case 0:
                     return 3000; //citizen
                 case 1:
-                    return 0;
+                    return 0; //beginner
                 case 2: 
                     return 1000; //noblese
                 case 3:

@@ -20,6 +20,7 @@ namespace WvsRebirth
         //Needs to be WvsCenter cuz when u migrate to WvsGame the login thinks
         //u logged out
         private readonly Dictionary<WvsLoginClient, Account> m_loginPool;
+
         //-----------------------------------------------------------------------------
         public WvsLogin(WvsCenter parent) : base("WvsLogin", Constants.LoginPort, parent)
         {
@@ -74,11 +75,25 @@ namespace WvsRebirth
 
             }
 
-            m_loginPool.Add(c, tmp);
+            var p = ParentServer.LoggedIn.FirstOrDefault(x => x.Account.Username == user);
 
+            if (p != null)
+            {
+                if (p.Migrated)
+                    return 7;
+
+                if ((DateTime.Now - p.Requested).TotalSeconds >= Constants.MigrateTimeoutSec)
+                {
+                    ParentServer.LoggedIn.Remove(p);
+                }
+            }
+
+            m_loginPool.Add(c, tmp);
             c.Account = tmp;
 
-            return 0;
+            return 0; //success
+
+
         }
         //-----------------------------------------------------------------------------
         protected override WvsLoginClient CreateClient(CClientSocket socket)
@@ -197,6 +212,14 @@ namespace WvsRebirth
             //var hwid2 = p.DecodeBuffer(6);
             //var hwid3 = p.DecodeString();
 
+            ParentServer.LoggedIn.Add(new PendingLogin
+            {
+                CharId = uid,
+                Account = c.Account,
+                Requested = DateTime.Now,
+                Migrated = false
+            });
+
             c.SendPacket(CPacket.SelectCharacterResult(uid));
         }
         private void Handle_CheckPassword(WvsLoginClient c, CInPacket p)
@@ -236,10 +259,10 @@ namespace WvsRebirth
         }
         private void Handle_SelectWorld(WvsLoginClient c, CInPacket p)
         {
-            var world = p.Decode1();
-            var channel = p.Decode1();
-            var unk = p.Decode1();
-            var hwid_maybe = p.Decode4();
+            //var world = p.Decode1();
+            //var channel = p.Decode1();
+            //var unk = p.Decode1();
+            //var hwid_maybe = p.Decode4();
 
             c.LoadAvatars();
             c.SendPacket(CPacket.SelectWorldResult(c.Avatars));
@@ -306,15 +329,15 @@ namespace WvsRebirth
             newChar.Look.anHairEquip[6] = bottom;
             newChar.Look.anHairEquip[7] = shoes;
             newChar.Look.anHairEquip[11] = weapon;
-            
-            newChar.aInvEquippedNormal.Add(-5, new GW_ItemSlotEquip { nItemID = top});
+
+            newChar.aInvEquippedNormal.Add(-5, new GW_ItemSlotEquip { nItemID = top });
             newChar.aInvEquippedNormal.Add(-6, new GW_ItemSlotEquip { nItemID = bottom });
             newChar.aInvEquippedNormal.Add(-7, new GW_ItemSlotEquip { nItemID = shoes });
             newChar.aInvEquippedNormal.Add(-11, new GW_ItemSlotEquip { nItemID = weapon });
 
             //newChar.aInvEquippedNormal.Add(1, new GW_ItemSlotEquip { nItemID = 1002080 });
-            newChar.aInvEquip.Add(1, new GW_ItemSlotEquip {nItemID = 1302016});
-            newChar.aInvConsume.Add(1, new GW_ItemSlotBundle {nItemID = 2000007, nNumber = 100});
+            newChar.aInvEquip.Add(1, new GW_ItemSlotEquip { nItemID = 1302016 });
+            newChar.aInvConsume.Add(1, new GW_ItemSlotBundle { nItemID = 2000007, nNumber = 100 });
 
             c.ParentServer.AddNewChar(newChar);
             c.SendPacket(CPacket.CreateNewCharacter(name, true, newChar));

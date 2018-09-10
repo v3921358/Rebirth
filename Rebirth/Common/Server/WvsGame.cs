@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Common.Client;
 using Common.Entities;
 using Common.Game;
@@ -123,22 +125,35 @@ namespace Common.Server
                 //Save to db
                 Db.GetCollection<CharacterData>("character_data")
                     .FindOneAndReplace(x => x.CharId == character.CharId, character);
+
+                ParentServer.LoggedIn.RemoveAll(x => x.CharId == character.CharId);
             }
         }
         //-----------------------------------------------------------------------------
         private void Handle_MigrateIn(WvsGameClient c, CInPacket p)
         {
-            //Remote hax 0mg!!!!!
-            //todo: code migration cache to prevent reloading of shit
             var uid = p.Decode4();
 
-            c.Load(uid);
+            var req = ParentServer.LoggedIn.FirstOrDefault(x => x.CharId == uid);
 
-            var character = c.Character;
+            if (req == null || req.Migrated ||(DateTime.Now - req.Requested).TotalSeconds >= Constants.MigrateTimeoutSec)
+            {
+                ParentServer.LoggedIn.Remove(req);
+                c.Disconnect();
+            }
+            else
+            {
+                req.Migrated = true;
 
-            GetField(character.Stats.dwPosMap).Add(c);
+                c.Load(uid);
 
-            c.SendPacket(CPacket.BroadcastServerMsg(Constants.ServerMessage));
+                var character = c.Character;
+
+                GetField(character.Stats.dwPosMap).Add(c);
+
+                c.SendPacket(CPacket.BroadcastServerMsg(Constants.ServerMessage));
+            }
+
         }
         private void Handle_UserChat(WvsGameClient c, CInPacket p)
         {
@@ -305,13 +320,11 @@ namespace Common.Server
                 //    npc.sendShop(c);
                 //}
                 //else
-                //{
-                //    NPCScriptManager.getInstance().start(c, npc.getId());
-                //}5
+                {
 
-
-                c.NpcScript = NpcScript.GetScript(npc.Id, c);
-                c.NpcScript.Execute();
+                    c.NpcScript = NpcScript.GetScript(npc.Id, c);
+                    c.NpcScript.Execute();
+                }
             }
             else
             {

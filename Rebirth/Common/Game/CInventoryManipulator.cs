@@ -28,8 +28,10 @@ namespace Common.Game
 
             var character = c.Character;
 
-            //var source = character.aInvEquip.Items[src];
-            //var target = character.aInvEquip.Items[dst];
+            var source = character.aInvEquip.GetKvp(src);
+            var target = character.aInvEquippedNormal.GetKvp(dst);
+
+            
 
             //if (source == null || source.nDurability == 0)
             {

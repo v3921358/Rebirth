@@ -24,6 +24,7 @@ namespace Common.Client
             ParentServer = game;
             SentCharData = false;
             Character = null;
+            NpcScript = null;
         }
 
         public void Load(int charId)

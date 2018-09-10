@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Database;
 using Common.Entities;
 using Common.Provider;
+using Common.Types.CLogin;
 using WvsRebirth;
 
 namespace Common.Server
@@ -17,6 +16,7 @@ namespace Common.Server
 
         public WzManager WzMan { get; }
         public MongoDb Db { get; }
+        public List<PendingLogin> LoggedIn { get; }
 
         public WvsCenter(int channels)
         {
@@ -24,6 +24,7 @@ namespace Common.Server
             WzMan.LoadFile("Map.wz");
 
             Db = new MongoDb();
+            LoggedIn = new List<PendingLogin>();
 
             m_login = new WvsLogin(this);
             m_games = new WvsGame[channels];

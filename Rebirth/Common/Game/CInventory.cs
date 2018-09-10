@@ -56,6 +56,14 @@ namespace Common.Game
 
             return default(TItem);
         }
+        public KeyValuePair<TKey, TItem> GetKvp(TKey key)
+        {
+            if (Items.ContainsKey(key))
+                return new KeyValuePair<TKey,TItem>(key,Items[key]);
+
+            return default(KeyValuePair<TKey, TItem>);
+        }
+
 
         public IEnumerator<KeyValuePair<TKey, TItem>> GetEnumerator()
         {
