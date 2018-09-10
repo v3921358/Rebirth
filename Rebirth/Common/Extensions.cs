@@ -37,9 +37,25 @@ namespace Common
             return collection[rand];
         }
 
+        public static void Encode1(this COutPacket packet, bool value)
+        {
+            packet.Encode1((byte)(value ? 1 : 0));
+        }
         public static void EncodeDateTime(this COutPacket packet, DateTime dt)
         {
             packet.Encode8(dt.ToFileTime());
+        }
+
+        public static void EncodePos(this COutPacket packet, TagPoint value)
+        {
+            packet.Encode2(value?.X ?? 0);
+            packet.Encode2(value?.Y ?? 0);
+        }
+        public static TagPoint DecodePos(this CInPacket packet)
+        {
+            var x = packet.Decode2();
+           var y = packet.Decode2();
+            return new TagPoint(x, y);
         }
     }
 }

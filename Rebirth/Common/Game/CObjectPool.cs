@@ -9,7 +9,7 @@ namespace Common.Game
     {
         private static int PoolCount = 0;
 
-        private int m_uidBase = 10000 * Interlocked.Increment(ref PoolCount);
+        private int m_uidBase = 1000 * Interlocked.Increment(ref PoolCount);
         private readonly Dictionary<TKey, TValue> m_cache;
 
         public int Count => m_cache.Count;

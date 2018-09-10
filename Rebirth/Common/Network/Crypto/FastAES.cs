@@ -2,6 +2,9 @@
 
 namespace Common.Network.Crypto
 {
+    /// <summary>
+    /// Credits Minike. He originally rls code using this FastAes, Awesome!
+    /// </summary>
     public sealed class FastAes
     {
         private uint[][] WorkingKey;

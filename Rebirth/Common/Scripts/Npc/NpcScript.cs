@@ -23,22 +23,18 @@ namespace Common.Scripts.Npc
         }
 
         public abstract void Execute();
-
         
         protected void SendOk(string text)
         {
             m_client.SendPacket(CPacket.NpcScriptMessage(m_npcId, 0, text, "00 00", 0, 0));
         }
-
         
         public void proceed_back() { }
         public void proceed_next() { }
-
-
+        
         public void proceed_text(string t) { }
         public void proceed_selection(int s) { }
         public void proceed_number(int n) { }
-
 
         public bool check_end()
         {
@@ -61,5 +57,16 @@ namespace Common.Scripts.Npc
             //m_cend = true;
         }
 
+
+        public static NpcScript GetScript(int npcId, WvsGameClient c)
+        {
+            switch (npcId)
+            {
+                case 9900000:
+                    return new Npc9900000(c);
+                default:
+                    return new NpcDefault(npcId, c);
+            }
+        }
     }
 }

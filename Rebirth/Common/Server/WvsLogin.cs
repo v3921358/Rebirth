@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Net.Sockets;
-using System.Security.Cryptography.X509Certificates;
 using Common;
 using Common.Client;
 using Common.Entities;
@@ -31,8 +29,8 @@ namespace WvsRebirth
         public bool IsUsernameTaken(string userName)
         {
             return Db.Get()
-                .GetCollection<CharacterEntry>("character")
-                .FindSync(x => x.Name == userName)
+                .GetCollection<CharacterData>("character_data")
+                .FindSync(x => x.Stats.sCharacterName == userName)
                 .Any();
         }
         public int FetchNewCharId()
@@ -49,28 +47,10 @@ namespace WvsRebirth
         }
         public void AddNewChar(CharacterData avatar)
         {
-            var name = avatar.Stats.sCharacterName;
-
             var db = Db.Get();
 
             db.GetCollection<CharacterData>("character_data")
                 .InsertOne(avatar);
-
-            //var entry = new CharacterEntry
-            //{
-            //    AccId = avatar.AccId,
-            //    CharId = avatar.CharId,
-            //    Name = name
-            //};
-
-            //db.GetCollection<CharacterEntry>("character")
-            //    .InsertOne(entry);
-
-            //db.GetCollection<AvatarLook>("character_looks")
-            //    .InsertOne(avatar.Look);
-
-            //db.GetCollection<GW_CharacterStat>("character_stats")
-            //    .InsertOne(avatar.Stats);
         }
         public byte Login(WvsLoginClient c, string user, string pass)
         {
@@ -226,7 +206,7 @@ namespace WvsRebirth
             var pwd = p.DecodeString();
             var user = p.DecodeString();
 
-            var result = c.ParentServer.Login(c, user, pwd);
+            var result = c.Login(user, pwd);
 
             if (result == 0)
             {
@@ -329,14 +309,14 @@ namespace WvsRebirth
             newChar.Look.anHairEquip[7] = shoes;
             newChar.Look.anHairEquip[11] = weapon;
             
-            newChar.aInvEquippedNormal.Add(5, new GW_ItemSlotEquip { nItemID = top});
-            newChar.aInvEquippedNormal.Add(6, new GW_ItemSlotEquip { nItemID = bottom });
-            newChar.aInvEquippedNormal.Add(7, new GW_ItemSlotEquip { nItemID = shoes });
-            newChar.aInvEquippedNormal.Add(11, new GW_ItemSlotEquip { nItemID = weapon });
+            newChar.aInvEquippedNormal.Add(-5, new GW_ItemSlotEquip { nItemID = top});
+            newChar.aInvEquippedNormal.Add(-6, new GW_ItemSlotEquip { nItemID = bottom });
+            newChar.aInvEquippedNormal.Add(-7, new GW_ItemSlotEquip { nItemID = shoes });
+            newChar.aInvEquippedNormal.Add(-11, new GW_ItemSlotEquip { nItemID = weapon });
 
             //newChar.aInvEquippedNormal.Add(1, new GW_ItemSlotEquip { nItemID = 1002080 });
-            //newChar.aInvEquip.Add(1, new GW_ItemSlotEquip {nItemID = 1302016});
-            //newChar.aInvConsume.Add(1, new GW_ItemSlotBundle {nItemID = 2000007, nNumber = 100});
+            newChar.aInvEquip.Add(1, new GW_ItemSlotEquip {nItemID = 1302016});
+            newChar.aInvConsume.Add(1, new GW_ItemSlotBundle {nItemID = 2000007, nNumber = 100});
 
             c.ParentServer.AddNewChar(newChar);
             c.SendPacket(CPacket.CreateNewCharacter(name, true, newChar));

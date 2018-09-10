@@ -8,6 +8,6 @@ namespace Common.Game
 {
     public class CNpc : CLife
     {
-        public int dwNpcId { get; set; }
+        public int dwNpcId { get; set; } //Ultimate KEK
     }
 }

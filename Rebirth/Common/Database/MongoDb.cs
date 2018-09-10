@@ -1,8 +1,9 @@
-﻿using MongoDB.Driver;
+﻿using System;
+using MongoDB.Driver;
 
-namespace Database
+namespace Common.Database
 {
-    public class MongoDb
+    public class MongoDb : IDisposable//This class is such a fucking joke L0L
     {
         private readonly MongoClient m_client;
         
@@ -14,6 +15,11 @@ namespace Database
         public IMongoDatabase Get(string db = "rebirth")
         {
             return m_client.GetDatabase(db);
+        }
+
+        public void Dispose()
+        {
+
         }
     }
 }

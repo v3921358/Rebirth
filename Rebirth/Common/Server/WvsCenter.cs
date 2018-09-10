@@ -3,30 +3,27 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Common.Database;
 using Common.Entities;
 using Common.Provider;
-using Database;
 using WvsRebirth;
 
 namespace Common.Server
 {
-    public class WvsCenter
+    public class WvsCenter : IDisposable
     {
-        private readonly WzManager m_wzMan;
-        private readonly MongoDb m_dataBase;
-
         private readonly WvsLogin m_login;
         private readonly WvsGame[] m_games;
 
-        public WzManager WzMan => m_wzMan;
-        public MongoDb Db => m_dataBase;
+        public WzManager WzMan { get; }
+        public MongoDb Db { get; }
 
         public WvsCenter(int channels)
         {
-            m_wzMan = new WzManager();
-            m_wzMan.LoadFile("Map.wz");
+            WzMan = new WzManager();
+            WzMan.LoadFile("Map.wz");
 
-            m_dataBase = new MongoDb();
+            Db = new MongoDb();
 
             m_login = new WvsLogin(this);
             m_games = new WvsGame[channels];
@@ -64,6 +61,12 @@ namespace Common.Server
         {
             m_login.Stop();
             m_games.ToList().ForEach(x => x.Stop());
+        }
+
+        public void Dispose()
+        {
+            WzMan?.Dispose();
+            Db?.Dispose();
         }
     }
 }

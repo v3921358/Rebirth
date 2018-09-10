@@ -30,7 +30,7 @@ namespace Common.Network.Crypto
             int start = 0;
             int index;
             
-            byte[] realIV = new byte[sizeof(int) * 4];
+            byte[] realIV = new byte[16];
             byte[] IVBytes = BitConverter.GetBytes(iv.Value);
 
             while (remaining > 0)

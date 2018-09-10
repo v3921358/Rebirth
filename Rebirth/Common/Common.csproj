@@ -43,14 +43,13 @@
   <ItemGroup>
     <Compile Include="Database\MongoDb.cs" />
     <Compile Include="Entities\Account.cs" />
-    <Compile Include="Entities\AvatarData.cs" />
     <Compile Include="Client\ClientBase.cs" />
     <Compile Include="Entities\AvatarLook.cs" />
     <Compile Include="Entities\CharacterData.cs" />
-    <Compile Include="Entities\CharacterEntry.cs" />
     <Compile Include="Entities\GW_Item.cs" />
     <Compile Include="Types\BodyPart.cs" />
     <Compile Include="Types\CField\DbCharFlags.cs" />
+    <Compile Include="Types\CField\PortalType.cs" />
     <Compile Include="Types\MapPos.cs" />
     <Compile Include="Types\ExtendSP.cs" />
     <Compile Include="Entities\GW_CharacterStat.cs" />

@@ -1,11 +1,12 @@
-﻿using Common.Server;
+﻿using System;
+using Common.Server;
 
 namespace WvsRebirth
 {
     /// <summary>
     /// Tiny wrapper for easy insertion into a windows service planned for the future.
     /// </summary>
-    public sealed class MapleService
+    public sealed class MapleService : IDisposable
     {
         public WvsCenter WvsCenter { get; }
 
@@ -16,5 +17,10 @@ namespace WvsRebirth
 
         public void Start() => WvsCenter.Start();
         public void Stop() => WvsCenter.Stop();
+
+        public void Dispose()
+        {
+            WvsCenter?.Dispose();
+        }
     }
 }

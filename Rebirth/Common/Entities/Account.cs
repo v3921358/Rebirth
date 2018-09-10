@@ -3,6 +3,12 @@ using MongoDB.Bson;
 
 namespace Common.Entities
 {
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class Account
     {
         public ObjectId Id { get; set; }

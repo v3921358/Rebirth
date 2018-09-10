@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Game;
 using Common.Log;
 using Common.Packets;
@@ -11,11 +9,17 @@ using MongoDB.Bson;
 
 namespace Common.Entities
 {
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public sealed class CharacterData
     {
-        public ObjectId Id { get; set; } //OH you a fool for this one
-        public int CharId;
-        public int AccId;
+        public ObjectId Id { get; set; }
+        public int CharId { get; set; }
+        public int AccId { get; set; }
         public AvatarLook Look { get; set; }
         public MapPos Position { get; set; }
         public GW_CharacterStat Stats { get; set; }
@@ -152,39 +156,38 @@ namespace Common.Entities
             p.Encode1(aInvCash.SlotLimit);
 
             p.Encode8(Constants.PERMANENT); //EQUIPEXTEXPIRE 
-
-            Logger.Write(LogLevel.Debug,"aInvEquippedNormal {0}",aInvEquippedNormal.Count);
+            
             foreach (var i in aInvEquippedNormal)
             {
-                p.Encode2(i.Key);
+                p.Encode2(Math.Abs(i.Key));
                 i.Value.RawEncode(p);
             }
             p.Encode2(0);
 
             foreach (var i in aInvEquippedCash)
             {
-                p.Encode2(i.Key);
+                p.Encode2(Math.Abs(i.Key));
                 i.Value.RawEncode(p);
             }
             p.Encode2(0);
 
             foreach (var i in aInvEquip)
             {
-                p.Encode2(i.Key);
+                p.Encode2(Math.Abs(i.Key));
                 i.Value.RawEncode(p);
             }
             p.Encode2(0);
 
             foreach (var i in aInvEquippedExt)
             {
-                p.Encode2(i.Key);
+                p.Encode2(Math.Abs(i.Key));
                 i.Value.RawEncode(p);
             }
             p.Encode2(0);
 
             foreach (var i in aInvEquippedUnk)
             {
-                p.Encode2(i.Key);
+                p.Encode2(Math.Abs(i.Key));
                 i.Value.RawEncode(p);
             }
             p.Encode2(0);

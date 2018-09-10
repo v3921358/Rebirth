@@ -1,29 +1,22 @@
-﻿// ReSharper disable InconsistentNaming
-
-using Common.Packets;
+﻿using Common.Packets;
 using Common.Types;
-using MongoDB.Bson;
 
 namespace Common.Entities
 {
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class GW_CharacterStat
     {
-        //public ObjectId Id { get; set; }
-        //public int AccId;
-        //public int CharId;
-
         public GW_CharacterStat()
         {
             aliPetLockerSN = new long[3];
             extendSP = new ExtendSP();
         }
-
-        //public GW_CharacterStat(int charId, int accId) : this()
-        //{
-        //    CharId = charId;
-        //    AccId = accId;          
-        //}
-
+        
         public int dwCharacterID;
         public string sCharacterName;
         public byte nGender;
@@ -33,7 +26,6 @@ namespace Common.Entities
         public long[] aliPetLockerSN;
         public byte nLevel;
         public short nJob;
-
         public short nSTR;
         public short nDEX;
         public short nINT;
@@ -42,17 +34,13 @@ namespace Common.Entities
         public int nMHP;
         public int nMP;
         public int nMMP;
-
         public short nAP;
         public short nSP;
-
         public int nEXP;
         public short nPOP;
         public int nMoney;
         public int nTempEXP;
-
         public ExtendSP extendSP;
-
         public int dwPosMap;
         public byte nPortal;
         //public int nCheckSum;             //Not sure where this is used

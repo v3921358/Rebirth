@@ -1,29 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Common.Game
+﻿namespace Common.Game
 {
-    public enum PortalType
-    {
-        STARTPOINT = 0x0,
-        INVISIBLE = 0x1,
-        VISIBLE = 0x2,
-        COLLISION = 0x3,
-        CHANGABLE = 0x4,
-        CHANGABLE_INVISIBLE = 0x5,
-        TOWNPORTAL_POINT = 0x6,
-        SCRIPT = 0x7,
-        SCRIPT_INVISIBLE = 0x8,
-        COLLISION_SCRIPT = 0x9,
-        HIDDEN = 0xA,
-        SCRIPT_HIDDEN = 0xB,
-        COLLISION_VERTICAL_JUMP = 0xC,
-        COLLISION_CUSTOM_IMPACT = 0xD,
-    }
-
     public sealed class Portal
     {
         public int nIdx;
@@ -111,6 +87,8 @@ namespace Common.Game
     //[4:59:12 PM] Neal: zythgor3 actually found that shit
     //[4:59:17 PM] Neal: THEY ALL MADE FUN OF HIM FOR IT
     //[4:59:23 PM] Neal: BUT HE SHOWED THEM
+
+    //LOL @ ABOVE xD
 
     //public enum PortalType : int
     //{

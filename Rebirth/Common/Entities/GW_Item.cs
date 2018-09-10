@@ -3,8 +3,12 @@ using Common.Packets;
 
 namespace Common.Entities
 {
-    //All these are updated to v95
-
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public abstract class GW_ItemSlotBase
     {
         public int nItemID;
@@ -58,6 +62,12 @@ namespace Common.Entities
         }
     }
 
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class GW_ItemSlotBundle : GW_ItemSlotBase
     {
         public short nNumber;
@@ -80,6 +90,12 @@ namespace Common.Entities
         }
     }
 
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class GW_ItemSlotPet : GW_ItemSlotBase
     {
         public string sPetName = string.Empty;//char sPetName[13];
@@ -110,6 +126,12 @@ namespace Common.Entities
         }
     }
 
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class GW_ItemSlotEquip : GW_ItemSlotBase
     {
         public byte nRUC;
@@ -146,8 +168,7 @@ namespace Common.Entities
         public short nSocket2;
         public long ftEquipped = Constants.PERMANENT;
         public int nPrevBonusExpRate = -1;
-
-
+        
         public override void RawEncode(COutPacket p)
         {
             p.Encode1(1);

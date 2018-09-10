@@ -38,18 +38,6 @@ namespace Common.Server
         {
             var db = ParentServer.Db.Get();
 
-            //var looks = db
-            //    .GetCollection<AvatarLook>("character_looks")
-            //    .FindSync(x => x.CharId == charId)
-            //    .First();
-
-            //var stats = db
-            //    .GetCollection<GW_CharacterStat>("character_stats")
-            //    .FindSync(avatar => avatar.CharId == charId)
-            //    .First();
-
-            //return CharacterData.Create(charId,stats, looks);
-
             return db
                 .GetCollection<CharacterData>("character_data")
                 .FindSync(x => x.CharId == charId)
@@ -68,7 +56,7 @@ namespace Common.Server
             base.HandlePacket(socket, packet);
             var opcode = (RecvOps)packet.Decode2();
 
-            if (socket.Initialized)
+            if (socket.LoggedIn)
             {
                 switch (opcode)
                 {
@@ -126,13 +114,17 @@ namespace Common.Server
 
             client.SentCharData = false;
 
-            if (client.Initialized)
+            if (client.LoggedIn)
             {
+                var character = client.Character;
+
                 client.GetCharField().Remove(client);
-                //Db.Get().GetCollection<CharacterData>("character_data").InsertOne(client.Character);
+                
+                //Save to db
+                Db.Get().GetCollection<CharacterData>("character_data")
+                    .FindOneAndReplace(x => x.CharId == character.CharId, character);
             }
         }
-
         //-----------------------------------------------------------------------------
         private void Handle_MigrateIn(WvsGameClient c, CInPacket p)
         {
@@ -140,12 +132,9 @@ namespace Common.Server
             //todo: code migration cache to prevent reloading of shit
             var uid = p.Decode4();
 
-            c.LoadCharacter(uid);
+            c.Load(uid);
 
             var character = c.Character;
-
-            Logger.Write(LogLevel.Debug, "Inveotry 1 {0}", character.aInvEquip.Count);
-            Logger.Write(LogLevel.Debug,"Inveotry 2 {0}",character.aInvEquippedNormal.Count);
 
             GetField(character.Stats.dwPosMap).Add(c);
 
@@ -160,6 +149,8 @@ namespace Common.Server
             if (msg.StartsWith("!"))
             {
                 var split = msg.Split(' ');
+                split[0] = split[0].Remove(0, 1);
+
                 c.HandleCommand(split);
             }
             else
@@ -319,7 +310,7 @@ namespace Common.Server
                 //}5
 
 
-                c.NpcScript = Constants.GetScript(npc.Id, c);
+                c.NpcScript = NpcScript.GetScript(npc.Id, c);
                 c.NpcScript.Execute();
             }
             else
@@ -498,8 +489,6 @@ namespace Common.Server
             c.GetCharField().Broadcast(mobMove, c);
 
         }
-
-
         private void Handle_UserCharacterInfoRequest(WvsGameClient c, CInPacket p)
         {
             var tick = p.Decode4();
@@ -508,7 +497,6 @@ namespace Common.Server
 
 
         }
-
         private void Handle_UserChangeSlotPositionRequest(WvsGameClient c, CInPacket p)
         {
             var tick = p.Decode4();

@@ -26,7 +26,7 @@ namespace Common
         public const long ZERO_TIME = 94354848000000000L;
         public const long PERMANENT = 150841440000000000L;
         
-        public const string ServerMessage = @"Welcome to the stream! twitch.tv/rajan710";
+        public const string ServerMessage = @"Welcome to the stream! http://twitch.tv/rajan710";
 
 
         //I have SUPER optomized versions of these methods just
@@ -115,24 +115,5 @@ namespace Common
             }
             return false;
         }
-
-        private static int UniqueIdKey = 10000;
-
-        public static int GetUniqueId()
-        {
-            return Interlocked.Increment(ref UniqueIdKey);
-        }
-
-        public static NpcScript GetScript(int npcId, WvsGameClient c)
-        {
-            switch (npcId)
-            {
-                case 9900000:
-                    return new Npc9900000(c);
-                default:
-                    return new NpcDefault(npcId, c);
-            }
-        }
-
     }
 }

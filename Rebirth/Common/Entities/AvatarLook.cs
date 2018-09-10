@@ -1,8 +1,13 @@
 ﻿using Common.Packets;
-using MongoDB.Bson;
 
 namespace Common.Entities
-{
+{    
+    /// <summary>
+    /// Mongo Class
+    /// 
+    /// Be cautiaus of all public members
+    /// And initializing them in the ctor
+    /// </summary>
     public class AvatarLook
     {
         public AvatarLook()
@@ -54,8 +59,8 @@ namespace Common.Entities
 
             p.Encode4(nWeaponStickerID);//Cash Weapon
 
-            for (int i = 0; i < anPetID.Length; i++)
-                p.Encode4(anPetID[i]);
+            foreach (int nPetId in anPetID) //3
+                p.Encode4(nPetId);
         }
     }
 
