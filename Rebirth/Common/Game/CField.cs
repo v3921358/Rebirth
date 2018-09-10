@@ -104,9 +104,9 @@ namespace Common.Game
         {
             foreach (var mob in Mobs)
             {
-                if (mob.Controller == 0 || mob.Controller == c.Character.Stats.dwCharacterID)
+                if (mob.Controller == 0 || mob.Controller == c.Character.Stats.CharId)
                 {
-                    mob.Controller = c.Character.Stats.dwCharacterID;
+                    mob.Controller = c.Character.Stats.CharId;
                     c.SendPacket(CPacket.MobChangeController(mob, 1));
                 }
                 

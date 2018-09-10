@@ -5,8 +5,6 @@ VisualStudioVersion = 15.0.27703.2018
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Common", "Common\Common.csproj", "{F9727663-7D7B-4A10-93D3-13FC26F9A230}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Database", "Database\Database.csproj", "{DC067824-84F0-4E45-A9A3-BE590995E3A2}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WvsRebirth", "WvsRebirth\WvsRebirth.csproj", "{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LuaEngine", "LuaEngine\LuaEngine.csproj", "{72B3C503-E27A-479F-A4E9-164DD058EFEB}"
@@ -21,10 +19,6 @@ Global
 		{F9727663-7D7B-4A10-93D3-13FC26F9A230}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F9727663-7D7B-4A10-93D3-13FC26F9A230}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F9727663-7D7B-4A10-93D3-13FC26F9A230}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DC067824-84F0-4E45-A9A3-BE590995E3A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DC067824-84F0-4E45-A9A3-BE590995E3A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DC067824-84F0-4E45-A9A3-BE590995E3A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DC067824-84F0-4E45-A9A3-BE590995E3A2}.Release|Any CPU.Build.0 = Release|Any CPU
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D3B0FFF8-BCB4-4D28-BB44-6854CE60B5BA}.Release|Any CPU.ActiveCfg = Release|Any CPU

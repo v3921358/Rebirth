@@ -7,7 +7,9 @@ namespace Common.Game
 {
     public abstract class CObjectPool<TKey, TValue> : IEnumerable<TValue>
     {
-        private int m_uidBase = 10000;
+        private static int PoolCount = 0;
+
+        private int m_uidBase = 10000 * Interlocked.Increment(ref PoolCount);
         private readonly Dictionary<TKey, TValue> m_cache;
 
         public int Count => m_cache.Count;

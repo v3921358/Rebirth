@@ -1,13 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿using System.Collections.Generic;
 using Common.Client;
+using Common.Entities;
 using Common.Game;
 using Common.Log;
 using Common.Network;
 using Common.Packets;
 using Common.Scripts.Npc;
+using MongoDB.Driver;
 
 namespace Common.Server
 {
@@ -34,6 +33,22 @@ namespace Common.Server
             }
 
             return CFieldMan[id];
+        }
+        public CharacterData LoadCharacter(int charId)
+        {
+            var db = ParentServer.Db.Get();
+
+            var looks = db
+                .GetCollection<AvatarLook>("character_looks")
+                .FindSync(x => x.CharId == charId)
+                .First();
+
+            var stats = db
+                .GetCollection<GW_CharacterStat>("character_stats")
+                .FindSync(avatar => avatar.CharId == charId)
+                .First();
+
+            return CharacterData.Create(stats, looks);
         }
         //-----------------------------------------------------------------------------
         protected override WvsGameClient CreateClient(CClientSocket socket)
@@ -77,7 +92,9 @@ namespace Common.Server
                     case RecvOps.CP_UserCharacterInfoRequest:
                         Handle_UserCharacterInfoRequest(socket, packet);
                         break;
-                        
+                    case RecvOps.CP_UserChangeSlotPositionRequest:
+                        Handle_UserChangeSlotPositionRequest(socket, packet);
+                        break;
                     case RecvOps.CP_MobMove:
                         Handle_MobMove(socket, packet);
                         break;
@@ -118,7 +135,7 @@ namespace Common.Server
             c.LoadCharacter(uid);
 
             var character = c.Character;
-            character.Stats.dwCharacterID = Constants.GetUniqueId(); //AGAIN
+            character.Stats.CharId = Constants.GetUniqueId(); //AGAIN
 
             GetField(character.Stats.dwPosMap).Add(c);
 
@@ -138,7 +155,7 @@ namespace Common.Server
             else
             {
                 var stats = c.Character.Stats;
-                c.GetCharField().Broadcast(CPacket.UserChat(stats.dwCharacterID, msg, true, show));
+                c.GetCharField().Broadcast(CPacket.UserChat(stats.CharId, msg, true, show));
             }
         }
         private void Handle_UserMove(WvsGameClient c, CInPacket p)
@@ -155,7 +172,7 @@ namespace Common.Server
 
             var stats = c.Character.Stats;
 
-            c.GetCharField().Broadcast(CPacket.UserMovement(stats.dwCharacterID, movePath), c);
+            c.GetCharField().Broadcast(CPacket.UserMovement(stats.CharId, movePath), c);
         }
         private void Handle_UserTransferFieldRequest(WvsGameClient c, CInPacket p)
         {
@@ -204,7 +221,7 @@ namespace Common.Server
 
             var stats = c.Character.Stats;
 
-            c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.dwCharacterID, nEmotion, nDuration, bByItemOption), c);
+            c.GetCharField().Broadcast(CPacket.UserEmoticon(stats.CharId, nEmotion, nDuration, bByItemOption), c);
         }
         private void Handle_UserHit(WvsGameClient c, CInPacket p)
         {
@@ -267,7 +284,7 @@ namespace Common.Server
 
                 var direction = p.Decode1();
             }
-            
+
 
         }
         private void Handle_UserSelectNpc(WvsGameClient c, CInPacket p)
@@ -487,6 +504,30 @@ namespace Common.Server
 
         }
 
+        private void Handle_UserChangeSlotPositionRequest(WvsGameClient c, CInPacket p)
+        {
+            var tick = p.Decode4();
+            var type = p.Decode1(); // inventory
+            var src = p.Decode2();
+            var dst = p.Decode2();
+            var quantity = p.Decode2();
 
+            if (src < 0 && dst > 0)
+            {
+                CInventoryManipulator.UnEquip(c, src, dst);
+            }
+            else if (dst < 0)
+            {
+                CInventoryManipulator.Equip(c, src, dst);
+            }
+            else if (dst == 0)
+            {
+                CInventoryManipulator.Drop(c, type, src, quantity);
+            }
+            else
+            {
+                CInventoryManipulator.Move(c, type, src, dst);
+            }
+        }
     }
 }

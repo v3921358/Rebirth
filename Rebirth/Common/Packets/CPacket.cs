@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Common.Client;
 using Common.Entities;
 using Common.Game;
@@ -39,6 +41,35 @@ namespace Common.Packets
             p.Encode8(0);
             p.Encode8(0);
 
+            return p;
+        }
+        public static COutPacket CheckPasswordResult(int reason)
+        {
+            /*	* 3: ID deleted or blocked
+             * 4: Incorrect password
+             * 5: Not a registered id
+             * 6: System error
+             * 7: Already logged in
+             * 8: System error
+             * 9: System error
+             * 10: Cannot process so many connections
+             * 11: Only users older than 20 can use this channel
+             * 13: Unable to log on as master at this ip
+             * 14: Wrong gateway or personal info and weird korean button
+             * 15: Processing request with that korean button!
+             * 16: Please verify your account through email...
+             * 17: Wrong gateway or personal info
+             * 21: Please verify your account through email...
+             * 23: License agreement
+             * 25: Maple Europe notice
+             * 27: Some weird full client notice, probably for trial versions
+             * 32: IP blocked
+             * 84: please revisit website for pass change --> 0x07 recv with response 00/01
+             */
+
+            var p = new COutPacket(SendOps.LP_CheckPasswordResult);
+            p.Encode4(reason);
+            p.Encode2(0);
             return p;
         }
         public static COutPacket WorldRequest(byte nWorldID,string sName)
@@ -85,11 +116,11 @@ namespace Common.Packets
             p.Encode4(nWorldID);
             return p;
         }
-        public static COutPacket SelectWorldResult(params AvatarData[] chars)
+        public static COutPacket SelectWorldResult(List<AvatarData> chars)
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
 
-            var charCount = (byte)chars.Length;
+            var charCount = (byte) chars.Count;
 
             p.Encode1(0);
             p.Encode1(charCount); //chars count
@@ -254,7 +285,7 @@ namespace Common.Packets
         public static COutPacket UserEnterField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserEnterField);
-            p.Encode4(c.Stats.dwCharacterID);
+            p.Encode4(c.Stats.CharId);
 
             // CUserRemote::Init(v12, iPacket, v13, 1);
             p.Encode1(c.Stats.nLevel);
@@ -314,7 +345,7 @@ namespace Common.Packets
         public static COutPacket UserLeaveField(CharacterData c)
         {
             var p = new COutPacket(SendOps.LP_UserLeaveField);
-            p.Encode4(c.Stats.dwCharacterID);
+            p.Encode4(c.Stats.CharId);
             return p;
         }
 

@@ -110,6 +110,17 @@ namespace Common.Entities
             x.aInvConsume.Add(1, v1);
             x.aInvConsume.Add(2, v2);
 
+            var v3 = new GW_ItemSlotEquip();
+            v3.nItemID = 1002080;
+
+            var v4 = new GW_ItemSlotEquip();
+            v4.nItemID = 1302016;
+
+            x.aInvEquippedNormal.Add(1, v3);
+            x.aInvEquip.Add(1, v4);
+            
+            //----------
+            
             return x;
         }
 
@@ -118,7 +129,7 @@ namespace Common.Entities
         {
             //TODO: Clean this packet up and make it 
             //cool with the flags at bottom of file
-            const long dbcharFlag = -1;
+            const long dbcharFlag = -1; //DBCHAR_FLAGS.ALL
 
             p.Encode8(dbcharFlag);
             p.Encode1((byte)nCombatOrders);
@@ -144,125 +155,26 @@ namespace Common.Entities
             Stats.EncodeMoney(p);
             //}
 
-            AddInventoryInfo(p);
-            AddSkillInfo(p);
-            AddQuestInfo(p);
-            AddMiniGameInfo(p);
-            AddRingInfo(p);
-            AddTeleportInfo(p);
-            AddMonsterBookInfo(p);
-            AddNewYearInfo(p); // Short 
-            AddAreaInfo(p); // Short 
+            EncodeInventoryInfo(p);
+            EncodeSkillInfo(p);
+            EncodeQuestInfo(p);
+            EncodeMiniGameInfo(p);
+            EncodeRingInfo(p);
+            EncodeTeleportInfo(p);
+            EncodeMonsterBookInfo(p);
+            EncodeNewYearInfo(p); // Short 
+            EncodeAreaInfo(p); // Short 
             p.Encode2(0);
             p.Encode2(0); //m_mVisitorQuestLog
         }
-
-        private void AddAreaInfo(COutPacket p)
+        private void EncodeInventoryInfo(COutPacket p)
         {
-            p.Encode2(0);
-        }
-        private void AddNewYearInfo(COutPacket p)
-        {
-            p.Encode2(0);
-        }
-        private void AddMonsterBookInfo(COutPacket p)
-        {
-            p.Encode4(nMonsterBookCoverID);//mplew.writeInt(chr.getMonsterBookCover()); // cover
-            p.Encode1(0);//mplew.write(0);
-            //Map<Integer, Integer> cards = chr.getMonsterBook().getCards();
-            p.Encode2(0);//mplew.writeShort(cards.size());
-            //for (Entry<Integer, Integer> all : cards.entrySet())
-            //{
-            //    mplew.writeShort(all.getKey() % 10000); // Id
-            //    mplew.write(all.getValue()); // Level
-            //}
-        }
-        private void AddTeleportInfo(COutPacket p)
-        {
-            for (int i = 0; i < adwMapTransfer.Length; i++)
-                p.Encode4(adwMapTransfer[i]);
-
-            for (int i = 0; i < adwMapTransferEx.Length; i++)
-                p.Encode4(adwMapTransferEx[i]);
-        }
-        private void AddRingInfo(COutPacket p)
-        {
-            p.Encode2(0); //getCrushRings
-            p.Encode2(0); //getFriendshipRings
-            p.Encode2(0); //getMarriageRing
-        }
-        private void AddMiniGameInfo(COutPacket p)
-        {
-            p.Encode2(0);
-        }
-        private void AddQuestInfo(COutPacket p)
-        {
-            p.Encode2(0);//mplew.writeShort(chr.getStartedQuestsSize());
-            //for (MapleQuestStatus q : chr.getStartedQuests())
-            //{
-            //    mplew.writeShort(q.getQuest().getId());
-            //    mplew.writeMapleAsciiString(q.getQuestData());
-            //    if (q.getQuest().getInfoNumber() > 0)
-            //    {
-            //        mplew.writeShort(q.getQuest().getInfoNumber());
-            //        mplew.writeMapleAsciiString(q.getQuestData());
-            //    }
-            //}
-            //List<MapleQuestStatus> completed = chr.getCompletedQuests();
-            //mplew.writeShort(completed.size());
-            p.Encode2(0);//for (MapleQuestStatus q : completed)
-            //{
-            //    mplew.writeShort(q.getQuest().getId());
-            //    mplew.writeLong(getTime(q.getCompletionTime()));
-            //}
-        }
-        private void AddSkillInfo(COutPacket p)
-        {
-            //Map<Skill, MapleCharacter.SkillEntry> skills = chr.getSkills();
-            //int skillsSize = skills.size();
-            //// We don't want to include any hidden skill in this, so subtract them from the size list and ignore them.
-            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
-            //{
-            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
-            //    {
-            //        skillsSize--;
-            //    }
-            //}
-            p.Encode2(0);//mplew.writeShort(skillsSize);
-            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
-            //{
-            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
-            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
-            //    {
-            //        continue;
-            //    }
-            //    mplew.writeInt(skill.getKey().getId());
-            //    mplew.writeInt(skill.getValue().skillevel);
-            //    addExpirationTime(mplew, skill.getValue().expiration);
-            //    if (skill.getKey().isFourthJob())
-            //    {
-            //        mplew.writeInt(skill.getValue().masterlevel);
-            //    }
-            //}
-            p.Encode2(0);//mplew.writeShort(chr.getAllCooldowns().size());
-            //for (PlayerCoolDownValueHolder cooling : chr.getAllCooldowns())
-            //{
-            //    mplew.writeInt(cooling.skillId);
-            //    int timeLeft = (int)(cooling.length + cooling.startTime - System.currentTimeMillis());
-            //    mplew.writeShort(timeLeft / 1000);
-            //}
-        }
-        private void AddInventoryInfo(COutPacket p)
-        {
-            //EQUIP, CONSUME, INSTALL, ETC, CASH
-            
             p.Encode1(aInvEquip.SlotLimit);
             p.Encode1(aInvConsume.SlotLimit);
             p.Encode1(aInvInstall.SlotLimit);
             p.Encode1(aInvEtc.SlotLimit);
             p.Encode1(aInvCash.SlotLimit);
-            
+
             p.Encode8(Constants.PERMANENT); //EQUIPEXTEXPIRE 
 
             foreach (var i in aInvEquippedNormal)
@@ -328,41 +240,137 @@ namespace Common.Entities
             }
             p.Encode1(0);
         }
+        private void EncodeSkillInfo(COutPacket p)
+        {
+            //Map<Skill, MapleCharacter.SkillEntry> skills = chr.getSkills();
+            //int skillsSize = skills.size();
+            //// We don't want to include any hidden skill in this, so subtract them from the size list and ignore them.
+            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
+            //{
+            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
+            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
+            //    {
+            //        skillsSize--;
+            //    }
+            //}
+            p.Encode2(0);//mplew.writeShort(skillsSize);
+            //for (Iterator<Entry<Skill, SkillEntry>> it = skills.entrySet().iterator(); it.hasNext();)
+            //{
+            //    Entry<Skill, MapleCharacter.SkillEntry> skill = it.next();
+            //    if (GameConstants.isHiddenSkills(skill.getKey().getId()))
+            //    {
+            //        continue;
+            //    }
+            //    mplew.writeInt(skill.getKey().getId());
+            //    mplew.writeInt(skill.getValue().skillevel);
+            //    addExpirationTime(mplew, skill.getValue().expiration);
+            //    if (skill.getKey().isFourthJob())
+            //    {
+            //        mplew.writeInt(skill.getValue().masterlevel);
+            //    }
+            //}
+            p.Encode2(0);//mplew.writeShort(chr.getAllCooldowns().size());
+            //for (PlayerCoolDownValueHolder cooling : chr.getAllCooldowns())
+            //{
+            //    mplew.writeInt(cooling.skillId);
+            //    int timeLeft = (int)(cooling.length + cooling.startTime - System.currentTimeMillis());
+            //    mplew.writeShort(timeLeft / 1000);
+            //}
+        }
+        private void EncodeQuestInfo(COutPacket p)
+        {
+            p.Encode2(0);//mplew.writeShort(chr.getStartedQuestsSize());
+            //for (MapleQuestStatus q : chr.getStartedQuests())
+            //{
+            //    mplew.writeShort(q.getQuest().getId());
+            //    mplew.writeMapleAsciiString(q.getQuestData());
+            //    if (q.getQuest().getInfoNumber() > 0)
+            //    {
+            //        mplew.writeShort(q.getQuest().getInfoNumber());
+            //        mplew.writeMapleAsciiString(q.getQuestData());
+            //    }
+            //}
+            //List<MapleQuestStatus> completed = chr.getCompletedQuests();
+            //mplew.writeShort(completed.size());
+            p.Encode2(0);//for (MapleQuestStatus q : completed)
+            //{
+            //    mplew.writeShort(q.getQuest().getId());
+            //    mplew.writeLong(getTime(q.getCompletionTime()));
+            //}
+        }
+        private void EncodeMiniGameInfo(COutPacket p)
+        {
+            p.Encode2(0);
+        }
+        private void EncodeRingInfo(COutPacket p)
+        {
+            p.Encode2(0); //getCrushRings
+            p.Encode2(0); //getFriendshipRings
+            p.Encode2(0); //getMarriageRing
+        }
+        private void EncodeTeleportInfo(COutPacket p)
+        {
+            for (int i = 0; i < adwMapTransfer.Length; i++)
+                p.Encode4(adwMapTransfer[i]);
+
+            for (int i = 0; i < adwMapTransferEx.Length; i++)
+                p.Encode4(adwMapTransferEx[i]);
+        }
+        private void EncodeMonsterBookInfo(COutPacket p)
+        {
+            p.Encode4(nMonsterBookCoverID);//mplew.writeInt(chr.getMonsterBookCover()); // cover
+            p.Encode1(0);//mplew.write(0);
+            //Map<Integer, Integer> cards = chr.getMonsterBook().getCards();
+            p.Encode2(0);//mplew.writeShort(cards.size());
+            //for (Entry<Integer, Integer> all : cards.entrySet())
+            //{
+            //    mplew.writeShort(all.getKey() % 10000); // Id
+            //    mplew.write(all.getValue()); // Level
+            //}
+        }
+        private void EncodeNewYearInfo(COutPacket p)
+        {
+            p.Encode2(0);
+        }
+        private void EncodeAreaInfo(COutPacket p)
+        {
+            p.Encode2(0);
+        }
     }
 
     /* 466 */
     enum DBCHAR_FLAGS
     {
-        DBCHAR_CHARACTER = 0x1,
-        DBCHAR_MONEY = 0x2,
-        DBCHAR_ITEMSLOTEQUIP = 0x4,
-        DBCHAR_ITEMSLOTCONSUME = 0x8,
-        DBCHAR_ITEMSLOTINSTALL = 0x10,
-        DBCHAR_ITEMSLOTETC = 0x20,
-        DBCHAR_ITEMSLOTCASH = 0x40,
-        DBCHAR_INVENTORYSIZE = 0x80,
-        DBCHAR_SKILLRECORD = 0x100,
-        DBCHAR_QUESTRECORD = 0x200,
-        DBCHAR_MINIGAMERECORD = 0x400,
-        DBCHAR_COUPLERECORD = 0x800,
-        DBCHAR_MAPTRANSFER = 0x1000,
-        DBCHAR_AVATAR = 0x2000,
-        DBCHAR_QUESTCOMPLETE = 0x4000,
-        DBCHAR_SKILLCOOLTIME = 0x8000,
-        DBCHAR_MONSTERBOOKCARD = 0x10000,
-        DBCHAR_MONSTERBOOKCOVER = 0x20000,
-        DBCHAR_NEWYEARCARD = 0x40000,
-        DBCHAR_QUESTRECORDEX = 0x80000,
-        DBCHAR_ADMINSHOPCOUNT = 0x100000,
-        DBCHAR_EQUIPEXT = 0x100000,
-        DBCHAR_WILDHUNTERINFO = 0x200000,
-        DBCHAR_QUESTCOMPLETE_OLD = 0x400000,
-        DBCHAR_VISITORLOG = 0x800000,
-        DBCHAR_VISITORLOG1 = 0x1000000,
-        DBCHAR_VISITORLOG2 = 0x2000000,
-        DBCHAR_VISITORLOG3 = 0x4000000,
-        DBCHAR_VISITORLOG4 = 0x8000000,
-        //DBCHAR_ALL = 0xFFFFFFFF,
-        DBCHAR_ITEMSLOT = 0x7C,
+        CHARACTER = 0x1,
+        MONEY = 0x2,
+        ITEMSLOTEQUIP = 0x4,
+        ITEMSLOTCONSUME = 0x8,
+        ITEMSLOTINSTALL = 0x10,
+        ITEMSLOTETC = 0x20,
+        ITEMSLOTCASH = 0x40,
+        INVENTORYSIZE = 0x80,
+        SKILLRECORD = 0x100,
+        QUESTRECORD = 0x200,
+        MINIGAMERECORD = 0x400,
+        COUPLERECORD = 0x800,
+        MAPTRANSFER = 0x1000,
+        AVATAR = 0x2000,
+        QUESTCOMPLETE = 0x4000,
+        SKILLCOOLTIME = 0x8000,
+        MONSTERBOOKCARD = 0x10000,
+        MONSTERBOOKCOVER = 0x20000,
+        NEWYEARCARD = 0x40000,
+        QUESTRECORDEX = 0x80000,
+        ADMINSHOPCOUNT = 0x100000,
+        EQUIPEXT = 0x100000,
+        WILDHUNTERINFO = 0x200000,
+        QUESTCOMPLETE_OLD = 0x400000,
+        VISITORLOG = 0x800000,
+        VISITORLOG1 = 0x1000000,
+        VISITORLOG2 = 0x2000000,
+        VISITORLOG3 = 0x4000000,
+        VISITORLOG4 = 0x8000000,
+        //ALL = 0xFFFFFFFF,
+        ITEMSLOT = 0x7C,
     };
 }

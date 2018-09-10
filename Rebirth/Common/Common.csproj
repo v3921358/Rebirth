@@ -31,15 +31,23 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="MongoDB.Bson, Version=2.7.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\MongoDB.Bson.2.7.0\lib\net45\MongoDB.Bson.dll</HintPath>
+    </Reference>
+    <Reference Include="MongoDB.Driver, Version=2.7.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="MongoDB.Driver.Core, Version=2.7.0.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="reWZ, Version=1.1.6.0, Culture=neutral, PublicKeyToken=null" />
     <Reference Include="System" />
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Database\MongoDb.cs" />
+    <Compile Include="Entities\Account.cs" />
     <Compile Include="Entities\AvatarData.cs" />
     <Compile Include="Client\ClientBase.cs" />
     <Compile Include="Entities\AvatarLook.cs" />
     <Compile Include="Entities\CharacterData.cs" />
+    <Compile Include="Entities\CharacterEntry.cs" />
     <Compile Include="Entities\GW_Item.cs" />
     <Compile Include="Entities\MapPos.cs" />
     <Compile Include="Entities\ExtendSP.cs" />
@@ -51,6 +59,7 @@
     <Compile Include="Game\CField.cs" />
     <Compile Include="Game\CFootholdMan.cs" />
     <Compile Include="Game\CInventory.cs" />
+    <Compile Include="Game\CInventoryManipulator.cs" />
     <Compile Include="Game\CMob.cs" />
     <Compile Include="Game\CLife.cs" />
     <Compile Include="Game\CMobPool.cs" />
@@ -90,14 +99,11 @@
     <Compile Include="Server\Executor.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Database\Database.csproj">
-      <Project>{dc067824-84f0-4e45-a9a3-be590995e3a2}</Project>
-      <Name>Database</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <Folder Include="Types\CField\" />
     <Folder Include="Types\CLogin\" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="packages.config" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

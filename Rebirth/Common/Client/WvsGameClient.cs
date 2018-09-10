@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Entities;
 using Common.Game;
 using Common.Log;
@@ -31,12 +27,9 @@ namespace Common.Client
             Character = null;
         }
 
-        public void LoadCharacter(int uid)
+        public void LoadCharacter(int charId)
         {
-            //TODO: Real database lol
-            var temp = AvatarData.Default();
-
-            Character = CharacterData.Create(temp.Stats, temp.Look);
+            Character = ParentServer.LoadCharacter(charId);
             Initialized = true;
         }
 

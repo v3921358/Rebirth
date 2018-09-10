@@ -1,14 +1,25 @@
 ﻿using Common.Packets;
+using MongoDB.Bson;
 
 namespace Common.Entities
 {
     public class AvatarLook
     {
+        public ObjectId Id { get; set; }
+        public int AccId;
+        public int CharId;
+
         public AvatarLook()
         {
             anHairEquip = new int[60];
             anUnseenEquip = new int[60];
             anPetID = new int[3];
+        }
+
+        public AvatarLook(int accId, int charId) : this()
+        {
+            AccId = accId;
+            CharId = charId;
         }
 
         public byte nGender;

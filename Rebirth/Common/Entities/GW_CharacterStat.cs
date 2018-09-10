@@ -1,18 +1,29 @@
 ﻿// ReSharper disable InconsistentNaming
 
 using Common.Packets;
+using MongoDB.Bson;
 
 namespace Common.Entities
 {
     public class GW_CharacterStat
     {
+        public ObjectId Id { get; set; }
+        public int AccId;
+        public int CharId;
+
         public GW_CharacterStat()
         {
             aliPetLockerSN = new long[3];
             extendSP = new ExtendSP();
         }
 
-        public int dwCharacterID;
+        public GW_CharacterStat(int accId, int charId) : this()
+        {
+            AccId = accId;
+            CharId = charId;
+        }
+
+
         public string sCharacterName;
         public byte nGender;
         public byte nSkin;
@@ -50,7 +61,7 @@ namespace Common.Entities
 
         public void Encode(COutPacket p)
         {
-            p.Encode4(dwCharacterID);
+            p.Encode4(CharId);
             p.EncodeFixedString(sCharacterName, 13);
             p.Encode1(nGender);
             p.Encode1(nSkin);
@@ -71,18 +82,18 @@ namespace Common.Entities
             p.Encode4(nMP);
             p.Encode4(nMMP);
             p.Encode2(nAP);
-            
+
             if (Constants.IsNotExtendedSp(nJob))
                 p.Encode2(nSP);
             else
                 extendSP.Encode(p);
-            
-            p.Encode4(nEXP); 
-            p.Encode2(nPOP); 
+
+            p.Encode4(nEXP);
+            p.Encode2(nPOP);
             p.Encode4(nTempEXP); //Gachapon
             p.Encode4(dwPosMap);
-            p.Encode1(nPortal); 
-            p.Encode4(nPlaytime); 
+            p.Encode1(nPortal);
+            p.Encode4(nPlaytime);
             p.Encode2(nSubJob); //Here for dual blade?
         }
         public void EncodeMoney(COutPacket p)
