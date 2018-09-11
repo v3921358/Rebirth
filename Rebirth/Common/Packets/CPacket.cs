@@ -104,36 +104,6 @@ namespace Common.Packets
 
             return p;
         }
-
-        public static COutPacket UserAvatarModified(CharacterData c, byte mode = 1)
-        {
-            var p = new COutPacket(SendOps.LP_UserAvatarModified);
-            p.Encode4(c.CharId);
-
-            p.Encode1(mode); // flags actually |
-
-            switch (mode)
-            {
-                case 1:
-                    c.Look.Encode(p);
-                    break;
-                case 2:
-                    p.Encode1(0);  //?
-                    break;
-                case 4: // Carry Item effect
-                    p.Encode1(0);
-                    break;
-            }
-
-            c.EncodeRingInfo(p);
-            c.EncodeRingInfo(p);
-            c.EncodeRingInfo(p);
-            p.Encode4(0); // charid to follow
-
-            return p;
-
-        }
-
         public static COutPacket WorldRequestEnd()
         {
             var p = new COutPacket(SendOps.LP_WorldInformation);
@@ -202,7 +172,6 @@ namespace Common.Packets
 
             return p;
         }
-
         public static COutPacket DeleteCharacter(int uid, byte result)
         {
             var p = new COutPacket(SendOps.LP_DeleteCharacterResult);
@@ -421,6 +390,35 @@ namespace Common.Packets
             p.Encode2(qty);
 
             return p;
+        }
+
+        public static COutPacket UserAvatarModified(CharacterData c, byte mode = 1)
+        {
+            var p = new COutPacket(SendOps.LP_UserAvatarModified);
+            p.Encode4(c.CharId);
+
+            p.Encode1(mode); // flags actually |
+
+            switch (mode)
+            {
+                case 1:
+                    c.Look.Encode(p);
+                    break;
+                case 2:
+                    p.Encode1(0);  //?
+                    break;
+                case 4: // Carry Item effect
+                    p.Encode1(0);
+                    break;
+            }
+
+            c.EncodeRingInfo(p);
+            c.EncodeRingInfo(p);
+            c.EncodeRingInfo(p);
+            p.Encode4(0); // charid to follow
+
+            return p;
+
         }
 
         //WvsGame::MobPool--------------------------------------------------------------------------------------------
@@ -869,7 +867,5 @@ namespace Common.Packets
              */
 
         }
-
-
     }
 }

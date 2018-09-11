@@ -8,6 +8,7 @@ using Common.Log;
 using Common.Network;
 using Common.Packets;
 using Common.Scripts.Npc;
+using Common.Types.CField;
 using MongoDB.Driver;
 
 namespace Common.Server
@@ -91,6 +92,9 @@ namespace Common.Server
                         break;
                     case RecvOps.CP_MobMove:
                         Handle_MobMove(socket, packet);
+                        break;
+                    case RecvOps.CP_UserMeleeAttack:
+                        Handle_UserMeleeAttack(socket, packet);
                         break;
                 }
             }
@@ -536,6 +540,10 @@ namespace Common.Server
             {
                 CInventoryManipulator.Move(c, type, src, dst); //check
             }
+        }
+        private void Handle_UserMeleeAttack(WvsGameClient c, CInPacket p)
+        {
+            var parse = AttackInfo.ParseMelee(p);
         }
     }
 }

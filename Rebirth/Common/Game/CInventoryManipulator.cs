@@ -23,8 +23,8 @@ namespace Common.Game
                 character.Look.anHairEquip[Math.Abs(src)] = 0;
             }
 
-            UpdateUserAvatarModified(c);
             c.SendPacket(CPacket.InventoryMoveItem(1, src, dst, 1));
+            Broadcast_UserAvatarModified(c);
         }
 
         public static void Equip(WvsGameClient c, short src, short dst)
@@ -48,9 +48,9 @@ namespace Common.Game
                 character.aInvEquippedNormal.Add(dst, source.Value);
                 character.Look.anHairEquip[Math.Abs(dst)] = source.Value.nItemID;
             }
-           
-            UpdateUserAvatarModified(c);
+
             c.SendPacket(CPacket.InventoryMoveItem((byte)InventoryType.EQUIP, src, dst, 2));
+            Broadcast_UserAvatarModified(c);
         }
 
         public static void Drop(WvsGameClient c, byte type, short src, short qty)
@@ -130,7 +130,7 @@ namespace Common.Game
             c.SendPacket(CPacket.InventoryMoveItem(type, src, dst, 0xFF));
         }
 
-        private static void UpdateUserAvatarModified(WvsGameClient c)
+        private static void Broadcast_UserAvatarModified(WvsGameClient c)
         {
             c.GetCharField().Broadcast(CPacket.UserAvatarModified(c.Character), c);
 

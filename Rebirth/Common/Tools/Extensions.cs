@@ -37,6 +37,10 @@ namespace Common
             return collection[rand];
         }
 
+        public static void Skip(this CInPacket packet, int length)
+        {
+            packet.DecodeBuffer(length);
+        }
         public static void Encode1(this COutPacket packet, bool value)
         {
             packet.Encode1((byte)(value ? 1 : 0));
@@ -44,6 +48,20 @@ namespace Common
         public static void EncodeDateTime(this COutPacket packet, DateTime dt)
         {
             packet.Encode8(dt.ToFileTime());
+        }
+        public static void EncodeFixedString(this COutPacket packet, string value, int count)
+        {
+            for (int i = 0; i < count; i++)
+            {
+                if (i < value.Length)
+                {
+                    packet.Encode1((byte)value[i]);
+                }
+                else
+                {
+                    packet.Encode1(0);
+                }
+            }
         }
 
         public static void EncodePos(this COutPacket packet, TagPoint value)

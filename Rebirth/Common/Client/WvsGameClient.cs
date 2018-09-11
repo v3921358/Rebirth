@@ -77,10 +77,10 @@ namespace Common.Client
                 case "snail":
                 {
                     var mob = new CMob(100101);
+                    mob.dwMobId = 1337;
                     mob.Position.Position = Character.Position.Position;
                     mob.Position.Foothold = Character.Position.Foothold;
 
-                    Logger.Write(LogLevel.Debug, "MrSnail {0}", mob.Position);
 
                     var p1 = CPacket.MobEnterField(mob);
 

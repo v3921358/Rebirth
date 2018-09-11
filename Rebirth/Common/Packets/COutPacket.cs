@@ -72,22 +72,6 @@ namespace Common.Packets
             foreach (char c in value)
                 Append(c, 1);
         }
-        public void EncodeFixedString(string value,int count)
-        {
-            ThrowIfDisposed();
-            
-            for (int i = 0; i < count; i++)
-            {
-                if (i < value.Length)
-                {
-                    Encode1((byte)value[i]);
-                }
-                else
-                {
-                    Encode1(0);
-                }
-            }
-        }
 
         public void Skip(int count)
         {
