@@ -102,9 +102,16 @@ namespace Common.Client
                     SetField(mapId, 0, 0);
                     break;
                 }
-                case "test":
-                    Character.Stats.sCharacterName = "W0RK3D";
+                case "lvl":
+                {
+                    Character.Stats.nLevel = Convert.ToByte(split[1]);
                     break;
+                }
+                case "meso":
+                {
+                    Character.Stats.nMoney = Convert.ToInt32(split[1]);
+                    break;
+                }
             }
         }
     }

@@ -1,7 +1,7 @@
 ﻿using System;
 using MongoDB.Driver;
 
-namespace Common.Database
+namespace Common.Tools
 {
     public class MongoDb : IDisposable//This class is such a fucking joke L0L
     {

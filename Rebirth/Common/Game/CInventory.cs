@@ -64,6 +64,11 @@ namespace Common.Game
             return default(KeyValuePair<TKey, TItem>);
         }
 
+        public bool Contains(TKey slot)
+        {
+            return Items.ContainsKey(slot);
+        }
+
 
         public IEnumerator<KeyValuePair<TKey, TItem>> GetEnumerator()
         {

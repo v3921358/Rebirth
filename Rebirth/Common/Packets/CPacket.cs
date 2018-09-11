@@ -260,7 +260,7 @@ namespace Common.Packets
                 p.Encode1(0); //Enables two Encode4's
             }
 
-            p.Encode8(Environment.TickCount); //Odin GameTime(-2)
+            p.Encode8(Constants.MAX_TIME);
 
             return p;
         }
@@ -356,6 +356,40 @@ namespace Common.Packets
             p.Encode4(nEmotion); //nEmoticon
             p.Encode4(nDuration); //tDuration
             p.Encode1(bByItemOption); //CUser->m_bEmotionByItemOption
+            return p;
+        }
+
+        public static COutPacket InventoryMoveItem(byte type, short src, short dst, byte equipIndicator)
+        {
+            var p = new COutPacket(SendOps.LP_InventoryOperation);
+
+            p.Encode1(1);
+            p.Encode1(1);
+            p.Encode1(2);
+
+            p.Encode1(type);
+            p.Encode2(src);
+            p.Encode2(dst);
+
+            if (equipIndicator != 0xFF)
+            {
+                p.Encode1(equipIndicator);
+            }
+            return p;
+
+        }
+        public static COutPacket InventoryDropItem(byte type, short src, short qty)
+        {
+            var p = new COutPacket(SendOps.LP_InventoryOperation);
+
+            p.Encode1(1);
+            p.Encode1(1);
+            p.Encode1(1);
+
+            p.Encode1(type);
+            p.Encode2(src);
+            p.Encode2(qty);
+
             return p;
         }
 
@@ -805,5 +839,7 @@ namespace Common.Packets
              */
 
         }
+
+ 
     }
 }

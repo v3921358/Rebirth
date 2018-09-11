@@ -45,7 +45,6 @@ namespace Common.Game
 
         public void Add(WvsGameClient c)
         {
-            //Send SetField | But how do i know the connect one or the smaller one ?
             var character = c.Character;
 
             if (c.SentCharData)
@@ -55,7 +54,12 @@ namespace Common.Game
             else
             {
                 c.SentCharData = true;
+#if DEBUG
+                //So me myself and i all spawn close to eachother <3
+                character.Stats.nPortal = 0;
+#else
                 character.Stats.nPortal = Portals.GetRandomSpawn();
+#endif
                 c.SendPacket(CPacket.SetField(character, true, c.ChannelId));
             }
 

@@ -1,6 +1,6 @@
 ﻿using Common.Packets;
 
-namespace Common.Types
+namespace Common
 {
     public class MapPos
     {

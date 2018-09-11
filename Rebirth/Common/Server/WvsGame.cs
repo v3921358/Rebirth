@@ -518,13 +518,16 @@ namespace Common.Server
             var dst = p.Decode2();
             var quantity = p.Decode2();
 
+            Logger.Write(LogLevel.Debug, "Src {0}, Dst {1} Type {2} Qty {3}", src, dst, type, quantity);
+
+
             if (src < 0 && dst > 0)
             {
                 CInventoryManipulator.UnEquip(c, src, dst);
             }
             else if (dst < 0)
             {
-                CInventoryManipulator.Equip(c, src, dst);
+                CInventoryManipulator.Equip(c, src, dst); //check
             }
             else if (dst == 0)
             {
@@ -532,7 +535,7 @@ namespace Common.Server
             }
             else
             {
-                CInventoryManipulator.Move(c, type, src, dst);
+                CInventoryManipulator.Move(c, type, src, dst); //check
             }
         }
     }

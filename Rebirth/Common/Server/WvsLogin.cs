@@ -252,9 +252,6 @@ namespace WvsRebirth
         private void Handle_CheckUserLimit(WvsLoginClient c, CInPacket p)
         {
             var world = p.Decode2();
-
-            //TODO: Bind world to client
-
             c.SendPacket(CPacket.CheckUserLimit(0));
         }
         private void Handle_SelectWorld(WvsLoginClient c, CInPacket p)

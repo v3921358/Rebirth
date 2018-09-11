@@ -57,5 +57,10 @@ namespace Common
            var y = packet.Decode2();
             return new TagPoint(x, y);
         }
+
+        public static bool EqualsIgnoreCase(this string input,string comperand)
+        {
+            return string.Compare(input, comperand, StringComparison.OrdinalIgnoreCase) == 0;
+        }
     }
 }
