@@ -543,7 +543,22 @@ namespace Common.Server
         }
         private void Handle_UserMeleeAttack(WvsGameClient c, CInPacket p)
         {
-            var parse = AttackInfo.ParseMelee(p);
+            var atkInfo = AttackInfo.ParseMelee(p);
+            var field = c.GetCharField();
+
+            foreach (var atk in atkInfo.allDamage)
+            {
+                var mob = field.Mobs.Get(atk.MobId);
+
+                var dmg = atk.Attack.Sum(x => x.Item1);
+
+                mob.CurHp -= dmg;
+
+                if (mob.CurHp <= 0)
+                {
+                    field.RemoveMob(c,mob,1);
+                }
+            }
         }
     }
 }

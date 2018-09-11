@@ -104,6 +104,12 @@ namespace Common.Game
             packet.Dispose();
         }
 
+        public void RemoveMob(WvsGameClient c, CMob mob, byte nDeadType)
+        {
+            Mobs.Remove(mob.dwMobId);
+            Broadcast(CPacket.MobLeaveField(mob, nDeadType));
+        }
+
         public void SendSpawnMobs(WvsGameClient c)
         {
             foreach (var mob in Mobs)
@@ -113,7 +119,7 @@ namespace Common.Game
                     mob.Controller = c.Character.CharId;
                     c.SendPacket(CPacket.MobChangeController(mob, 1));
                 }
-                
+
                 c.SendPacket(CPacket.MobEnterField(mob));
             }
         }

@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Common.Log;
 using Common.Packets;
 
@@ -10,14 +7,13 @@ namespace Common.Types.CField
 {
     public class AttackPair
     {
+        public int MobId { get; }
+        public List<Tuple<int, bool>> Attack { get; }
 
-        public int objectid;
-        public List<Tuple<int, bool>> attack;
-
-        public AttackPair(int objectid, List<Tuple<int, bool>> attack)
+        public AttackPair(int mobId)
         {
-            this.objectid = objectid;
-            this.attack = attack;
+            MobId = mobId;
+            Attack = new List<Tuple<int, bool>>();
         }
     }
 
@@ -33,35 +29,36 @@ namespace Common.Types.CField
         public byte direction;
         public byte stance;
         public byte speed;
+        public byte display;
         public int lastAttackTickCount;
         public List<AttackPair> allDamage;
-
         public TagPoint position;
 
         /// <summary>
         /// Not yet working 
         /// </summary>
-        /// <param name="lea"></param>
+        /// <param name="p"></param>
         /// <returns></returns>
-        public static AttackInfo ParseMelee(CInPacket lea)
+        public static AttackInfo ParseMelee(CInPacket p)
         {
             AttackInfo ret = new AttackInfo();
 
-            ret.portals = lea.Decode1();
-            bool unkk = lea.Decode1() == 0xFF;
-            lea.Skip(unkk ? 7 : 8);
-            ret.tbyte = lea.Decode1();
-            //System.out.println("TBYTE: " + tbyte);
+            ret.portals = p.Decode1();
+
+            bool unkk = p.Decode1() == 0xFF;
+            p.Skip(unkk ? 7 : 8);
+
+            ret.tbyte = p.Decode1();
             ret.targets = (byte)((ret.tbyte >> 4) & 0xF);
             ret.hits = (byte)(ret.tbyte & 0xF);
-            lea.Skip(8);
 
-
-            ret.skill = lea.Decode4();
-            lea.Skip(1); // 0.94
-            lea.Skip(4); // 0.74
-            lea.Skip(4); // 0.74
-            lea.Skip(8); // 0.88
+            p.Skip(8); //-1
+            
+            ret.skill = p.Decode4();
+            p.Skip(1); // 0.94
+            p.Skip(4); // 0.74
+            p.Skip(4); // 0.74
+            p.Skip(8); // 0.88 (0)
 
             switch (ret.skill)
             {
@@ -71,20 +68,21 @@ namespace Common.Types.CField
                 case 14111006: // Poison bomb
                 case 4341002: // Final Cut
                 case 4341003: // Monster Bomb
-                    ret.charge = lea.Decode4();
+                    ret.charge = p.Decode4();
                     break;
                 default:
                     ret.charge = 0;
                     break;
             }
             
-            ret.direction = lea.Decode1(); // Always zero?
-            ret.stance = lea.Decode1();
-            lea.Skip(4);
-            lea.Skip(1); // Weapon class
-            ret.speed = lea.Decode1(); // Confirmed
-            ret.lastAttackTickCount = lea.Decode4(); // Ticks
-            lea.Skip(4); //0
+            ret.display = p.Decode1(); // Always zero?
+            ret.direction = p.Decode1();
+            ret.stance = p.Decode1();
+            p.Skip(4);
+            p.Skip(1); // Weapon class
+            ret.speed = p.Decode1(); // Confirmed
+            ret.lastAttackTickCount = p.Decode4(); // Ticks
+            p.Skip(4); //0
 
             ret.allDamage = new List<AttackPair>();
 
@@ -92,28 +90,28 @@ namespace Common.Types.CField
             //{ // Meso Explosion
             //    return parseMesoExplosion(lea, ret);
             //}
-
-            //good bottom up so far
-
+            
             for (int i = 0; i < ret.targets; i++)
             {
-                var oid = lea.Decode4();
-                //	    System.out.println(tools.HexTool.toString(lea.read(14)));
-                lea.Skip(14); // [1] Always 6?, [3] unk, [4] Pos1, [4] Pos2, [2] seems to change randomly for some attack
+                var mobId = p.Decode4();
+                var atkPair = new AttackPair(mobId);
 
-                var allDamageNumbers = new List<Tuple<int, bool>>();
+                p.Skip(14);
 
                 for (int j = 0; j < ret.hits; j++)
                 {
-                    var damage = lea.Decode4();
-                    Logger.Write(LogLevel.Debug, "Attack Mob {0} Dmg {1}", oid, damage);
-                    // System.out.println("Damage: " + damage);
-                    allDamageNumbers.Add(new Tuple<int, bool>(damage,false));
+                    var damage = p.Decode4();
+                    atkPair.Attack.Add(new Tuple<int, bool>(damage,false));
+
+                    Logger.Write(LogLevel.Debug, "Attack Mob {0} Dmg {1}", mobId, damage);
                 }
-                lea.Skip(4); // CRC of monster [Wz Editing]
-                ret.allDamage.Add(new AttackPair(oid, allDamageNumbers));
+
+                p.Skip(4); // CRC of monster [Wz Editing]
+                ret.allDamage.Add(atkPair);
             }
-            ret.position = lea.DecodePos();
+
+            ret.position = p.DecodePos();
+
             return ret;
         }
     }

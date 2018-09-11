@@ -430,7 +430,7 @@ namespace Common.Packets
         }
         public static COutPacket MobLeaveField(CMob mob, byte nDeadType)
         {
-            var p = new COutPacket(SendOps.LP_MobEnterField);
+            var p = new COutPacket(SendOps.LP_MobLeaveField);
             p.Encode4(mob.dwMobId);
             p.Encode1(nDeadType); // 0 = dissapear, 1 = fade out, 2+ = special
 

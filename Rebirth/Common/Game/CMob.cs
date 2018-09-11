@@ -12,6 +12,8 @@ namespace Common.Game
         public MapPos Position { get; }
         public int Controller { get; set; } //Char id or zero
         
+        //WOAH
+        public int CurHp { get; set; } = 5;
 
         public CMob(int mobId)
         {
