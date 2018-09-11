@@ -72,7 +72,7 @@ namespace Common.Packets
             p.Encode2(0);
             return p;
         }
-        public static COutPacket WorldRequest(byte nWorldID,string sName)
+        public static COutPacket WorldRequest(byte nWorldID, string sName)
         {
             var p = new COutPacket();
 
@@ -104,6 +104,36 @@ namespace Common.Packets
 
             return p;
         }
+
+        public static COutPacket UserAvatarModified(CharacterData c, byte mode = 1)
+        {
+            var p = new COutPacket(SendOps.LP_UserAvatarModified);
+            p.Encode4(c.CharId);
+
+            p.Encode1(mode); // flags actually |
+
+            switch (mode)
+            {
+                case 1:
+                    c.Look.Encode(p);
+                    break;
+                case 2:
+                    p.Encode1(0);  //?
+                    break;
+                case 4: // Carry Item effect
+                    p.Encode1(0);
+                    break;
+            }
+
+            c.EncodeRingInfo(p);
+            c.EncodeRingInfo(p);
+            c.EncodeRingInfo(p);
+            p.Encode4(0); // charid to follow
+
+            return p;
+
+        }
+
         public static COutPacket WorldRequestEnd()
         {
             var p = new COutPacket(SendOps.LP_WorldInformation);
@@ -120,7 +150,7 @@ namespace Common.Packets
         {
             var p = new COutPacket(SendOps.LP_SelectWorldResult);
 
-            var charCount = (byte) chars.Count;
+            var charCount = (byte)chars.Count;
 
             p.Encode1(0);
             p.Encode1(charCount); //chars count
@@ -214,7 +244,7 @@ namespace Common.Packets
 
             return p;
         }
-     
+
         //WvsGame-----------------------------------------------------------------------------------------------------
         public static COutPacket SetField(CharacterData c, bool bCharacterData, int nChannel)
         {
@@ -363,9 +393,9 @@ namespace Common.Packets
         {
             var p = new COutPacket(SendOps.LP_InventoryOperation);
 
-            p.Encode1(1);
-            p.Encode1(1);
-            p.Encode1(2);
+            p.Encode1(1);//bExcelReq
+            p.Encode1(1);//changeLogSize
+            p.Encode1(2);//changeType
 
             p.Encode1(type);
             p.Encode2(src);
@@ -382,9 +412,9 @@ namespace Common.Packets
         {
             var p = new COutPacket(SendOps.LP_InventoryOperation);
 
-            p.Encode1(1);
-            p.Encode1(1);
-            p.Encode1(1);
+            p.Encode1(1);//bExcelReq
+            p.Encode1(1);//changeLogSize
+            p.Encode1(1);//changeType
 
             p.Encode1(type);
             p.Encode2(src);
@@ -441,7 +471,7 @@ namespace Common.Packets
         public static COutPacket MobMove(int dwMobId, bool bMobMoveStartResult, byte pCurSplit, int bIllegealVelocity, byte[] movePath)
         {
             var p = new COutPacket(SendOps.LP_MobMove);
-            p.Encode4(dwMobId); 
+            p.Encode4(dwMobId);
 
             //Section 1 - BMS / PDB Combined Version ?
             p.Encode1(bMobMoveStartResult); //bNotForceLandingWhenDiscard
@@ -503,7 +533,7 @@ namespace Common.Packets
             var p = new COutPacket(SendOps.LP_ScriptMessage);
 
             //CScriptMan::OnScriptMessage
-            
+
             p.Encode1(4);
             p.Encode4(npc);
             p.Encode1(msgType); //NpcDialogOptions | todo make this
@@ -524,7 +554,7 @@ namespace Common.Packets
 
             return p;
         }
-    
+
         //--------------------------------------------------------------------------------------------
         public static COutPacket BroadcastPinkMsg(string msg)
         {
@@ -538,7 +568,7 @@ namespace Common.Packets
         {
             return BroadcastMsg(1, msg);
         }
-        private static COutPacket BroadcastMsg(byte nType,string message)
+        private static COutPacket BroadcastMsg(byte nType, string message)
         {
             var p = new COutPacket(SendOps.LP_BroadcastMsg);
             p.Encode1(nType);
@@ -562,9 +592,9 @@ namespace Common.Packets
             // 16: Lightblue Text
             // 18: LightBlue Text ({} as Item)
             // 20: (Red Message) : Skull?
-            
+
             if (nType == 4)
-            { 
+            {
                 p.Encode1(true); // Server Message
             }
 
@@ -597,7 +627,7 @@ namespace Common.Packets
 
             return p;
         }
-     
+
         //WvsCommon---------------------------------------------------------------------------------------------------
         private static void AddCharEntry(COutPacket p, CharacterData c)
         {
@@ -840,6 +870,6 @@ namespace Common.Packets
 
         }
 
- 
+
     }
 }

@@ -23,9 +23,8 @@ namespace Common.Game
                 character.Look.anHairEquip[Math.Abs(src)] = 0;
             }
 
+            UpdateUserAvatarModified(c);
             c.SendPacket(CPacket.InventoryMoveItem(1, src, dst, 1));
-
-
         }
 
         public static void Equip(WvsGameClient c, short src, short dst)
@@ -50,12 +49,12 @@ namespace Common.Game
                 character.Look.anHairEquip[Math.Abs(dst)] = source.Value.nItemID;
             }
            
+            UpdateUserAvatarModified(c);
             c.SendPacket(CPacket.InventoryMoveItem((byte)InventoryType.EQUIP, src, dst, 2));
         }
 
         public static void Drop(WvsGameClient c, byte type, short src, short qty)
         {
-            //Src 1, Dst 0 Type 1 Qty 1
             var ret = GetInventory(type, c.Character);
 
             if (ret is CInventory<short, GW_ItemSlotEquip> v1)
@@ -67,6 +66,7 @@ namespace Common.Game
 
                 v1.Remove(src);
 
+                //This pocket is not working :(
                 c.SendPacket(CPacket.InventoryDropItem(type,src, qty));
                 c.SendPacket(CPacket.BroadcastPinkMsg("Deleted item, doesnt drop yet"));
 
@@ -78,10 +78,16 @@ namespace Common.Game
                 if (source == null)
                     return;
 
-                v2.Remove((byte)src);
+                source.nNumber -= qty;
 
+                if (source.nNumber <= 0)
+                {
+                    v2.Remove((byte) src);
+                    c.SendPacket(CPacket.BroadcastPinkMsg("Deleted item"));
+                }
+
+                //This pocket is not working :(
                 c.SendPacket(CPacket.InventoryDropItem(type, src, qty));
-                c.SendPacket(CPacket.BroadcastPinkMsg("Deleted item"));
             }
             else
             {
@@ -124,14 +130,23 @@ namespace Common.Game
             c.SendPacket(CPacket.InventoryMoveItem(type, src, dst, 0xFF));
         }
 
-        public static object GetInventory(byte nType, CharacterData data)
+        private static void UpdateUserAvatarModified(WvsGameClient c)
+        {
+            c.GetCharField().Broadcast(CPacket.UserAvatarModified(c.Character), c);
+
+            //stats.recalcLocalStats();
+            //if (getMessenger() != null)
+            //{
+            //    World.Messenger.updateMessenger(getMessenger().getId(), getName(), client.getChannel());
+            //}
+        }
+
+        private static object GetInventory(byte nType, CharacterData data)
         {
             var inv = (InventoryType)nType;
 
             switch (inv)
             {
-                case InventoryType.EQUIPPED:
-                    return data.aInvEquippedNormal;
                 case InventoryType.EQUIP:
                     return data.aInvEquip;
                 case InventoryType.USE:
@@ -142,6 +157,8 @@ namespace Common.Game
                     return data.aInvEtc;
                 case InventoryType.CASH:
                     return data.aInvCash;
+                case InventoryType.EQUIPPED:
+                    return data.aInvEquippedNormal;
                 default:
                     return null;
             }

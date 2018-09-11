@@ -518,12 +518,11 @@ namespace Common.Server
             var dst = p.Decode2();
             var quantity = p.Decode2();
 
-            Logger.Write(LogLevel.Debug, "Src {0}, Dst {1} Type {2} Qty {3}", src, dst, type, quantity);
-
-
+            Logger.Write(LogLevel.Debug, "UserChangeSlotPositionRequest Src {0}, Dst {1} Type {2} Qty {3}", src, dst, type, quantity);
+            
             if (src < 0 && dst > 0)
             {
-                CInventoryManipulator.UnEquip(c, src, dst);
+                CInventoryManipulator.UnEquip(c, src, dst); //check
             }
             else if (dst < 0)
             {

@@ -282,7 +282,7 @@ namespace Common.Entities
         {
             p.Encode2(0);
         }
-        private void EncodeRingInfo(COutPacket p)
+        public void EncodeRingInfo(COutPacket p)
         {
             p.Encode2(0); //getCrushRings
             p.Encode2(0); //getFriendshipRings
