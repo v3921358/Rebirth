@@ -102,7 +102,7 @@ namespace WvsRebirth
         }
         protected override void HandlePacket(WvsLoginClient socket, CInPacket packet)
         {
-            //base.HandlePacket(socket, packet);
+            base.HandlePacket(socket, packet);
             var opcode = (RecvOps)packet.Decode2();
 
             if (socket.LoggedIn)
@@ -330,9 +330,8 @@ namespace WvsRebirth
             newChar.aInvEquippedNormal.Add(-5, new GW_ItemSlotEquip { nItemID = top });
             newChar.aInvEquippedNormal.Add(-6, new GW_ItemSlotEquip { nItemID = bottom });
             newChar.aInvEquippedNormal.Add(-7, new GW_ItemSlotEquip { nItemID = shoes });
-            newChar.aInvEquippedNormal.Add(-11, new GW_ItemSlotEquip { nItemID = weapon });
-
-            //newChar.aInvEquippedNormal.Add(1, new GW_ItemSlotEquip { nItemID = 1002080 });
+            newChar.aInvEquippedNormal.Add(-11, new GW_ItemSlotEquip { nItemID = weapon, niPAD = 20 });
+            
             newChar.aInvEquip.Add(1, new GW_ItemSlotEquip { nItemID = 1302016 });
             newChar.aInvConsume.Add(1, new GW_ItemSlotBundle { nItemID = 2000007, nNumber = 100 });
 

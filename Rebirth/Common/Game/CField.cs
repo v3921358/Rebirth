@@ -104,10 +104,10 @@ namespace Common.Game
             packet.Dispose();
         }
 
-        public void RemoveMob(WvsGameClient c, CMob mob, byte nDeadType)
+        public void RemoveMob(WvsGameClient c, CMob mob)
         {
             Mobs.Remove(mob.dwMobId);
-            Broadcast(CPacket.MobLeaveField(mob, nDeadType));
+            Broadcast(CPacket.MobLeaveField(mob));
         }
 
         public void SendSpawnMobs(WvsGameClient c)

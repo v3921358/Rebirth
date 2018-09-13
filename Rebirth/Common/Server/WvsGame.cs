@@ -39,9 +39,7 @@ namespace Common.Server
         }
         public CharacterData LoadCharacter(int charId)
         {
-            var db = ParentServer.Db.Get();
-
-            return db
+            return Db
                 .GetCollection<CharacterData>("character_data")
                 .FindSync(x => x.CharId == charId)
                 .First();
@@ -107,8 +105,7 @@ namespace Common.Server
                         break;
                     case RecvOps.CP_AliveAck:
                         break;
-                    default:
-                        //An invalid packet was sent before the client migrated in
+                    default: //An invalid packet was sent before the client migrated in
                         socket.Disconnect();
                         break;
                 }
@@ -549,16 +546,22 @@ namespace Common.Server
             foreach (var atk in atkInfo.allDamage)
             {
                 var mob = field.Mobs.Get(atk.MobId);
-
                 var dmg = atk.Attack.Sum(x => x.Item1);
 
                 mob.CurHp -= dmg;
 
                 if (mob.CurHp <= 0)
                 {
-                    field.RemoveMob(c,mob,1);
+                    field.RemoveMob(c,mob);
+                    return;
                 }
             }
+
+            //This pocket is not working ;( - rt if u cried
+            var v1 = CPacket.CloseRangeAttack(c.Character.CharId, atkInfo.tbyte, atkInfo.skill, 0, atkInfo.display,
+                atkInfo.stance, atkInfo.speed, atkInfo.allDamage, false, 1, 0, 0, 0);
+
+            field.Broadcast(v1,c);
         }
     }
 }

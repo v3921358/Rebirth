@@ -13,15 +13,39 @@
       <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
       <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
     </Filter>
+    <Filter Include="NMCO">
+      <UniqueIdentifier>{33dae3de-1f6f-4079-8d20-22c8b8103d0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="detours.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="NMCO\NMDataObject.h">
+      <Filter>NMCO</Filter>
+    </ClInclude>
+    <ClInclude Include="NMCO\NMFunctionObject.h">
+      <Filter>NMCO</Filter>
+    </ClInclude>
+    <ClInclude Include="NMCO\NMGeneral.h">
+      <Filter>NMCO</Filter>
+    </ClInclude>
+    <ClInclude Include="NMCO\NMSerializable.h">
+      <Filter>NMCO</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="NMCO\NMDataObject.cpp">
+      <Filter>NMCO</Filter>
+    </ClCompile>
+    <ClCompile Include="NMCO\NMFunctionObject.cpp">
+      <Filter>NMCO</Filter>
+    </ClCompile>
+    <ClCompile Include="NMCO\NMSerializable.cpp">
+      <Filter>NMCO</Filter>
     </ClCompile>
   </ItemGroup>
 </Project>

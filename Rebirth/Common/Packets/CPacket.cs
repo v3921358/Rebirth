@@ -5,6 +5,7 @@ using Common.Client;
 using Common.Entities;
 using Common.Game;
 using Common.Network;
+using Common.Types.CField;
 
 // ReSharper disable InconsistentNaming
 
@@ -421,6 +422,50 @@ namespace Common.Packets
 
         }
 
+        public static COutPacket CloseRangeAttack(int cid, byte tbyte, int skill, byte level, byte display, byte animation, byte speed, List<AttackPair> damage, bool energy, byte lvl, byte mastery, byte unk, int charge)
+        {
+            var mplew = new COutPacket(SendOps.LP_UserMeleeAttack);
+            
+            mplew.Encode4(cid);
+            mplew.Encode1(tbyte);
+            mplew.Encode1(lvl); //?
+
+            if (skill > 0)
+            {
+                mplew.Encode1(level);
+                mplew.Encode4(skill);
+            }
+            else
+            {
+                mplew.Encode1(0);
+            }
+            mplew.Encode1(unk); // Added on v.82
+            //a short actually
+            mplew.Encode1(display);
+            mplew.Encode1(animation);
+
+            mplew.Encode1(speed);
+            mplew.Encode1(mastery); // Mastery
+            mplew.Encode4(0);  // E9 03 BE FC
+
+            foreach (var oned in damage)
+
+            {
+                mplew.Encode4(oned.MobId);
+                mplew.Encode1(0x07);
+
+                foreach (var eachd in oned.Attack)
+                {
+                    mplew.Encode1(eachd.Item2);
+                    mplew.Encode4(eachd.Item1); //m.e. is never crit
+                }
+            }
+            //if (charge > 0) {
+            //	mplew.writeInt(charge); //is it supposed to be here
+            //}
+            return mplew;
+        }
+
         //WvsGame::MobPool--------------------------------------------------------------------------------------------
         public static COutPacket MobEnterField(CMob mob)
         {
@@ -428,7 +473,7 @@ namespace Common.Packets
             mob.EncodeInitData(p);
             return p;
         }
-        public static COutPacket MobLeaveField(CMob mob, byte nDeadType)
+        public static COutPacket MobLeaveField(CMob mob, byte nDeadType = 1)
         {
             var p = new COutPacket(SendOps.LP_MobLeaveField);
             p.Encode4(mob.dwMobId);
@@ -476,7 +521,7 @@ namespace Common.Packets
             p.Encode1(pCurSplit);
             p.Encode1(0);
             p.Encode1(0);
-            p.Encode4(bIllegealVelocity);
+            p.Encode4(bIllegealVelocity); //CRC
 
             //Section 1 - Mordred Version
             //packet.Encode2(actionAndDirection);

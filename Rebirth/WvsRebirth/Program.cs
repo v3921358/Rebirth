@@ -1,4 +1,5 @@
 ﻿using System;
+using Common;
 using Common.Log;
 
 namespace WvsRebirth
@@ -11,7 +12,7 @@ namespace WvsRebirth
             {
                 if (Environment.UserInteractive)
                 {
-                    ConsoleLog.InitConsole("Rebirth v95");
+                    ConsoleLog.InitConsole($"Rebirth v{Constants.Version}");
                     Logger.Add(new ConsoleLog());
 
                     //mapleSvc.WvsCenter.InsertAccount(20000,1,"admin","123456");

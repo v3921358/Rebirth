@@ -13,7 +13,7 @@ namespace Common.Game
         public int Controller { get; set; } //Char id or zero
         
         //WOAH
-        public int CurHp { get; set; } = 5;
+        public int CurHp { get; set; } = 25;
 
         public CMob(int mobId)
         {
@@ -34,7 +34,7 @@ namespace Common.Game
             p.Encode2(Position.Position.X); //m_ptPosPrev.x
             p.Encode2(Position.Position.Y); //m_ptPosPrev.y
             p.Encode1(0 & 1 | 2 * 2);//mob.Position.Stance); //m_nMoveAction
-            p.Encode2(0); //  m_nFootholdSN
+            p.Encode2(Position.Foothold); //  m_nFootholdSN
             p.Encode2(Position.Foothold); //  m_nHomeFoothold
 
             var m_nSummonType = unchecked((byte)-2);
