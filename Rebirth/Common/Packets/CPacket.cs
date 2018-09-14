@@ -198,7 +198,7 @@ namespace Common.Packets
             p.Encode1(0); //v3 | World
             p.Encode1(0); //dwCharacterID | Selectec Char
 
-            var ip = new byte[] { 127, 0, 0, 1 };
+            var ip = Constants.UseLoopBack ? Constants.LocalIpAddr : Constants.GameIpAddr;
             p.EncodeBuffer(ip, 0, ip.Length);
             p.Encode2(Constants.GamePort);
             p.Encode4(uid);

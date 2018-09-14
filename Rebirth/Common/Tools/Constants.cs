@@ -17,6 +17,11 @@ namespace Common
 
         public const ushort Version = 95;
 
+        public const bool UseLoopBack = false;
+        public static readonly byte[] GameIpAddr = {63, 251, 217, 3};
+        public static readonly byte[] LocalIpAddr = { 127, 0, 0, 1 };
+
+
         public const int LoginPort = 8484;
         public const int GamePort = 8585;
 
