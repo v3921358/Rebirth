@@ -14,28 +14,20 @@
 #include "NMCO\NMFunctionObject.h"
 #include "NMCO\NMSerializable.h"
 
-#include <winternl.h>
-
 //Libraries
 #pragma comment(lib, "ws2_32.lib")
 #pragma comment(lib, "detours.lib")
 
 //Macros
-#define M_WINDOWNAME		"May Pul Uh Stoh Reeeeeeeeeee"
-#define M_REPLACEPATTERN1	"63.251.217" //63.251.217.[1-4]
-#define M_REPLACEPATTERN2	":8585"
+#define M_WINDOWNAME		"Loli v95"
+#define M_REPLACEPATTERN	":8484"			//63.251.217.1 - 4
 #define M_HOSTNAME			"127.0.0.1"
 #define M_MUTEXNAME			"meteora"
-#define M_SPLASHURL			"https://mapleme.me/"
-#define M_MSGBOXURL			"https://twitch.tv/rajan710"
-#define M_MSGBOXMSG			"Login server is down... Watch my stream instead???"
-
-#define M_HOOK(x,y)	{ if(!x(y)) MessageBoxA(0,"Failed to hook title", #x,0); }
+#define M_HOOK(x,y)	if(!x(y)) MessageBoxA(0,"Failed to hook title", #x,0);
 
 //Etc
 HMODULE			g_ehsvc;
 char*			g_UserName = new char[PASSPORT_SIZE];
-BOOL			g_CheckHotKeys = TRUE;
 
 //Program Flags
 const BOOL		g_SkipSplash = TRUE;
@@ -68,101 +60,19 @@ struct ZExceptionHandler
 	int(__stdcall *_SymGetLineFromAddr)(void *, unsigned int, unsigned int *, _IMAGEHLP_LINE *);
 	int(__stdcall *_MiniDumpWriteDump)(void *, unsigned int, void *, _MINIDUMP_TYPE, _MINIDUMP_EXCEPTION_INFORMATION *, _MINIDUMP_USER_STREAM_INFORMATION *, _MINIDUMP_CALLBACK_INFORMATION *);
 };
-
-//struct ZXString<char>
-//{
-//	char *_m_pStr;
-//};
-
-struct CMsgbox		// : TSingleton<CMsgbox>
-{
-	void* vfptr;	//CMsgboxVtbl *vfptr;
-	char* m_sMsg;	//ZXString<char> m_sMsg;
-	char* m_sLink;	//ZXString<char> m_sLink;
-	char* m_sDesc;	//ZXString<char> m_sDesc;
-	tagRECT m_rtMsg;
-	tagRECT m_rtLink;
-	int m_bLinkClicked;
-	HICON__ *m_hCursorHand;
-	HICON__ *m_hCursorArrow;
-};
-
-struct StartUpWndParam
-{
-	char URL[512];
-	int width;
-	int height;
-	unsigned int timeout;
-	HINSTANCE__ *hInst;
-};
-
-//struct CWvsAppVtbl
-//{
-//	void *(__thiscall *__vecDelDtor)(CWvsApp *this, unsigned int);
-//};
-
-struct CWvsApp// : TSingleton<CWvsApp>
-{
-	void* vfptr; //CWvsAppVtbl *vfptr;
-	HWND__ *m_hWnd;
-	int m_bPCOMInitialized;
-	unsigned int m_dwMainThreadId;
-	HHOOK__ *m_hHook;
-	int m_bWin9x;
-	int m_nOSVersion;
-	int m_nOSMinorVersion;
-	int m_nOSBuildNumber;
-
-	char* m_sCSDVersion;//ZXString<char> m_sCSDVersion;
-
-	int m_b64BitInfo;
-	int m_tUpdateTime; //44 ?
-	int m_bFirstUpdate;
-
-	char* m_sCmdLine; //ZXString<char> m_sCmdLine;
-
-	int m_nGameStartMode;
-	int m_bAutoConnect;
-	int m_bShowAdBalloon;
-	int m_bExitByTitleEscape;
-
-	HRESULT m_hrZExceptionCode;
-	HRESULT m_hrComErrorCode;
-
-	unsigned int m_dwSecurityErrorCode;
-
-	int m_nTargetVersion;
-	int m_tLastServerIPCheck;
-	int m_tLastServerIPCheck2;
-	int m_tLastGGHookingAPICheck;
-	int m_tLastSecurityCheck;
-
-	void *m_ahInput[3];
-
-	int m_tNextSecurityCheck;
-
-	bool m_bEnabledDX9;
-
-	void* m_pBackupBuffer;//ZArray<unsigned char> m_pBackupBuffer;
-
-	unsigned int m_dwBackupBufferSize;
-	unsigned int m_dwClearStackLog;
-
-	int m_bWindowActive;
-};
-
-
 //---------------------------------------------------------------------------------------------
 
 typedef int (WINAPI* pWSPStartup)(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPROTOCOL_INFO lpProtocolInfo, WSPUPCALLTABLE UpcallTable, LPWSPPROC_TABLE lpProcTable);
+typedef HWND(WINAPI* pCreateWindowExA)(DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam);
 typedef BOOL(WINAPI* pCreateProcessA)(LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation);
-typedef BOOL(__cdecl* pNMCO_CallNMFunc)(int uFuncCode, BYTE* pCallingData, BYTE**ppReturnData, UINT32&	uReturnDataLen);
 
 typedef HRESULT(WINAPI *pDirectInput8Create)(HINSTANCE, DWORD, REFIID, LPVOID*, LPUNKNOWN);
+typedef BOOL(__cdecl* pNMCO_CallNMFunc)(int uFuncCode, BYTE* pCallingData, BYTE**ppReturnData, UINT32&	uReturnDataLen);
 
 //---------------------------------------------------------------------------------------------
 
 pWSPStartup				_WSPStartup;
+pCreateWindowExA		_CreateWindowExA;
 pCreateProcessA			_CreateProcessA;
 pNMCO_CallNMFunc		_NMCO_CallNMFunc;
 
@@ -172,10 +82,6 @@ DWORD					userServer;
 
 PTOP_LEVEL_EXCEPTION_FILTER	ZExceptionHandler__RawUnhandledExceptionFilter;
 ZExceptionHandler* _ZExceptionHandler = nullptr;
-
-CWvsApp* _CWvsApp = nullptr;
-
-//Field::Init(char *this, int a2) is ruining my life btw
 
 //---------------------------------------------------------------------------------------------
 
@@ -191,24 +97,6 @@ void Log(const char* format, ...)
 	OutputDebugStringA(buf);
 
 	va_end(args);
-}
-void LogHexDump(char* ptr, int len)
-{
-	char buf[8192] = { 0 };
-	char tmp[16] = { 0 };
-
-	int bufPos = 0;
-
-	for (int i = 0;i < len;i++)
-	{
-		auto value = (unsigned char)ptr[i];
-
-		memset(tmp, 0, 16);
-		sprintf(tmp, "%02X ", value);
-		strcat(buf, tmp);
-	}
-
-	Log("[HexDump] %s", buf);
 }
 void MessageBoxFormat(const char* format, ...)
 {
@@ -285,6 +173,7 @@ unsigned int FindAoB(unsigned int start, unsigned int end, unsigned char *patter
 
 	return 0;
 }
+
 //---------------------------------------------------------------------------------------------
 void PatchClientSecurity()
 {
@@ -317,16 +206,10 @@ bool Hook_CreateWindowExA(bool bEnable)
 
 	decltype(&CreateWindowExA) Hook = [](DWORD dwExStyle, LPCTSTR lpClassName, LPCTSTR lpWindowName, DWORD dwStyle, int x, int y, int nWidth, int nHeight, HWND hWndParent, HMENU hMenu, HINSTANCE hInstance, LPVOID lpParam) -> HWND
 	{
-		DWORD dwESI = NULL;
-		_asm
-		{
-			MOV dwESI, ESI;
-		}
-
 		auto windowName = lpWindowName;
 		auto ret = (DWORD)_ReturnAddress();
 
-		Log("CreateWindowExA [%s] [%s] RET [%#08x]", lpClassName, lpWindowName, ret);
+		Log("CreateWindowExA [%s] [%s] [%#08x]", lpClassName, lpWindowName, ret);
 
 		if (!strcmp(lpClassName, "StartUpDlgClass"))
 		{
@@ -335,15 +218,8 @@ bool Hook_CreateWindowExA(bool bEnable)
 			if (!g_SkipSecurityClient)
 				PatchClientSecurity();
 
-			if (!g_SkipSplash)
-			{
-				auto startParam = (StartUpWndParam*)dwESI;
-				strcpy(startParam->URL, M_SPLASHURL);
-			}
-			else
-			{
+			if (g_SkipSplash)
 				return NULL;
-			}
 		}
 		if (!strcmp(lpClassName, "NexonADBallon"))
 		{
@@ -353,38 +229,12 @@ bool Hook_CreateWindowExA(bool bEnable)
 		else if (!strcmp(lpClassName, "MapleStoryClass"))
 		{
 			windowName = M_WINDOWNAME;
-
-			_CWvsApp = (CWvsApp*)lpParam;
-			Log("CWvsApp [%#08x]", lpParam);
 		}
 
 		return _CreateWindowExA(dwExStyle, lpClassName, windowName, dwStyle, x, y, nWidth, nHeight, hWndParent, hMenu, hInstance, lpParam);
 	};
 
 	return SetHook(bEnable, reinterpret_cast<void**>(&_CreateWindowExA), Hook);
-}
-bool Hook_DialogBoxParamA(bool bEnable)
-{
-	static auto _DialogBoxParamA =
-		decltype(&DialogBoxParamA)(GetFuncAddress("USER32", "DialogBoxParamA"));
-
-	decltype(&DialogBoxParamA) Hook = [](HINSTANCE hInstance, LPCSTR lpTemplateName, HWND hWndParent, DLGPROC lpDialogFunc, LPARAM dwInitParam) -> INT_PTR
-	{
-		DWORD dwESI = NULL;
-
-		_asm
-		{
-			MOV dwESI, ESI;
-		}
-
-		CMsgbox* msgBox = (CMsgbox*)dwESI;
-		strcpy(msgBox->m_sMsg, M_MSGBOXMSG);
-		strcpy(msgBox->m_sLink, M_MSGBOXURL);
-
-		return _DialogBoxParamA(hInstance, lpTemplateName, hWndParent, lpDialogFunc, dwInitParam);
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_DialogBoxParamA), Hook);
 }
 
 bool Hook_wvsprintfA(bool bEnable)
@@ -413,7 +263,7 @@ bool Hook_memset(bool bEnable)
 			Log("[memset] [%#08x]", addy);
 		}
 
-		return _memset(dest, c, count);
+		return _memset(dest,c,count);
 	};
 
 	return SetHook(bEnable, reinterpret_cast<void**>(&_memset), Hook);
@@ -455,7 +305,7 @@ bool Hook_SetUnhandledExceptionFilter(bool bEnable)
 
 		_asm
 		{
-			MOV dwESI, ESI;
+			MOV dwESI, ESI; // Now dwESI hold the value of ESI
 		}
 
 		auto addy = (DWORD)_ReturnAddress();
@@ -496,8 +346,8 @@ bool Hook_GetModuleFileNameW(bool bEnable)
 
 	decltype(&GetModuleFileNameW) Hook = [](HMODULE hModule, LPWSTR lpFilename, DWORD nSize) -> DWORD
 	{
-		//auto ret = _ReturnAddress();
-		//Log("GetModuleFileNameW [%#08x] [hModule is NULL]", ret);
+		auto ret = _ReturnAddress();
+		Log("GetModuleFileNameW [%#08x] [hModule is NULL]", ret);
 		return _GetModuleFileNameW(NULL, lpFilename, nSize);
 	};
 
@@ -534,7 +384,7 @@ bool Hook_FreeLibrary(bool bEnable)
 	decltype(&FreeLibrary) Hook = [](HMODULE hModule) -> BOOL
 	{
 		auto ret = (DWORD)_ReturnAddress();
-		Log("[FreeLibrary] [%#08x]", ret);
+		Log("FreeLibrary [%#08x]", ret);
 		return _FreeLibrary(hModule);
 	};
 
@@ -591,143 +441,51 @@ bool Hook_DirectInput8Create(bool bEnable)
 	return SetHook(bEnable, reinterpret_cast<void**>(&_DirectInput8Create), Hook);
 }
 
-bool Hook_closesocket(bool bEnable)
-{
-	static auto _closesocket =
-		decltype(&closesocket)(GetFuncAddress("WS2_32", "closesocket"));
-
-	decltype(&closesocket) Hook = [](SOCKET s) -> int
-	{
-		auto addy = (DWORD)_ReturnAddress();
-		Log("[closesocket] [%#08x]", addy);
-		return _closesocket(s);
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_closesocket), Hook);
-}
-
-bool Hook_RegisterClassA(bool bEnable)
-{
-	static auto _RegisterClassA =
-		decltype(&RegisterClassA)(GetFuncAddress("USER32", "RegisterClassA"));
-
-	decltype(&RegisterClassA) Hook = [](CONST WNDCLASSA *lpWndClass) -> ATOM
-	{
-		auto addy = (DWORD)_ReturnAddress();
-		Log("[RegisterClassA] [%#08x] %s", addy, lpWndClass->lpszMenuName);
-		return _RegisterClassA(lpWndClass);
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_RegisterClassA), Hook);
-}
-
-bool Hook_GetTickCount(bool bEnable)
-{
-	static auto _GetTickCount =
-		decltype(&GetTickCount)(GetFuncAddress("KERNEL32", "GetTickCount"));
-
-	decltype(&GetTickCount) Hook = []() -> DWORD
-	{
-		//auto addy = (DWORD)_ReturnAddress();
-		//Log("[GetTickCount] [%#08x]", addy);
-		return _GetTickCount();
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_GetTickCount), Hook);
-}
-
-bool Hook_NtCurrentTeb(bool bEnable)
-{
-	static decltype(&NtCurrentTeb) _NtCurrentTeb = NtCurrentTeb;
-
-	decltype(&NtCurrentTeb) Hook = []() -> _TEB *
-	{
-		auto addy = (DWORD)_ReturnAddress();
-		Log("[NtCurrentTeb] [%#08x]", addy);
-		return _NtCurrentTeb();
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_NtCurrentTeb), Hook);
-}
-
-bool Hook_VirtualQuery(bool bEnable)
-{
-	static decltype(&VirtualQuery) _VirtualQuery = VirtualQuery;
-
-	decltype(&VirtualQuery) Hook = [](LPCVOID lpAddress, PMEMORY_BASIC_INFORMATION lpBuffer, SIZE_T dwLength) -> SIZE_T
-	{
-		auto addy = (DWORD)_ReturnAddress();
-		Log("[VirtualQuery] [%#08x]", addy);
-		return _VirtualQuery(lpAddress, lpBuffer, dwLength);
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_VirtualQuery), Hook);
-}
-
-bool Hook_IsDebuggerPresent(bool bEnable)
-{
-	static decltype(&IsDebuggerPresent) _IsDebuggerPresent = IsDebuggerPresent;
-
-	decltype(&IsDebuggerPresent) Hook = []() -> BOOL
-	{
-		auto addy = (DWORD)_ReturnAddress();
-		Log("[IsDebuggerPresent] [%#08x]", addy);
-		return FALSE;
-	};
-
-	return SetHook(bEnable, reinterpret_cast<void**>(&_IsDebuggerPresent), Hook);
-}
-
 //---------------------------------------------------------------------------------------------
 
-int WINAPI WSPGetPeerName_Hook(SOCKET s, struct sockaddr *name, LPINT namelen, LPINT lpErrno)
+int WINAPI WSPGetPeerName_detour(SOCKET s, struct sockaddr *name, LPINT namelen, LPINT lpErrno)
 {
 	int ret = procTable.lpWSPGetPeerName(s, name, namelen, lpErrno);
 
 	char buf[50];
 	DWORD len = 50;
 	WSAAddressToString((sockaddr*)name, *namelen, NULL, buf, &len);
-	Log("[GetPeerName] Original: %s", buf);
+	Log("GetPeerName Original: %s", buf);
 
 	sockaddr_in* service = (sockaddr_in*)name;
 	memcpy(&service->sin_addr, &nexonServer, sizeof(DWORD));
 
 	return  ret;
 }
-int WINAPI WSPConnect_Hook(SOCKET s, const struct sockaddr *name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS, LPINT lpErrno)
+int WINAPI WSPConnect_detour(SOCKET s, const struct sockaddr *name, int namelen, LPWSABUF lpCallerData, LPWSABUF lpCalleeData, LPQOS lpSQOS, LPQOS lpGQOS, LPINT lpErrno)
 {
 	char buf[50];
 	DWORD len = 50;
 	WSAAddressToString((sockaddr*)name, namelen, NULL, buf, &len);
-	Log("[WSPConnect] Original: %s", buf);
+	Log("WSPConnect Original: %s", buf);
 
-	if (strstr(buf, M_REPLACEPATTERN1))
+	if (strstr(buf, M_REPLACEPATTERN))
 	{
 		sockaddr_in* service = (sockaddr_in*)name;
 		memcpy(&nexonServer, &service->sin_addr, sizeof(DWORD)); //sin_adder -> nexonServer
 		service->sin_addr.S_un.S_addr = inet_addr(M_HOSTNAME);
 	}
 
-	if (strstr(buf, M_REPLACEPATTERN2))
-	{
-		//g_CheckHotKeys = FALSE;
-	}
-
 	return procTable.lpWSPConnect(s, name, namelen, lpCallerData, lpCalleeData, lpSQOS, lpGQOS, lpErrno);
 }
-int WINAPI WSPStartup_Hook(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPROTOCOL_INFO lpProtocolInfo, WSPUPCALLTABLE UpcallTable, LPWSPPROC_TABLE lpProcTable)
+int WINAPI WSPStartup_detour(WORD wVersionRequested, LPWSPDATA lpWSPData, LPWSAPROTOCOL_INFO lpProtocolInfo, WSPUPCALLTABLE UpcallTable, LPWSPPROC_TABLE lpProcTable)
 {
-	Log("[WSPStartup] Hijacked the winsock table");
+	Log("Hijacked the winsock table");
 
 	int ret = _WSPStartup(wVersionRequested, lpWSPData, lpProtocolInfo, UpcallTable, lpProcTable);
 	procTable = *lpProcTable;
 
-	lpProcTable->lpWSPConnect = WSPConnect_Hook;
-	lpProcTable->lpWSPGetPeerName = WSPGetPeerName_Hook;
+	lpProcTable->lpWSPConnect = WSPConnect_detour;
+	lpProcTable->lpWSPGetPeerName = WSPGetPeerName_detour;
 
 	return ret;
 }
-BOOL WINAPI CreateProcessA_Hook(LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation)
+BOOL WINAPI CreateProcessA_detour(LPCSTR lpApplicationName, LPSTR lpCommandLine, LPSECURITY_ATTRIBUTES lpProcessAttributes, LPSECURITY_ATTRIBUTES lpThreadAttributes, BOOL bInheritHandles, DWORD dwCreationFlags, LPVOID lpEnvironment, LPCSTR lpCurrentDirectory, LPSTARTUPINFOA lpStartupInfo, LPPROCESS_INFORMATION lpProcessInformation)
 {
 	MessageBox(0, lpApplicationName, lpCommandLine, 0);
 	Log("CreateProcessA: %s - %s", lpApplicationName, lpCommandLine);
@@ -764,7 +522,7 @@ BOOL NMCO_CallNMFunc_Hook(int uFuncCode, BYTE* pCallingData, BYTE**ppReturnData,
 		pFunc.DeSerialize(ssStream);
 
 		memcpy(g_UserName, pFunc.szNexonID, PASSPORT_SIZE);
-		Log("[CNMLoginAuthFunc] Username: %s", g_UserName);
+		Log("Username: %s", g_UserName);
 
 		// Return to the client that login was successful.. NOT
 		CNMSimpleStream* returnStream = new CNMSimpleStream(); // Memleaked actually. 
@@ -831,7 +589,7 @@ BOOL Hook_Winsock()
 
 	_WSPStartup = (pWSPStartup)address;
 
-	return SetHook(true, (PVOID*)&_WSPStartup, (PVOID)WSPStartup_Hook);
+	return SetHook(true, (PVOID*)&_WSPStartup, (PVOID)WSPStartup_detour);
 }
 BOOL Hook_CreateProcessA()
 {
@@ -842,57 +600,9 @@ BOOL Hook_CreateProcessA()
 
 	_CreateProcessA = (pCreateProcessA)address;
 
-	return SetHook(true, (PVOID*)&_CreateProcessA, (PVOID)CreateProcessA_Hook);
+	return SetHook(true, (PVOID*)&_CreateProcessA, (PVOID)CreateProcessA_detour);
 }
 //---------------------------------------------------------------------------------------------
-DWORD WINAPI HotKeyThread()
-{
-	Log("[HotKeyThread] Started");
-	while (g_CheckHotKeys)
-	{
-		if (GetAsyncKeyState(VK_F3))
-		{
-			if (_CWvsApp)
-			{
-				LogHexDump((char*)_CWvsApp, sizeof(CWvsApp));
-
-				Log("CWvsApp m_dwMainThreadId %d", _CWvsApp->m_dwMainThreadId);
-
-				Log("CWvsApp m_tUpdateTime %d", _CWvsApp->m_tUpdateTime);
-				Log("CWvsApp m_tLastServerIPCheck %d", _CWvsApp->m_tLastServerIPCheck);
-				Log("CWvsApp m_tLastServerIPCheck2 %d", _CWvsApp->m_tLastServerIPCheck2);
-				Log("CWvsApp m_tLastGGHookingAPICheck %d", _CWvsApp->m_tLastGGHookingAPICheck);
-				Log("CWvsApp m_tLastSecurityCheck %d", _CWvsApp->m_tLastSecurityCheck);
-				Log("CWvsApp m_tNextSecurityCheck %d", _CWvsApp->m_tNextSecurityCheck);
-			}
-		}
-
-		Sleep(100);
-	}
-	Log("[HotKeyThread] Ended");
-	return 1;
-}
-DWORD WINAPI CWvsAppThread()
-{
-	Log("[CWvsAppThread] Started");
-	while (g_CheckHotKeys)
-	{
-		if (_CWvsApp && _CWvsApp->m_tUpdateTime)
-		{
-			Log("CWvsApp m_tUpdateTime PATCH %d", _CWvsApp->m_tUpdateTime);
-
-			_CWvsApp->m_tLastServerIPCheck = _CWvsApp->m_tUpdateTime;
-			_CWvsApp->m_tLastServerIPCheck2 = _CWvsApp->m_tUpdateTime;
-			_CWvsApp->m_tLastGGHookingAPICheck = _CWvsApp->m_tUpdateTime;
-			_CWvsApp->m_tLastSecurityCheck = _CWvsApp->m_tUpdateTime;
-			_CWvsApp->m_tNextSecurityCheck = _CWvsApp->m_tUpdateTime;
-
-		}
-		Sleep(5000);
-	}
-	Log("[CWvsAppThread] Ended");
-	return 1;
-}
 
 BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 {
@@ -901,9 +611,6 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 	if (fdwReason == DLL_PROCESS_ATTACH)
 	{
 		Log("Injected into MapleStory PID: %i", GetCurrentProcessId());
-
-		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&HotKeyThread, NULL, NULL, NULL);
-		CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)&CWvsAppThread, NULL, NULL, NULL);
 
 		g_ehsvc = LoadLibraryA("HShield\\ehsvc.dll");
 
@@ -919,29 +626,18 @@ BOOL WINAPI DllMain(HINSTANCE hinstDLL, DWORD fdwReason, LPVOID lpvReserved)
 		if (!Hook_CreateProcessA())
 			MessageBoxA(0, "Failed Hook_CreateProcessA", 0, 0);
 
-			M_HOOK(Hook_CreateWindowExA, true)
-			M_HOOK(Hook_DialogBoxParamA, true)
-			M_HOOK(Hook_wvsprintfA, true)
-			//M_HOOK(Hook_memset, true) //OH DONT DO IT (Seriously)
-			M_HOOK(Hook_OutputDebugStringA, true)
-			//M_HOOK(Hook_SetUnhandledExceptionFilter, true)
-			//M_HOOK(Hook_GetProcAddress, true)
-			M_HOOK(Hook_GetModuleFileNameW, true)
-			M_HOOK(Hook_OpenMutexA, true)
-			//M_HOOK(Hook_FreeLibrary, true)
-			//M_HOOK(Hook_LoadLibraryA, true)
-			//M_HOOK(Hook_LoadLibraryExA, true)
-			//M_HOOK(Hook_DirectInput8Create, true)
-			//M_HOOK(Hook_closesocket, true)
-			//M_HOOK(Hook_RegisterClassA, true)
-			//M_HOOK(Hook_GetTickCount, true)
-			//M_HOOK(Hook_NtCurrentTeb, true)
-			//M_HOOK(Hook_VirtualQuery,true)
-			//M_HOOK(Hook_IsDebuggerPresent,true)
-	}
-	else if (fdwReason == DLL_PROCESS_DETACH)
-	{
-		g_CheckHotKeys = FALSE;
+		M_HOOK(Hook_CreateWindowExA, true)
+		M_HOOK(Hook_wvsprintfA, true)
+		//M_HOOK(Hook_memset, true) //OH DONT DO IT (Seriously)
+		M_HOOK(Hook_OutputDebugStringA, true)
+		//M_HOOK(Hook_SetUnhandledExceptionFilter, true)
+		//M_HOOK(Hook_GetProcAddress, true)
+		M_HOOK(Hook_GetModuleFileNameW, true)
+		M_HOOK(Hook_OpenMutexA, true)
+		//M_HOOK(Hook_FreeLibrary, true)
+		//M_HOOK(Hook_LoadLibraryA, true)
+		//M_HOOK(Hook_LoadLibraryExA, true)
+		//M_HOOK(Hook_DirectInput8Create, true)
 	}
 	return TRUE;
 }
