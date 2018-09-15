@@ -422,48 +422,66 @@ namespace Common.Packets
 
         }
 
-        public static COutPacket CloseRangeAttack(int cid, byte tbyte, int skill, byte level, byte display, byte animation, byte speed, List<AttackPair> damage, bool energy, byte lvl, byte mastery, byte unk, int charge)
+        public static COutPacket CloseRangeAttack(int cid, MapleAttackNew a)
         {
-            var mplew = new COutPacket(SendOps.LP_UserMeleeAttack);
-            
-            mplew.Encode4(cid);
-            mplew.Encode1(tbyte);
-            mplew.Encode1(lvl); //?
+            var p = new COutPacket(SendOps.LP_UserMeleeAttack);
 
-            if (skill > 0)
+            p.Encode4(cid);
+
+            p.Encode1(a.tByte1);
+            p.Encode1(10); // m_nLevel
+
+
+            //if (a.nSkillID > 0)
+            //{
+            //    p.Encode1(0); //level (need to fetch myself )
+            //    p.Encode4(a.nSkillID);
+            //}
+            //else
             {
-                mplew.Encode1(level);
-                mplew.Encode4(skill);
+                p.Encode1(0);
             }
-            else
+
+            p.Encode1(0); //bSerialAttack = CInPacket::Decode1(v4) & 0x20;
+            p.Encode2(a.tByte2); //its a short now ???
+            //bLeft = ((unsigned int)tByte2 >> 15) & 1;
+            //nAction = tByte2 & 0x7FFF;
+
+            p.Encode1(a.nActionSpeed);
+            p.Encode1(a.nMastery);
+            p.Encode4(a.nBulletItemID);
+
+            for (int i = 0; i < a.nMobCount; i++)
             {
-                mplew.Encode1(0);
-            }
-            mplew.Encode1(unk); // Added on v.82
-            //a short actually
-            mplew.Encode1(display);
-            mplew.Encode1(animation);
+                var info = a.aAttackInfo[i];
 
-            mplew.Encode1(speed);
-            mplew.Encode1(mastery); // Mastery
-            mplew.Encode4(0);  // E9 03 BE FC
+                p.Encode4(info.dwMobID);
+                p.Encode1(0xFF);  //hitAction?
 
-            foreach (var oned in damage)
 
-            {
-                mplew.Encode4(oned.MobId);
-                mplew.Encode1(0x07);
-
-                foreach (var eachd in oned.Attack)
+                for (int j = 0; j < a.nDamagePerMob; j++)
                 {
-                    mplew.Encode1(eachd.Item2);
-                    mplew.Encode4(eachd.Item1); //m.e. is never crit
+                    p.Encode1(info.abCritical[j] != 0);
+                    p.Encode4(info.aDamage[j]);
                 }
             }
-            //if (charge > 0) {
-            //	mplew.writeInt(charge); //is it supposed to be here
+            
+            //if (nType == 212)
+            //{
+            //    ptBallStart.x = (signed __int16)CInPacket::Decode2(v4);
+            //    ptBallStart.y = (signed __int16)CInPacket::Decode2(v4);
             //}
-            return mplew;
+
+            if (a.tKeyDown > 0) {
+            	p.Encode4(a.tKeyDown); //is it supposed to be here
+            }
+
+            //else if (nSkillID == (char*)33101007)
+            //{
+            //    dwSwallowMobTemplateID = CInPacket::Decode4(v4);
+            //    CUser::RemoveSwallowingEffect((CUser*)&v63->vfptr);
+            //}
+            return p;
         }
 
         //WvsGame::MobPool--------------------------------------------------------------------------------------------

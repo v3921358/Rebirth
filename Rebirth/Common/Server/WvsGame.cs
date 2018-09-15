@@ -122,7 +122,7 @@ namespace Common.Server
                 var character = client.Character;
 
                 client.GetCharField().Remove(client);
-                
+
                 //Save to db
                 Db.GetCollection<CharacterData>("character_data")
                     .FindOneAndReplace(x => x.CharId == character.CharId, character);
@@ -137,7 +137,7 @@ namespace Common.Server
 
             var req = ParentServer.LoggedIn.FirstOrDefault(x => x.CharId == uid);
 
-            if (req == null || req.Migrated ||(DateTime.Now - req.Requested).TotalSeconds >= Constants.MigrateTimeoutSec)
+            if (req == null || req.Migrated || (DateTime.Now - req.Requested).TotalSeconds >= Constants.MigrateTimeoutSec)
             {
                 ParentServer.LoggedIn.Remove(req);
                 c.Disconnect();
@@ -185,7 +185,7 @@ namespace Common.Server
 
             var movePath = p.DecodeBuffer(p.Available);
             c.Character.Position.DecodeMovePath(movePath);
-            
+
             c.GetCharField().Broadcast(CPacket.UserMovement(c.Character.CharId, movePath), c);
         }
         private void Handle_UserTransferFieldRequest(WvsGameClient c, CInPacket p)
@@ -232,7 +232,7 @@ namespace Common.Server
             //    int emoteid = 5159992 + emote;
             //    //TODO: As if i care check if the emote is in CS inventory, if not return
             //}
-            
+
             c.GetCharField().Broadcast(CPacket.UserEmoticon(c.Character.CharId, nEmotion, nDuration, bByItemOption), c);
         }
         private void Handle_UserHit(WvsGameClient c, CInPacket p)
@@ -520,7 +520,7 @@ namespace Common.Server
             var quantity = p.Decode2();
 
             Logger.Write(LogLevel.Debug, "UserChangeSlotPositionRequest Src {0}, Dst {1} Type {2} Qty {3}", src, dst, type, quantity);
-            
+
             if (src < 0 && dst > 0)
             {
                 CInventoryManipulator.UnEquip(c, src, dst); //check
@@ -540,28 +540,34 @@ namespace Common.Server
         }
         private void Handle_UserMeleeAttack(WvsGameClient c, CInPacket p)
         {
-            var atkInfo = AttackInfo.ParseMelee(p);
+            var m_bCurFieldKey = p.Decode1();
+
+            var atkInfo = MapleAttackNew.Parse(p, 0);
             var field = c.GetCharField();
 
-            foreach (var atk in atkInfo.allDamage)
+            //This pocket is not working ;( - rt if u cried
+            var v1 = CPacket.CloseRangeAttack(c.Character.CharId, atkInfo);
+
+            field.Broadcast(v1, c);
+
+            for (int i = 0; i < atkInfo.nMobCount; i++)
             {
-                var mob = field.Mobs.Get(atk.MobId);
-                var dmg = atk.Attack.Sum(x => x.Item1);
+                var info = atkInfo.aAttackInfo[i];
+
+                var mob = field.Mobs.Get(info.dwMobID);
+                
+                int dmg = 0;
+
+                for (int j = 0; j < atkInfo.nDamagePerMob; j++)
+                    dmg += info.aDamage[j];
 
                 mob.CurHp -= dmg;
 
                 if (mob.CurHp <= 0)
                 {
-                    field.RemoveMob(c,mob);
-                    return;
+                    field.RemoveMob(c, mob);
                 }
             }
-
-            //This pocket is not working ;( - rt if u cried
-            var v1 = CPacket.CloseRangeAttack(c.Character.CharId, atkInfo.tbyte, atkInfo.skill, 0, atkInfo.display,
-                atkInfo.stance, atkInfo.speed, atkInfo.allDamage, false, 1, 0, 0, 0);
-
-            field.Broadcast(v1,c);
         }
     }
 }
